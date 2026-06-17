@@ -260,4 +260,111 @@ const PLANS = [
   {id:3,days:15,price:5700, popular:false,perks:['Acceso completo','Soporte personalizado','Gaming y streaming']},
   {id:4,days:25,price:6000, popular:true, perks:['Acceso completo','Soporte personalizado','Gaming + streaming','Mejor precio/días']},
   {id:5,days:30,price:7500, popular:false,perks:['Acceso completo','Soporte 24/7','Un mes completo']},
-  {id:6,days:60,price:10000,popular:false,perks:['Acceso completo','Soporte 24/7','Dos m
+  {id:6,days:60,price:10000,popular:false,perks:['Acceso completo','Soporte 24/7','Dos meses']},
+  {id:7,days:80,price:13300,popular:false,perks:['Acceso completo','Soporte 24/7','Máximo ahorro']},
+];
+let cart={};
+function fmt(n){return '$'+n.toLocaleString('es-AR');}
+function renderPlans(){
+  document.getElementById('plansGrid').innerHTML=PLANS.map(p=>`
+    <div class="plan-card${p.popular?' popular':''}">
+      ${p.popular?'<div class="popular-badge">⭐ Popular</div>':''}
+      <div class="plan-days">${p.days}</div>
+      <div class="plan-label">días de acceso</div>
+      <ul class="plan-perks">${p.perks.map(k=>`<li>${k}</li>`).join('')}</ul>
+      <div class="plan-price">${fmt(p.price)} <span>ARS</span></div>
+      <button class="plan-btn" onclick="addVPN(${p.id})">Agregar al carrito</button>
+    </div>`).join('');
+}
+function addVPN(id){
+  const p=PLANS.find(x=>x.id===id);
+  const key='vpn_'+id;
+  if(cart[key])cart[key].qty++;
+  else cart[key]={key,emoji:'🔐',name:`VPN ${p.days} días`,sub:'',price:p.price,qty:1};
+  updateCartUI();showToast('✅ Plan '+p.days+' días agregado');
+}
+function updateCfPreview(){
+  const sub=document.getElementById('cfSubdomain').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  const ip=document.getElementById('cfIP').value.trim();
+  const prev=document.getElementById('cfPreview');
+  if(sub&&ip)prev.innerHTML=`<span style="color:#F6821F;font-weight:600;">✓ ${sub}.jittervpn.com → ${ip}</span>`;
+  else if(sub)prev.textContent=sub+'.jittervpn.com';
+  else prev.textContent='';
+}
+function addCloudflare(){
+  const sub=document.getElementById('cfSubdomain').value.trim();
+  const ip=document.getElementById('cfIP').value.trim();
+  if(!sub){showToast('⚠️ Ingresá el nombre de tu subdominio');return;}
+  if(!ip){showToast('⚠️ Ingresá la IP de tu VPS');return;}
+  const key='cf_'+sub;
+  cart[key]={key,emoji:'☁️',name:'Subdominio Cloudflare',sub:`${sub}.jittervpn.com → ${ip}`,price:3000,qty:1,fixed:true};
+  updateCartUI();showToast('✅ Subdominio '+sub+'.jittervpn.com agregado');
+}
+function changeQty(key,delta){
+  if(!cart[key])return;
+  if(cart[key].fixed){delete cart[key];updateCartUI();return;}
+  cart[key].qty+=delta;
+  if(cart[key].qty<=0)delete cart[key];
+  updateCartUI();
+}
+function removeItem(key){delete cart[key];updateCartUI();}
+function updateCartUI(){
+  const items=Object.values(cart);
+  const count=items.reduce((a,i)=>a+i.qty,0);
+  const total=items.reduce((a,i)=>a+i.price*i.qty,0);
+  document.getElementById('cartCount').textContent=count;
+  const el=document.getElementById('cartItems');
+  if(!items.length){
+    el.innerHTML=`<div class="cart-empty"><div class="empty-icon">🛒</div><p>Tu carrito está vacío</p><p style="font-size:13px;margin-top:6px;">¡Elegí un plan para comenzar!</p></div>`;
+  }else{
+    el.innerHTML=items.map(i=>`
+      <div class="cart-item">
+        <div class="cart-item-emoji">${i.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          ${i.sub?`<div class="cart-item-sub">${i.sub}</div>`:''}
+          <div class="cart-item-price">${fmt(i.price)}${i.fixed?'':' c/u'}</div>
+          <div class="cart-item-qty">
+            ${i.fixed
+              ?`<button class="qty-btn" style="color:#E94560;" onclick="removeItem('${i.key}')">✕</button><span style="font-size:12px;color:var(--muted);">Quitar</span>`
+              :`<button class="qty-btn" onclick="changeQty('${i.key}',-1)">−</button><span class="qty-num">${i.qty}</span><button class="qty-btn" onclick="changeQty('${i.key}',1)">+</button>`}
+          </div>
+        </div>
+        <button class="remove-item" onclick="removeItem('${i.key}')">🗑</button>
+      </div>`).join('');
+  }
+  document.getElementById('cartSummary').innerHTML=`
+    <div class="summary-row"><span>Subtotal</span><span>${fmt(total)}</span></div>
+    <div class="summary-total"><span>Total</span><span>${fmt(total)}</span></div>`;
+  document.getElementById('checkoutBtn').disabled=!items.length;
+}
+function openCart(){document.getElementById('cartOverlay').classList.add('open');}
+function closeCart(){document.getElementById('cartOverlay').classList.remove('open');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+async function checkout(){
+  const items=Object.values(cart);
+  if(!items.length)return;
+  document.getElementById('loadingOverlay').classList.add('show');
+  try{
+    const res=await fetch(BACKEND_URL+'/api/crear-preferencia',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({items})
+    });
+    const data=await res.json();
+    if(data.init_point){window.location.href=data.init_point;}
+    else throw new Error('Sin link de pago');
+  }catch(err){
+    document.getElementById('loadingOverlay').classList.remove('show');
+    showToast('❌ Error al conectar con el servidor. Intentá de nuevo.');
+    console.error(err);
+  }
+}
+const params=new URLSearchParams(window.location.search);
+if(params.get('pago')==='ok'){cart={};document.getElementById('pagoOk').classList.add('show');}
+if(params.get('pago')==='error'){showToast('❌ El pago no pudo procesarse. Intentá de nuevo.');}
+if(params.get('pago')==='pendiente'){showToast('⏳ Tu pago está pendiente. Te avisamos cuando se confirme.');}
+renderPlans();updateCartUI();
+</script>
+</body>
+</html>
