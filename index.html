@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShockTV | Streaming Gratis</title>
+    <title>ShockTV | Fútbol en Vivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -61,64 +61,62 @@
         <div class="container mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <h1 class="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-shock-rojo">ShockTV</h1>
-                <span class="hidden md:inline-block text-sm text-gray-300">• Streaming Sin Límites</span>
+                <span class="hidden md:inline-block text-sm text-gray-300">• Fútbol en Vivo</span>
             </div>
             <nav class="hidden md:flex items-center gap-8">
                 <a href="#inicio" class="font-medium hover:text-shock-rojo transition-colors">Inicio</a>
-                <a href="#peliculas" class="font-medium hover:text-shock-rojo transition-colors">Películas</a>
-                <a href="#series" class="font-medium hover:text-shock-rojo transition-colors">Series</a>
                 <a href="#futbol" class="font-medium hover:text-shock-rojo transition-colors flex items-center gap-1">
-                    <i class="fa fa-futbol-o"></i> Fútbol
+                    <i class="fa fa-futbol-o"></i> Partidos
                 </a>
-                <a href="#canales" class="font-medium hover:text-shock-rojo transition-colors">Canales en Vivo</a>
+                <a href="#canales" class="font-medium hover:text-shock-rojo transition-colors">Canales</a>
             </nav>
             <div class="flex items-center gap-3">
-                <div class="relative hidden sm:block">
-                    <input type="text" placeholder="Buscar contenido..." class="bg-shock-gris/70 rounded-full py-2 px-4 pl-10 w-[200px] lg:w-[300px] focus:outline-none focus:ring-2 focus:ring-shock-rojo">
-                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
                 <button class="md:hidden text-xl" id="btnMenu">
                     <i class="fa fa-bars"></i>
                 </button>
             </div>
         </div>
+        <!-- Menú móvil -->
         <div id="menuMovil" class="hidden md:hidden absolute top-full left-0 right-0 bg-black/95 border-t border-gray-800 py-3 px-4">
             <nav class="flex flex-col gap-3">
                 <a href="#inicio" class="py-2 hover:text-shock-rojo">Inicio</a>
-                <a href="#peliculas" class="py-2 hover:text-shock-rojo">Películas</a>
-                <a href="#series" class="py-2 hover:text-shock-rojo">Series</a>
-                <a href="#futbol" class="py-2 hover:text-shock-rojo flex items-center gap-1"><i class="fa fa-futbol-o"></i> Fútbol</a>
+                <a href="#futbol" class="py-2 hover:text-shock-rojo flex items-center gap-1"><i class="fa fa-futbol-o"></i> Partidos</a>
                 <a href="#canales" class="py-2 hover:text-shock-rojo">Canales</a>
             </nav>
         </div>
     </header>
 
     <!-- Sección Principal -->
-    <section id="inicio" class="relative h-[70vh] flex items-center bg-[url('https://image.tmdb.org/t/p/original/7RyHsO4yDXt2il0T9tQb1K5w5yY.jpg')] bg-cover bg-center">
+    <section id="inicio" class="relative h-[70vh] flex items-center bg-[url('https://images.unsplash.com/photo-1574629810236-75f52736c4b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center">
         <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
         <div class="container mx-auto px-4 md:px-8 relative z-10">
             <div class="max-w-2xl">
-                <h2 class="text-[clamp(2rem,5vw,4rem)] font-bold leading-tight sombra-texto">Todo el Fútbol y Entretenimiento</h2>
-                <p class="text-lg md:text-xl text-gray-200 mt-4 mb-8">Resultados, partidos en vivo y todo lo que te gusta en un solo lugar.</p>
+                <h2 class="text-[clamp(2rem,5vw,4rem)] font-bold leading-tight sombra-texto">Todo el Fútbol en un Solo Lugar</h2>
+                <p class="text-lg md:text-xl text-gray-200 mt-4 mb-8">Resultados en vivo, próximos partidos y todas las ligas del mundo.</p>
                 <a href="#futbol" class="bg-shock-rojo hover:bg-shock-rojo/90 text-white font-semibold py-3 px-8 rounded-lg transition-all transform hover:scale-105">
-                    <i class="fa fa-futbol-o mr-2"></i> Ir al Fútbol
+                    <i class="fa fa-list mr-2"></i> Ver Partidos
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN FÚTBOL - 100% API -->
+    <!-- SECCIÓN FÚTBOL - API ISPORT CORREGIDA -->
     <section id="futbol" class="py-12 px-4 md:px-8 bg-black/40">
         <div class="container mx-auto">
             <div class="flex items-center justify-between mb-8">
                 <h3 class="text-2xl md:text-3xl font-bold flex items-center gap-2">
-                    <i class="fa fa-futbol-o text-shock-rojo"></i> Fútbol en Vivo y Resultados
+                    <i class="fa fa-futbol-o text-shock-rojo"></i> Partidos y Resultados
                 </h3>
+            </div>
+
+            <!-- Mensaje de estado -->
+            <div id="estadoConexion" class="mb-6 p-3 rounded-lg text-center bg-blue-600/20 text-blue-300">
+                🔄 Conectando con la base de datos...
             </div>
 
             <!-- Ligas Principales -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                <!-- Liga Argentina ID: 128 -->
+                <!-- Liga Argentina -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
                     <h4 class="font-bold text-xl mb-3 text-center">Liga Profesional Argentina</h4>
                     <div id="ligaArgentina" class="space-y-3 min-h-[100px] flex items-center justify-center">
@@ -126,7 +124,7 @@
                     </div>
                 </div>
 
-                <!-- Copa Libertadores ID: 13 -->
+                <!-- Copa Libertadores -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
                     <h4 class="font-bold text-xl mb-3 text-center">Copa Libertadores</h4>
                     <div id="libertadores" class="space-y-3 min-h-[100px] flex items-center justify-center">
@@ -134,7 +132,7 @@
                     </div>
                 </div>
 
-                <!-- Premier League ID: 39 -->
+                <!-- Premier League -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
                     <h4 class="font-bold text-xl mb-3 text-center">Premier League</h4>
                     <div id="premierLeague" class="space-y-3 min-h-[100px] flex items-center justify-center">
@@ -143,19 +141,10 @@
                 </div>
             </div>
 
-            <!-- Próximos Partidos -->
+            <!-- Todos los Partidos / Próximos -->
             <div class="bg-shock-gris/40 rounded-xl p-6 mb-8">
-                <h4 class="font-bold text-xl mb-4 text-center">Próximos Partidos y Resultados</h4>
-                <div id="proximosPartidos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="p-4 bg-black/30 rounded-lg text-center">
-                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    </div>
-                    <div class="p-4 bg-black/30 rounded-lg text-center">
-                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    </div>
-                    <div class="p-4 bg-black/30 rounded-lg text-center">
-                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    </div>
+                <h4 class="font-bold text-xl mb-4 text-center">Todos los Partidos de Hoy</h4>
+                <div id="todosPartidos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     <div class="p-4 bg-black/30 rounded-lg text-center">
                         <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
                     </div>
@@ -163,30 +152,10 @@
             </div>
 
             <!-- Reproductor de TV -->
-            <div class="bg-shock-gris/40 rounded-xl p-6">
-                <h4 class="font-bold text-xl mb-4 text-center">Canales de Fútbol</h4>
+            <div id="canales" class="bg-shock-gris/40 rounded-xl p-6">
+                <h4 class="font-bold text-xl mb-4 text-center">Canales de Transmisión</h4>
                 <div class="reproductor-container bg-black rounded-lg overflow-hidden">
                     <iframe src="https://bit.ly/3xm7Y8z" allowfullscreen></iframe>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Películas y Series (Opcional) -->
-    <section id="peliculas" class="py-12 px-4 md:px-8">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl md:text-3xl font-bold">Películas Populares</h3>
-            </div>
-            <div id="contenedorPeliculas" class="flex gap-4 overflow-x-auto pb-6 ocultar-scroll">
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
-                    <i class="fa fa-film text-4xl text-gray-500"></i>
-                </div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
-                    <i class="fa fa-film text-4xl text-gray-500"></i>
-                </div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
-                    <i class="fa fa-film text-4xl text-gray-500"></i>
                 </div>
             </div>
         </div>
@@ -195,136 +164,165 @@
     <!-- Pie de página -->
     <footer class="bg-black/80 py-8 px-4 md:px-8">
         <div class="container mx-auto text-center text-gray-500 text-sm">
-            <p>© 2026 ShockTV - Todos los derechos reservados</p>
+            <p>© 2026 ShockTV - Todos los derechos reservados | Datos proporcionados por isport</p>
         </div>
     </footer>
 
-    <!-- SCRIPT PRINCIPAL - API FÚTBOL FUNCIONANDO -->
+    <!-- SCRIPT CORREGIDO PARA ISPORT -->
     <script>
-        // ✅ TU CLAVE DE API YA ESTÁ CONFIGURADA AQUÍ
-        const CLAVE_FUTBOL = '7c4f254dd9da84defb5e77f03768d708';
-        const URL_FUTBOL = 'https://v3.football.api-sports.io';
+        // TU TOKEN
+        const TOKEN_ISPORT = 'KlvY3hvAmtKslrng';
+        
+        // 🛠️ URL CORREGIDA Y PROXY PARA EVITAR EL ERROR DE CORS
+        // Usamos un proxy público para que el navegador deje pasar la información
+        const PROXY_CORS = 'https://api.allorigins.win/raw?url=';
+        const URL_API = 'https://isport-api.com/v1';
 
+        // Cabeceras correctas para isport
         const OPCIONES = {
             method: 'GET',
             headers: {
-                'x-rapidapi-key': CLAVE_FUTBOL,
-                'x-rapidapi-host': 'v3.football.api-sports.io'
+                'Authorization': `Bearer ${TOKEN_ISPORT}`,
+                'Accept': 'application/json'
             }
         };
 
-        // Cargar todas las ligas
-        async function cargarTodo() {
+        // Actualizar estado en pantalla
+        function actualizarEstado(texto, tipo = 'ok') {
+            const caja = document.getElementById('estadoConexion');
+            caja.innerHTML = texto;
+            if(tipo === 'ok') caja.className = 'mb-6 p-3 rounded-lg text-center bg-green-600/20 text-green-300';
+            if(tipo === 'error') caja.className = 'mb-6 p-3 rounded-lg text-center bg-red-600/20 text-red-300';
+            if(tipo === 'aviso') caja.className = 'mb-6 p-3 rounded-lg text-center bg-yellow-600/20 text-yellow-300';
+        }
+
+        // Iniciar carga de datos
+        async function cargarDatosFutbol() {
             try {
-                // Liga Argentina
-                await cargarLiga(128, 'ligaArgentina');
-                // Copa Libertadores
-                await cargarLiga(13, 'libertadores');
-                // Premier League
-                await cargarLiga(39, 'premierLeague');
-                // Próximos partidos
-                await cargarProximos();
+                actualizarEstado('🔄 Cargando datos de isport...');
+
+                // Cargar ligas específicas
+                await cargarLiga(223, 'ligaArgentina'); // Liga Argentina
+                await cargarLiga(128, 'libertadores');  // Copa Libertadores
+                await cargarLiga(39, 'premierLeague');   // Premier League
+                
+                // Cargar todos los partidos del día
+                await cargarTodosLosPartidos();
+
+                actualizarEstado('✅ Datos cargados correctamente', 'ok');
+
             } catch (error) {
                 console.error('Error general:', error);
-                mostrarErrorGeneral();
+                actualizarEstado(`❌ Error: ${error.message}`, 'error');
             }
         }
 
         // Cargar una liga específica
         async function cargarLiga(idLiga, contenedorId) {
             try {
-                // Año actual automático
-                const añoActual = new Date().getFullYear();
-                const res = await fetch(`${URL_FUTBOL}/fixtures?league=${idLiga}&season=${añoActual}&last=3`, OPCIONES);
+                // Enviamos la petición a través del proxy para evitar el bloqueo
+                const endpoint = `${URL_API}/matches?league_id=${idLiga}`;
+                const res = await fetch(PROXY_CORS + encodeURIComponent(endpoint), OPCIONES);
+                
+                if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+                
                 const datos = await res.json();
                 
-                if(datos.errors && Object.keys(datos.errors).length > 0) {
-                    throw new Error('Error API: ' + JSON.stringify(datos.errors));
+                if (!datos.success) {
+                    throw new Error(datos.message || 'Respuesta inválida de la API');
                 }
 
-                mostrarPartidos(contenedorId, datos.response);
+                mostrarPartidosLiga(contenedorId, datos.data.slice(0, 3)); // Mostrar últimos 3
 
             } catch (error) {
                 console.error(`Error liga ${idLiga}:`, error);
-                document.getElementById(contenedorId).innerHTML = `<p class="text-red-400 text-sm">No se pudo cargar</p>`;
+                document.getElementById(contenedorId).innerHTML = `
+                    <p class="text-red-400 text-sm text-center p-2">
+                        ⚠️ No se pudo cargar<br>${error.message}
+                    </p>
+                `;
             }
         }
 
-        // Mostrar partidos en la interfaz
-        function mostrarPartidos(contenedorId, partidos) {
+        // Mostrar partidos en la tarjeta de liga
+        function mostrarPartidosLiga(contenedorId, partidos) {
             const contenedor = document.getElementById(contenedorId);
             contenedor.innerHTML = '';
 
             if (!partidos || partidos.length === 0) {
-                contenedor.innerHTML = '<p class="text-gray-400 text-sm">Sin partidos recientes</p>';
+                contenedor.innerHTML = '<p class="text-gray-400 text-sm text-center p-2">Sin partidos disponibles</p>';
                 return;
             }
 
             partidos.forEach(partido => {
-                const local = partido.teams.home.name;
-                const visitante = partido.teams.away.name;
-                const golL = partido.goals.home ?? '-';
-                const golV = partido.goals.away ?? '-';
-                const estado = partido.fixture.status.long;
-                const esVivo = partido.fixture.status.short === 'LIVE' || partido.fixture.status.short === '1H' || partido.fixture.status.short === '2H';
+                const esVivo = partido.status === 'live' || partido.status === 'inprogress';
+                const estadoTexto = esVivo ? '🔴 EN VIVO' : formatearFecha(partido.start_time);
+                const claseVivo = esVivo ? 'bg-shock-rojo/20 border border-shock-rojo' : 'bg-black/30';
 
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-lg text-sm ${esVivo ? 'bg-shock-rojo/20 border border-shock-rojo' : 'bg-black/30'}`;
+                div.className = `p-3 rounded-lg text-sm ${claseVivo}`;
                 div.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="text-right w-28 truncate">${local}</span>
-                        <span class="font-bold text-lg">${golL} - ${golV}</span>
-                        <span class="text-left w-28 truncate">${visitante}</span>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="text-right w-24 truncate">${partido.home_team.name}</span>
+                        <span class="font-bold text-lg">${partido.home_score ?? '-'} - ${partido.away_score ?? '-'}</span>
+                        <span class="text-left w-24 truncate">${partido.away_team.name}</span>
                     </div>
-                    <p class="text-[10px] text-center mt-1 text-gray-300">${esVivo ? '🔴 EN VIVO' : estado}</p>
+                    <p class="text-[10px] text-center mt-1 text-gray-300">${estadoTexto}</p>
                 `;
                 contenedor.appendChild(div);
             });
         }
 
-        // Cargar próximos partidos
-        async function cargarProximos() {
+        // Cargar todos los partidos generales
+        async function cargarTodosLosPartidos() {
             try {
-                const res = await fetch(`${URL_FUTBOL}/fixtures?next=8`, OPCIONES);
+                const fechaHoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const endpoint = `${URL_API}/matches?date=${fechaHoy}`;
+                
+                const res = await fetch(PROXY_CORS + encodeURIComponent(endpoint), OPCIONES);
+                if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+                
                 const datos = await res.json();
 
-                if(datos.errors && Object.keys(datos.errors).length > 0) {
-                    throw new Error('Error API');
-                }
+                if (!datos.success) throw new Error('No se pudieron obtener los partidos');
 
-                const contenedor = document.getElementById('proximosPartidos');
+                const contenedor = document.getElementById('todosPartidos');
                 contenedor.innerHTML = '';
 
-                if (!datos.response || datos.response.length === 0) {
-                    contenedor.innerHTML = '<p class="text-center col-span-4 text-gray-400">No hay partidos programados</p>';
+                if (!datos.data || datos.data.length === 0) {
+                    contenedor.innerHTML = '<p class="text-center col-span-4 text-gray-400 py-8">📅 Hoy no hay partidos programados</p>';
                     return;
                 }
 
-                datos.response.forEach(partido => {
-                    const fecha = new Date(partido.fixture.date).toLocaleString('es-AR', { 
-                        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
-                    });
-
+                datos.data.forEach(partido => {
                     const div = document.createElement('div');
                     div.className = 'p-4 bg-black/30 rounded-lg text-center hover:bg-black/50 transition-colors';
                     div.innerHTML = `
-                        <p class="text-shock-rojo text-sm font-medium mb-2">${fecha}</p>
-                        <p class="font-semibold text-sm truncate">${partido.teams.home.name}</p>
+                        <p class="text-shock-rojo text-sm font-medium mb-2">${formatearFecha(partido.start_time)}</p>
+                        <p class="font-semibold text-sm truncate">${partido.home_team.name}</p>
                         <p class="text-gray-400 text-xs">vs</p>
-                        <p class="font-semibold text-sm truncate">${partido.teams.away.name}</p>
+                        <p class="font-semibold text-sm truncate">${partido.away_team.name}</p>
+                        <span class="text-xs mt-1 inline-block px-2 py-0.5 bg-shock-gris rounded">${partido.league.name}</span>
                     `;
                     contenedor.appendChild(div);
                 });
 
             } catch (error) {
-                console.error('Error próximos:', error);
-                document.getElementById('proximosPartidos').innerHTML = '<p class="text-center col-span-4 text-red-400">Error al cargar datos</p>';
+                console.error('Error todos los partidos:', error);
+                document.getElementById('todosPartidos').innerHTML = `
+                    <p class="text-center col-span-4 text-red-400 p-4">
+                        ❌ No se pudieron cargar los partidos de hoy<br>
+                        <small>${error.message}</small>
+                    </p>`;
             }
         }
 
-        function mostrarErrorGeneral(){
-            const seccion = document.getElementById('futbol');
-            seccion.innerHTML += `<p class="text-center text-red-400 font-bold mt-6">⚠️ La API devolvió un error, verifica los límites o la clave</p>`;
+        // Formatear fecha y hora legible
+        function formatearFecha(fechaISO) {
+            const fecha = new Date(fechaISO);
+            return fecha.toLocaleString('es-AR', { 
+                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+            });
         }
 
         // Menú móvil
@@ -332,8 +330,8 @@
             document.getElementById('menuMovil').classList.toggle('hidden');
         });
 
-        // Iniciar carga automática
-        document.addEventListener('DOMContentLoaded', cargarTodo);
+        // Iniciar todo al cargar
+        document.addEventListener('DOMContentLoaded', cargarDatosFutbol);
     </script>
 </body>
 </html>
