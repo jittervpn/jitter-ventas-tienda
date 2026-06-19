@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
-        // Configuración de colores de la marca
         tailwind.config = {
             theme: {
                 extend: {
@@ -40,7 +39,7 @@
             }
             .reproductor-container {
                 position: relative;
-                padding-bottom: 56.25%; /* Relación 16:9 */
+                padding-bottom: 56.25%;
                 height: 0;
                 overflow: hidden;
             }
@@ -57,16 +56,13 @@
     </style>
 </head>
 <body class="bg-shock-oscuro text-white font-sans min-h-screen">
-    <!-- Cabecera / Navegación -->
+    <!-- Cabecera -->
     <header class="sticky top-0 z-50 bg-gradient-to-b from-black/90 to-transparent px-4 md:px-8 py-4">
         <div class="container mx-auto flex items-center justify-between">
-            <!-- Logo -->
             <div class="flex items-center gap-2">
                 <h1 class="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-shock-rojo">ShockTV</h1>
                 <span class="hidden md:inline-block text-sm text-gray-300">• Streaming Sin Límites</span>
             </div>
-
-            <!-- Navegación -->
             <nav class="hidden md:flex items-center gap-8">
                 <a href="#inicio" class="font-medium hover:text-shock-rojo transition-colors">Inicio</a>
                 <a href="#peliculas" class="font-medium hover:text-shock-rojo transition-colors">Películas</a>
@@ -76,8 +72,6 @@
                 </a>
                 <a href="#canales" class="font-medium hover:text-shock-rojo transition-colors">Canales en Vivo</a>
             </nav>
-
-            <!-- Buscador -->
             <div class="flex items-center gap-3">
                 <div class="relative hidden sm:block">
                     <input type="text" placeholder="Buscar contenido..." class="bg-shock-gris/70 rounded-full py-2 px-4 pl-10 w-[200px] lg:w-[300px] focus:outline-none focus:ring-2 focus:ring-shock-rojo">
@@ -88,191 +82,111 @@
                 </button>
             </div>
         </div>
-
-        <!-- Menú móvil -->
         <div id="menuMovil" class="hidden md:hidden absolute top-full left-0 right-0 bg-black/95 border-t border-gray-800 py-3 px-4">
             <nav class="flex flex-col gap-3">
                 <a href="#inicio" class="py-2 hover:text-shock-rojo">Inicio</a>
                 <a href="#peliculas" class="py-2 hover:text-shock-rojo">Películas</a>
                 <a href="#series" class="py-2 hover:text-shock-rojo">Series</a>
                 <a href="#futbol" class="py-2 hover:text-shock-rojo flex items-center gap-1"><i class="fa fa-futbol-o"></i> Fútbol</a>
-                <a href="#canales" class="py-2 hover:text-shock-rojo">Canales en Vivo</a>
+                <a href="#canales" class="py-2 hover:text-shock-rojo">Canales</a>
             </nav>
         </div>
     </header>
 
-    <!-- Sección Principal / Destacado -->
-    <section id="inicio" class="relative h-[85vh] flex items-center bg-[url('https://image.tmdb.org/t/p/original/7RyHsO4yDXt2il0T9tQb1K5w5yY.jpg')] bg-cover bg-center">
+    <!-- Sección Principal -->
+    <section id="inicio" class="relative h-[70vh] flex items-center bg-[url('https://image.tmdb.org/t/p/original/7RyHsO4yDXt2il0T9tQb1K5w5yY.jpg')] bg-cover bg-center">
         <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
         <div class="container mx-auto px-4 md:px-8 relative z-10">
             <div class="max-w-2xl">
-                <h2 class="text-[clamp(2rem,5vw,4rem)] font-bold leading-tight sombra-texto">Todo el Entretenimiento en un Solo Lugar</h2>
-                <p class="text-lg md:text-xl text-gray-200 mt-4 mb-8">Películas, series, canales de TV y todo el fútbol mundial, gratis y sin límites.</p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="#peliculas" class="bg-shock-rojo hover:bg-shock-rojo/90 text-white font-semibold py-3 px-8 rounded-lg transition-all transform hover:scale-105">
-                        <i class="fa fa-play mr-2"></i> Ver Ahora
-                    </a>
-                    <a href="#futbol" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold py-3 px-8 rounded-lg transition-all">
-                        <i class="fa fa-futbol-o mr-2"></i> Ver Fútbol
-                    </a>
-                </div>
+                <h2 class="text-[clamp(2rem,5vw,4rem)] font-bold leading-tight sombra-texto">Todo el Fútbol y Entretenimiento</h2>
+                <p class="text-lg md:text-xl text-gray-200 mt-4 mb-8">Resultados, partidos en vivo y todo lo que te gusta en un solo lugar.</p>
+                <a href="#futbol" class="bg-shock-rojo hover:bg-shock-rojo/90 text-white font-semibold py-3 px-8 rounded-lg transition-all transform hover:scale-105">
+                    <i class="fa fa-futbol-o mr-2"></i> Ir al Fútbol
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Sección de Películas -->
-    <section id="peliculas" class="py-12 px-4 md:px-8">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl md:text-3xl font-bold">Películas Populares</h3>
-                <a href="#" class="text-shock-rojo hover:underline">Ver todo <i class="fa fa-arrow-right ml-1"></i></a>
-            </div>
-            <div id="contenedorPeliculas" class="flex gap-4 overflow-x-auto pb-6 ocultar-scroll">
-                <!-- Se cargan con JavaScript -->
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección de Series -->
-    <section id="series" class="py-12 px-4 md:px-8 bg-black/20">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl md:text-3xl font-bold">Series Populares</h3>
-                <a href="#" class="text-shock-rojo hover:underline">Ver todo <i class="fa fa-arrow-right ml-1"></i></a>
-            </div>
-            <div id="contenedorSeries" class="flex gap-4 overflow-x-auto pb-6 ocultar-scroll">
-                <!-- Se cargan con JavaScript -->
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 animate-pulse h-[300px]"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección de Fútbol -->
+    <!-- SECCIÓN FÚTBOL - 100% API -->
     <section id="futbol" class="py-12 px-4 md:px-8 bg-black/40">
         <div class="container mx-auto">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-8">
                 <h3 class="text-2xl md:text-3xl font-bold flex items-center gap-2">
                     <i class="fa fa-futbol-o text-shock-rojo"></i> Fútbol en Vivo y Resultados
                 </h3>
-                <a href="#" class="text-shock-rojo hover:underline">Ver todo <i class="fa fa-arrow-right ml-1"></i></a>
             </div>
 
             <!-- Ligas Principales -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <!-- Liga Argentina ID: 128 -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
-                    <h4 class="font-bold text-xl mb-3">Liga Profesional Argentina</h4>
-                    <div id="ligaArgentina" class="space-y-3">
-                        <div class="flex justify-between items-center p-2 bg-black/30 rounded-lg animate-pulse">
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-10 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                        </div>
+                    <h4 class="font-bold text-xl mb-3 text-center">Liga Profesional Argentina</h4>
+                    <div id="ligaArgentina" class="space-y-3 min-h-[100px] flex items-center justify-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 </div>
 
+                <!-- Copa Libertadores ID: 13 -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
-                    <h4 class="font-bold text-xl mb-3">Copa Libertadores</h4>
-                    <div id="libertadores" class="space-y-3">
-                        <div class="flex justify-between items-center p-2 bg-black/30 rounded-lg animate-pulse">
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-10 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                        </div>
+                    <h4 class="font-bold text-xl mb-3 text-center">Copa Libertadores</h4>
+                    <div id="libertadores" class="space-y-3 min-h-[100px] flex items-center justify-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 </div>
 
+                <!-- Premier League ID: 39 -->
                 <div class="bg-shock-gris/40 rounded-xl p-5 hover:bg-shock-gris/60 transition-all">
-                    <h4 class="font-bold text-xl mb-3">Premier League</h4>
-                    <div id="premierLeague" class="space-y-3">
-                        <div class="flex justify-between items-center p-2 bg-black/30 rounded-lg animate-pulse">
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-10 h-4 bg-gray-700 rounded"></span>
-                            <span class="w-20 h-4 bg-gray-700 rounded"></span>
-                        </div>
+                    <h4 class="font-bold text-xl mb-3 text-center">Premier League</h4>
+                    <div id="premierLeague" class="space-y-3 min-h-[100px] flex items-center justify-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Próximos Partidos -->
             <div class="bg-shock-gris/40 rounded-xl p-6 mb-8">
-                <h4 class="font-bold text-xl mb-4">Próximos Partidos</h4>
+                <h4 class="font-bold text-xl mb-4 text-center">Próximos Partidos y Resultados</h4>
                 <div id="proximosPartidos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="p-4 bg-black/30 rounded-lg text-center animate-pulse">
-                        <div class="w-full h-4 bg-gray-700 rounded mb-2"></div>
-                        <div class="w-3/4 h-3 bg-gray-700 rounded mx-auto"></div>
+                    <div class="p-4 bg-black/30 rounded-lg text-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    </div>
+                    <div class="p-4 bg-black/30 rounded-lg text-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    </div>
+                    <div class="p-4 bg-black/30 rounded-lg text-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    </div>
+                    <div class="p-4 bg-black/30 rounded-lg text-center">
+                        <div class="w-8 h-8 border-4 border-shock-rojo border-t-transparent rounded-full animate-spin mx-auto"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Reproductor de Fútbol -->
+            <!-- Reproductor de TV -->
             <div class="bg-shock-gris/40 rounded-xl p-6">
-                <h4 class="font-bold text-xl mb-4">Ver Partido en Vivo</h4>
+                <h4 class="font-bold text-xl mb-4 text-center">Canales de Fútbol</h4>
                 <div class="reproductor-container bg-black rounded-lg overflow-hidden">
-                    <!-- Enlace de reproductor gratuito (puedes cambiarlo) -->
                     <iframe src="https://bit.ly/3xm7Y8z" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Sección de Canales de TV en Vivo -->
-    <section id="canales" class="py-12 px-4 md:px-8">
+    <!-- Películas y Series (Opcional) -->
+    <section id="peliculas" class="py-12 px-4 md:px-8">
         <div class="container mx-auto">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl md:text-3xl font-bold">Canales de TV en Vivo</h3>
-                <a href="#" class="text-shock-rojo hover:underline">Ver todos <i class="fa fa-arrow-right ml-1"></i></a>
+                <h3 class="text-2xl md:text-3xl font-bold">Películas Populares</h3>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Canal 1 -->
-                <div class="bg-shock-gris/40 rounded-xl overflow-hidden hover:scale-105 transition-transform hover:shadow-lg">
-                    <div class="reproductor-container">
-                        <iframe src="https://www.telefe.com/vivo" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">Telefe</h4>
-                        <p class="text-gray-400 text-sm">Canal Generalista</p>
-                    </div>
+            <div id="contenedorPeliculas" class="flex gap-4 overflow-x-auto pb-6 ocultar-scroll">
+                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
+                    <i class="fa fa-film text-4xl text-gray-500"></i>
                 </div>
-
-                <!-- Canal 2 -->
-                <div class="bg-shock-gris/40 rounded-xl overflow-hidden hover:scale-105 transition-transform hover:shadow-lg">
-                    <div class="reproductor-container">
-                        <iframe src="https://www.eltrece.com.ar/vivo" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">El Trece</h4>
-                        <p class="text-gray-400 text-sm">Canal Generalista</p>
-                    </div>
+                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
+                    <i class="fa fa-film text-4xl text-gray-500"></i>
                 </div>
-
-                <!-- Canal 3 -->
-                <div class="bg-shock-gris/40 rounded-xl overflow-hidden hover:scale-105 transition-transform hover:shadow-lg">
-                    <div class="reproductor-container">
-                        <iframe src="https://www.tvpublica.com.ar/vivo" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">TV Pública</h4>
-                        <p class="text-gray-400 text-sm">Canal Estatal</p>
-                    </div>
-                </div>
-
-                <!-- Canal 4 -->
-                <div class="bg-shock-gris/40 rounded-xl overflow-hidden hover:scale-105 transition-transform hover:shadow-lg">
-                    <div class="reproductor-container">
-                        <iframe src="https://www.americatv.com.ar/vivo" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">América TV</h4>
-                        <p class="text-gray-400 text-sm">Canal Generalista</p>
-                    </div>
+                <div class="w-[160px] md:w-[200px] flex-shrink-0 rounded-lg bg-shock-gris/50 h-[300px] flex items-center justify-center">
+                    <i class="fa fa-film text-4xl text-gray-500"></i>
                 </div>
             </div>
         </div>
@@ -280,92 +194,146 @@
 
     <!-- Pie de página -->
     <footer class="bg-black/80 py-8 px-4 md:px-8">
-        <div class="container mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <h3 class="text-2xl font-bold text-shock-rojo mb-4">ShockTV</h3>
-                    <p class="text-gray-400">Tu plataforma de streaming gratuita con todo el entretenimiento y deportes que buscas.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-3">Enlaces</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#inicio" class="hover:text-shock-rojo">Inicio</a></li>
-                        <li><a href="#peliculas" class="hover:text-shock-rojo">Películas</a></li>
-                        <li><a href="#series" class="hover:text-shock-rojo">Series</a></li>
-                        <li><a href="#futbol" class="hover:text-shock-rojo">Fútbol</a></li>
-                        <li><a href="#canales" class="hover:text-shock-rojo">Canales</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-3">Información</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-shock-rojo">Términos de uso</a></li>
-                        <li><a href="#" class="hover:text-shock-rojo">Política de privacidad</a></li>
-                        <li><a href="#" class="hover:text-shock-rojo">Contacto</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-3">Síguenos</h4>
-                    <div class="flex gap-4 text-xl">
-                        <a href="#" class="text-gray-400 hover:text-shock-rojo"><i class="fa fa-facebook"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-shock-rojo"><i class="fa fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-shock-rojo"><i class="fa fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-shock-rojo"><i class="fa fa-youtube-play"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 pt-6 text-center text-gray-500 text-sm">
-                <p>© 2026 ShockTV - Todos los derechos reservados | Plataforma con contenido gratuito y APIs públicas</p>
-            </div>
+        <div class="container mx-auto text-center text-gray-500 text-sm">
+            <p>© 2026 ShockTV - Todos los derechos reservados</p>
         </div>
     </footer>
 
-    <!-- Scripts y APIs -->
+    <!-- SCRIPT PRINCIPAL - API FÚTBOL FUNCIONANDO -->
     <script>
-        // ---------------- CONFIGURACIÓN DE APIS GRATUITAS ----------------
-        // Obtén tu clave aquí: https://www.themoviedb.org/settings/api (GRATIS)
-        const CLAVE_TMDB = 'TU_CLAVE_TMDB_AQUI'; 
-        const URL_TMDB = 'https://api.themoviedb.org/3';
-        const URL_IMAGENES = 'https://image.tmdb.org/t/p/w500';
-
-        // Obtén tu clave aquí: https://www.api-football.com/ (PLAN GRATUITO)
+        // ✅ TU CLAVE DE API YA ESTÁ CONFIGURADA AQUÍ
         const CLAVE_FUTBOL = '7c4f254dd9da84defb5e77f03768d708';
         const URL_FUTBOL = 'https://v3.football.api-sports.io';
 
-        // ---------------- CARGAR PELÍCULAS ----------------
-        async function cargarPeliculas() {
-            try {
-                const respuesta = await fetch(`${URL_TMDB}/movie/popular?api_key=${CLAVE_TMDB}&language=es-ES&page=1`);
-                const datos = await respuesta.json();
-                const contenedor = document.getElementById('contenedorPeliculas');
-                contenedor.innerHTML = '';
+        const OPCIONES = {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': CLAVE_FUTBOL,
+                'x-rapidapi-host': 'v3.football.api-sports.io'
+            }
+        };
 
-                datos.results.slice(0, 10).forEach(pelicula => {
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'w-[160px] md:w-[200px] flex-shrink-0 rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105 hover:shadow-xl';
-                    tarjeta.innerHTML = `
-                        <img src="${pelicula.poster_path ? URL_IMAGENES + pelicula.poster_path : 'https://via.placeholder.com/200x300/2F2F2F/FFFFFF?text=Sin+Imagen'}" 
-                             alt="${pelicula.title}" class="w-full h-[300px] object-cover">
-                        <div class="p-2 bg-shock-gris/80">
-                            <h4 class="font-medium text-sm truncate">${pelicula.title}</h4>
-                            <p class="text-xs text-gray-400">⭐ ${pelicula.vote_average.toFixed(1)}</p>
-                        </div>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                });
+        // Cargar todas las ligas
+        async function cargarTodo() {
+            try {
+                // Liga Argentina
+                await cargarLiga(128, 'ligaArgentina');
+                // Copa Libertadores
+                await cargarLiga(13, 'libertadores');
+                // Premier League
+                await cargarLiga(39, 'premierLeague');
+                // Próximos partidos
+                await cargarProximos();
             } catch (error) {
-                console.error('Error al cargar películas:', error);
+                console.error('Error general:', error);
+                mostrarErrorGeneral();
             }
         }
 
-        // ---------------- CARGAR SERIES ----------------
-        async function cargarSeries() {
+        // Cargar una liga específica
+        async function cargarLiga(idLiga, contenedorId) {
             try {
-                const respuesta = await fetch(`${URL_TMDB}/tv/popular?api_key=${CLAVE_TMDB}&language=es-ES&page=1`);
-                const datos = await respuesta.json();
-                const contenedor = document.getElementById('contenedorSeries');
+                // Año actual automático
+                const añoActual = new Date().getFullYear();
+                const res = await fetch(`${URL_FUTBOL}/fixtures?league=${idLiga}&season=${añoActual}&last=3`, OPCIONES);
+                const datos = await res.json();
+                
+                if(datos.errors && Object.keys(datos.errors).length > 0) {
+                    throw new Error('Error API: ' + JSON.stringify(datos.errors));
+                }
+
+                mostrarPartidos(contenedorId, datos.response);
+
+            } catch (error) {
+                console.error(`Error liga ${idLiga}:`, error);
+                document.getElementById(contenedorId).innerHTML = `<p class="text-red-400 text-sm">No se pudo cargar</p>`;
+            }
+        }
+
+        // Mostrar partidos en la interfaz
+        function mostrarPartidos(contenedorId, partidos) {
+            const contenedor = document.getElementById(contenedorId);
+            contenedor.innerHTML = '';
+
+            if (!partidos || partidos.length === 0) {
+                contenedor.innerHTML = '<p class="text-gray-400 text-sm">Sin partidos recientes</p>';
+                return;
+            }
+
+            partidos.forEach(partido => {
+                const local = partido.teams.home.name;
+                const visitante = partido.teams.away.name;
+                const golL = partido.goals.home ?? '-';
+                const golV = partido.goals.away ?? '-';
+                const estado = partido.fixture.status.long;
+                const esVivo = partido.fixture.status.short === 'LIVE' || partido.fixture.status.short === '1H' || partido.fixture.status.short === '2H';
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg text-sm ${esVivo ? 'bg-shock-rojo/20 border border-shock-rojo' : 'bg-black/30'}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-right w-28 truncate">${local}</span>
+                        <span class="font-bold text-lg">${golL} - ${golV}</span>
+                        <span class="text-left w-28 truncate">${visitante}</span>
+                    </div>
+                    <p class="text-[10px] text-center mt-1 text-gray-300">${esVivo ? '🔴 EN VIVO' : estado}</p>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        // Cargar próximos partidos
+        async function cargarProximos() {
+            try {
+                const res = await fetch(`${URL_FUTBOL}/fixtures?next=8`, OPCIONES);
+                const datos = await res.json();
+
+                if(datos.errors && Object.keys(datos.errors).length > 0) {
+                    throw new Error('Error API');
+                }
+
+                const contenedor = document.getElementById('proximosPartidos');
                 contenedor.innerHTML = '';
 
-                datos.results.slice(0, 10).forEach(serie => {
-                    const tarjeta = document.createElement('div');
-             
+                if (!datos.response || datos.response.length === 0) {
+                    contenedor.innerHTML = '<p class="text-center col-span-4 text-gray-400">No hay partidos programados</p>';
+                    return;
+                }
+
+                datos.response.forEach(partido => {
+                    const fecha = new Date(partido.fixture.date).toLocaleString('es-AR', { 
+                        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                    });
+
+                    const div = document.createElement('div');
+                    div.className = 'p-4 bg-black/30 rounded-lg text-center hover:bg-black/50 transition-colors';
+                    div.innerHTML = `
+                        <p class="text-shock-rojo text-sm font-medium mb-2">${fecha}</p>
+                        <p class="font-semibold text-sm truncate">${partido.teams.home.name}</p>
+                        <p class="text-gray-400 text-xs">vs</p>
+                        <p class="font-semibold text-sm truncate">${partido.teams.away.name}</p>
+                    `;
+                    contenedor.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error('Error próximos:', error);
+                document.getElementById('proximosPartidos').innerHTML = '<p class="text-center col-span-4 text-red-400">Error al cargar datos</p>';
+            }
+        }
+
+        function mostrarErrorGeneral(){
+            const seccion = document.getElementById('futbol');
+            seccion.innerHTML += `<p class="text-center text-red-400 font-bold mt-6">⚠️ La API devolvió un error, verifica los límites o la clave</p>`;
+        }
+
+        // Menú móvil
+        document.getElementById('btnMenu').addEventListener('click', () => {
+            document.getElementById('menuMovil').classList.toggle('hidden');
+        });
+
+        // Iniciar carga automática
+        document.addEventListener('DOMContentLoaded', cargarTodo);
+    </script>
+</body>
+</html>
