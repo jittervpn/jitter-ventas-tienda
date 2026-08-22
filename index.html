@@ -17,6 +17,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
+  html,body{max-width:100%;overflow-x:hidden}
   body{background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
   body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     background:
@@ -28,7 +29,7 @@
   .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
 
   /* ---------- nav ---------- */
-  .nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(10,15,28,.75);border-bottom:1px solid var(--line)}
+  .nav{position:sticky;width:100%;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(10,15,28,.75);border-bottom:1px solid var(--line)}
   .nav .in{max-width:1100px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
   .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px;text-decoration:none}
   .logo i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font-style:normal;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(34,211,238,.35)}
@@ -42,13 +43,13 @@
   /* ---------- layout ---------- */
   main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:36px 20px 56px}
   .hero{margin-bottom:28px}
-  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(34,211,238,.3);border-radius:999px;background:rgba(34,211,238,.06);margin-bottom:14px}
-  h1{font-size:clamp(28px,5vw,44px);line-height:1.1;letter-spacing:-.03em;font-weight:800;max-width:720px}
+  .eyebrow{display:inline-flex;max-width:100%;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(34,211,238,.3);border-radius:999px;background:rgba(34,211,238,.06);margin-bottom:14px}
+  h1{font-size:clamp(26px,5vw,44px);overflow-wrap:anywhere;line-height:1.1;letter-spacing:-.03em;font-weight:800;max-width:720px}
   h1 span{background:linear-gradient(90deg,var(--accent),#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
   .lead{color:var(--ink2);max-width:620px;margin-top:12px;font-size:16px}
 
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:14px 16px}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0}
+  .stat{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:14px 16px}
   .stat label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
   .stat .bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:10px}
@@ -57,7 +58,7 @@
 
   .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:start}
   @media(max-width:860px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
+  .card{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
   @media(max-width:480px){.card{padding:20px}}
   .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .card h2 svg{width:20px;height:20px;color:var(--accent);flex:none}
@@ -70,10 +71,10 @@
   .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
   .field input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);padding:13px 14px;font:500 15px "JetBrains Mono",monospace}
   .field input::placeholder{color:var(--muted)}
-  .field .sfx{display:flex;align-items:center;padding:0 14px;color:var(--ink2);font:500 14px "JetBrains Mono",monospace;background:var(--card2);border-left:1px solid var(--line2);white-space:nowrap;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+  .field .sfx{display:flex;align-items:center;padding:0 14px;color:var(--ink2);font:500 14px "JetBrains Mono",monospace;background:var(--card2);border-left:1px solid var(--line2);white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px}
   .hint{font-size:12px;color:var(--muted);margin-top:6px}
   .preview{margin-top:16px;padding:12px 14px;border-radius:var(--r2);background:var(--bg2);border:1px dashed var(--line2);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .preview code{font-family:"JetBrains Mono",monospace;color:var(--ink);font-size:13px;word-break:break-all}
+  .preview code{min-width:0;font-family:"JetBrains Mono",monospace;color:var(--ink);font-size:13px;word-break:break-all}
   .preview .arrow{color:var(--accent)}
   button.primary{margin-top:20px;width:100%;padding:15px 18px;border:0;border-radius:var(--r2);cursor:pointer;font:700 15px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(34,211,238,.28);transition:transform .12s,box-shadow .12s,opacity .2s;display:flex;align-items:center;justify-content:center;gap:10px}
   button.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 30px rgba(34,211,238,.36)}
@@ -115,7 +116,7 @@
   .rules li{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--ink2)}
   .rules li svg{width:18px;height:18px;color:var(--accent);flex:none;margin-top:2px}
   .rules b{color:var(--ink);font-weight:600}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
   @media(max-width:640px){.steps{grid-template-columns:1fr}}
   .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px}
   .step i{font-style:normal;font:600 12px "JetBrains Mono",monospace;color:var(--accent)}
@@ -201,7 +202,11 @@ const $=s=>document.querySelector(s);
 let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)jx_device=([^;]+)/)||[])[1]||'';
 if(!device){device=crypto.randomUUID();}
 localStorage.setItem('jx_device',device);
-const api=(path,opts={})=>fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device}}).then(r=>r.json());
+const api=async(path,opts={})=>{
+  const r=await fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device}});
+  const txt=await r.text();
+  try{return JSON.parse(txt)}catch{throw new Error(r.status===404?('No existe '+path+' en el servidor'):('Respuesta inválida del servidor ('+r.status+')'))}
+};
 
 const ICON_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
 const ICON_ERR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
@@ -248,10 +253,11 @@ async function load(){
     $('#free').textContent=Math.max(0,s.max-s.active)+' / '+s.max;
     $('#bar').style.width=Math.min(100,s.active/s.max*100)+'%';
     setStatus('on','Sistema operativo');
-    const m=await api('/api/me');
-    const rec=m.record||JSON.parse(localStorage.getItem('jx_record')||'null');
+    let remote=null;
+    try{const m=await api('/api/me'); remote=m.record||null;}catch(e){console.warn('api/me:',e.message)}
+    const rec=remote||JSON.parse(localStorage.getItem('jx_record')||'null');
     const valid=rec&&rec.expiresAt>Date.now()?rec:null;
-    if(m.record) localStorage.setItem('jx_record',JSON.stringify(m.record));
+    if(remote) localStorage.setItem('jx_record',JSON.stringify(remote));
     showRecord(valid); lockButton(!!valid);
   }catch(e){
     setStatus('off','Sin conexión con la API');
@@ -263,7 +269,7 @@ async function load(){
 $('#go').onclick=async()=>{
   const b=$('#go'); b.disabled=true; b.classList.add('loading'); $('#goText').textContent='Creando…'; $('#msg').className='msg';
   const j=await api('/api/create',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({subdomain:$('#sub').value,ip:$('#ip').value})}).catch(()=>({error:'Respuesta inválida del servidor'}));
+    body:JSON.stringify({subdomain:$('#sub').value,ip:$('#ip').value})}).catch(e=>({error:e.message}));
   if(j.ok){
     localStorage.setItem('jx_record',JSON.stringify(j.record));
     showMsg('ok','Registro creado: <b>'+j.record.name+'</b> → '+j.record.ip+'. Estará activo en menos de un minuto.');
