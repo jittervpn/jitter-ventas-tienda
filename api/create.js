@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
-import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, userKey, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
+import { limit } from "../lib/ratelimit.js";
+import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 const isValidIPv4 = (ip) =>
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip);
@@ -8,6 +9,8 @@ const RESERVED = new Set(["www", "mail", "ns1", "ns2", "api", "panel", "admin", 
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
+  const over = limit(req, { max: 5, windowMs: 60000 });
+  if (over) return res.status(429).json({ error: over });
   const err = checkEnv();
   if (err) return res.status(500).json({ error: err });
 
@@ -18,18 +21,16 @@ export default async function handler(req, res) {
   if (RESERVED.has(sub)) return res.status(400).json({ error: "Ese subdominio está reservado." });
   if (!isValidIPv4(ip)) return res.status(400).json({ error: "IP inválida. Usa una IPv4 pública, por ejemplo 203.0.113.10." });
 
-  let device = getCookie(req, "jx_device");
-  if (!device) {
-    device = crypto.randomUUID();
-    res.setHeader("set-cookie", `jx_device=${device}; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly`);
-  }
-  const key = userKey(req, device);
+  let device = req.headers["x-jx-device"] || getCookie(req, "jx_device");
+  if (!device) device = crypto.randomUUID();
+  res.setHeader("set-cookie", `jx_device=${device}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`);
+  const id = identity({ ...req, headers: { ...req.headers, "x-jx-device": device } });
   const fqdn = `${sub}.${clean(process.env.ZONE_NAME)}`;
 
   try {
     const zone = await zoneId();
     const active = await listActive();
-    const mine = active.find((r) => r.userKey === key);
+    const mine = active.find((r) => isMine(r, id));
     if (mine) return res.status(429).json({ error: "Ya tienes un registro activo. Podrás crear otro cuando expire.", record: mine });
 
     const max = parseInt(process.env.MAX_USERS || "100", 10);
@@ -42,11 +43,11 @@ export default async function handler(req, res) {
     const expiresAt = now + SEVEN_DAYS_MS;
     const dns = await cfRequest(`/zones/${zone}/dns_records`, {
       method: "POST",
-      body: JSON.stringify({ type: "A", name: fqdn, content: ip, ttl: 60, proxied: false, comment: makeComment(key, expiresAt) }),
+      body: JSON.stringify({ type: "A", name: fqdn, content: ip, ttl: 60, proxied: false, comment: makeComment(id, expiresAt) }),
     });
     await incrementTotal().catch(() => {});
 
-    res.status(201).json({ ok: true, record: { id: dns.id, name: fqdn, ip, createdAt: now, expiresAt, userKey: key } });
+    res.status(201).json({ ok: true, record: { id: dns.id, name: fqdn, ip, createdAt: now, expiresAt }, device });
   } catch (e) {
     res.status(502).json({ error: "Cloudflare rechazó la operación: " + e.message });
   }
