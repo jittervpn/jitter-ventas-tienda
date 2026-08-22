@@ -1,0 +1,318 @@
+#!/bin/bash
+# ============================================================
+#  Jitterx Agent — instalador todo en uno
+#  Uso:  bash <(curl -sL TU_URL/install.sh)
+# ============================================================
+set -e
+[ "$EUID" -eq 0 ] || { echo "Ejecuta como root (usa: sudo -i)"; exit 1; }
+command -v python3 >/dev/null || { echo "Falta python3"; exit 1; }
+
+echo
+echo "=========================================="
+echo "   INSTALADOR JITTERX AGENT"
+echo "=========================================="
+echo
+
+DEFDOM=$(hostname -f 2>/dev/null || echo "")
+read -rp "Dominio publico del VPS [$DEFDOM]: " HOST_DOMAIN; HOST_DOMAIN=${HOST_DOMAIN:-$DEFDOM}
+[ -z "$HOST_DOMAIN" ] && { echo "El dominio es obligatorio"; exit 1; }
+read -rp "Puerto WebSocket [80]: " WS_PORT; WS_PORT=${WS_PORT:-80}
+read -rp "Puerto SSL/TLS [443]: " SSL_PORT; SSL_PORT=${SSL_PORT:-443}
+read -rp "Puerto SSH [22]: " SSH_PORT; SSH_PORT=${SSH_PORT:-22}
+read -rp "Maximo de cuentas activas [30]: " MAX_USERS; MAX_USERS=${MAX_USERS:-30}
+read -rp "Puerto del agente [8088]: " AGENT_PORT; AGENT_PORT=${AGENT_PORT:-8088}
+
+if [ -f /etc/jitterx-agent.conf ]; then
+  TOKEN=$(grep '^AGENT_TOKEN=' /etc/jitterx-agent.conf | cut -d= -f2)
+  echo "-> Conservando el token existente."
+else
+  TOKEN=$(head -c 32 /dev/urandom | base64 | tr -d '/+=' | head -c 40)
+fi
+
+echo "-> Instalando agente..."
+cat > /usr/local/bin/jitterx-agent << 'JITTERX_AGENT_EOF'
+#!/usr/bin/env python3
+"""
+Agente Jitterx para VPS — crea cuentas SSH/WebSocket bajo demanda.
+Escucha peticiones firmadas con un token compartido y crea usuarios Linux
+con expiración automática y límite de conexiones simultáneas.
+
+Instalar con install.sh. Config en /etc/jitterx-agent.conf
+"""
+import json, os, re, subprocess, secrets, string, hmac, time
+from datetime import datetime, timedelta, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+CONF = "/etc/jitterx-agent.conf"
+cfg = {}
+for line in open(CONF):
+    line = line.strip()
+    if line and not line.startswith("#") and "=" in line:
+        k, v = line.split("=", 1)
+        cfg[k.strip()] = v.strip().strip('"').strip("'")
+
+TOKEN      = cfg["AGENT_TOKEN"]
+PORT       = int(cfg.get("AGENT_PORT", "8088"))
+HOST_DOM   = cfg.get("HOST_DOMAIN", "")
+WS_PORT    = cfg.get("WS_PORT", "80")
+SSL_PORT   = cfg.get("SSL_PORT", "443")
+SSH_PORT   = cfg.get("SSH_PORT", "22")
+DAYS       = int(cfg.get("DAYS", "7"))
+MAX_LOGIN  = int(cfg.get("MAX_LOGIN", "1"))
+MAX_USERS  = int(cfg.get("MAX_USERS", "100"))
+PREFIX     = cfg.get("USER_PREFIX", "jx")
+DB         = "/etc/jitterx-users.json"
+
+USER_RE = re.compile(r"^[a-z][a-z0-9]{2,15}$")
+RESERVED = {"root","admin","ubuntu","test","user","ssh","www","daemon","bin","sys"}
+
+
+def load_db():
+    try:
+        return json.load(open(DB))
+    except Exception:
+        return {}
+
+
+def save_db(db):
+    tmp = DB + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(db, f, indent=1)
+    os.replace(tmp, DB)
+    os.chmod(DB, 0o600)
+
+
+def sh(*args):
+    return subprocess.run(args, capture_output=True, text=True)
+
+
+def system_user_exists(name):
+    return sh("id", "-u", name).returncode == 0
+
+
+def purge_expired(db):
+    """Borra del sistema los usuarios cuya fecha ya pasó."""
+    now = time.time()
+    changed = False
+    for name, rec in list(db.items()):
+        if rec["expires_at"] <= now:
+            sh("pkill", "-9", "-u", name)
+            sh("userdel", "-r", name)
+            del db[name]
+            changed = True
+    if changed:
+        save_db(db)
+    return db
+
+
+def gen_password(n=10):
+    alphabet = string.ascii_lowercase + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(n))
+
+
+def create_account(username, device):
+    db = purge_expired(load_db())
+
+    if len(db) >= MAX_USERS:
+        return 503, {"error": "El servidor alcanzó el límite de cuentas. Inténtalo más tarde."}
+
+    # 1 cuenta por dispositivo
+    for name, rec in db.items():
+        if rec.get("device") == device:
+            return 429, {"error": "Ya tienes una cuenta activa. Podrás crear otra cuando expire.",
+                         "account": public(name, rec)}
+
+    if not USER_RE.match(username):
+        return 400, {"error": "Usuario inválido: 3-16 caracteres, empieza por letra, solo minúsculas y números."}
+    if username in RESERVED or username in db or system_user_exists(username):
+        return 409, {"error": "Ese usuario ya está en uso, elige otro."}
+
+    password = gen_password()
+    expires = datetime.now(timezone.utc) + timedelta(days=DAYS)
+    exp_str = expires.strftime("%Y-%m-%d")
+
+    r = sh("useradd", "-M", "-N", "-s", "/bin/false", "-e", exp_str, username)
+    if r.returncode != 0:
+        return 500, {"error": "No se pudo crear el usuario en el sistema."}
+    p = subprocess.run(["chpasswd"], input=f"{username}:{password}\n", capture_output=True, text=True)
+    if p.returncode != 0:
+        sh("userdel", "-r", username)
+        return 500, {"error": "No se pudo asignar la contraseña."}
+
+    # Límite de conexiones simultáneas
+    with open("/etc/security/limits.d/jitterx.conf", "a") as f:
+        f.write(f"{username} hard maxlogins {MAX_LOGIN}\n")
+
+    rec = {"password": password, "device": device,
+           "created_at": time.time(), "expires_at": expires.timestamp()}
+    db[username] = rec
+    save_db(db)
+    return 201, {"ok": True, "account": public(username, rec)}
+
+
+def public(name, rec):
+    return {
+        "username": name, "password": rec["password"],
+        "host": HOST_DOM, "ws_port": WS_PORT, "ssl_port": SSL_PORT, "ssh_port": SSH_PORT,
+        "created_at": int(rec["created_at"] * 1000),
+        "expires_at": int(rec["expires_at"] * 1000),
+        "max_login": MAX_LOGIN,
+    }
+
+
+def find_by_device(device):
+    db = purge_expired(load_db())
+    for name, rec in db.items():
+        if rec.get("device") == device:
+            return public(name, rec)
+    return None
+
+
+class Handler(BaseHTTPRequestHandler):
+    server_version = "jitterx"
+
+    def log_message(self, fmt, *args):
+        pass  # silencio; systemd ya registra lo importante
+
+    def reply(self, code, obj):
+        body = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("content-type", "application/json; charset=utf-8")
+        self.send_header("content-length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def authed(self):
+        got = self.headers.get("x-agent-token", "")
+        return hmac.compare_digest(got, TOKEN)
+
+    def do_GET(self):
+        if not self.authed():
+            return self.reply(401, {"error": "No autorizado"})
+        if self.path.startswith("/status"):
+            db = purge_expired(load_db())
+            return self.reply(200, {"ok": True, "active": len(db), "max": MAX_USERS,
+                                    "host": HOST_DOM, "days": DAYS})
+        if self.path.startswith("/account"):
+            device = self.headers.get("x-jx-device", "")
+            return self.reply(200, {"account": find_by_device(device) if device else None})
+        self.reply(404, {"error": "Ruta no encontrada"})
+
+    def do_POST(self):
+        if not self.authed():
+            return self.reply(401, {"error": "No autorizado"})
+        if not self.path.startswith("/create"):
+            return self.reply(404, {"error": "Ruta no encontrada"})
+        try:
+            n = int(self.headers.get("content-length", 0))
+            data = json.loads(self.rfile.read(n) or b"{}")
+        except Exception:
+            return self.reply(400, {"error": "JSON inválido"})
+        username = str(data.get("username", "")).strip().lower()
+        device = str(data.get("device", "")).strip()
+        if not device:
+            return self.reply(400, {"error": "Falta el identificador de dispositivo"})
+        code, out = create_account(username, device)
+        self.reply(code, out)
+
+
+if __name__ == "__main__":
+    purge_expired(load_db())
+    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+JITTERX_AGENT_EOF
+chmod 755 /usr/local/bin/jitterx-agent
+
+cat > /etc/jitterx-agent.conf << CONF
+AGENT_TOKEN=$TOKEN
+AGENT_PORT=$AGENT_PORT
+HOST_DOMAIN=$HOST_DOMAIN
+WS_PORT=$WS_PORT
+SSL_PORT=$SSL_PORT
+SSH_PORT=$SSH_PORT
+DAYS=7
+MAX_LOGIN=1
+MAX_USERS=$MAX_USERS
+USER_PREFIX=jx
+CONF
+chmod 600 /etc/jitterx-agent.conf
+[ -f /etc/jitterx-users.json ] || echo '{}' > /etc/jitterx-users.json
+chmod 600 /etc/jitterx-users.json
+touch /etc/security/limits.d/jitterx.conf
+
+cat > /etc/systemd/system/jitterx-agent.service << 'UNIT'
+[Unit]
+Description=Jitterx agent (cuentas SSH temporales)
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/jitterx-agent
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat > /usr/local/bin/jitterx-purge << 'PURGE'
+#!/usr/bin/env python3
+import importlib.util, sys
+spec = importlib.util.spec_from_loader("jx", importlib.machinery.SourceFileLoader("jx", "/usr/local/bin/jitterx-agent"))
+m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+m.purge_expired(m.load_db())
+PURGE
+chmod 755 /usr/local/bin/jitterx-purge
+
+cat > /etc/systemd/system/jitterx-purge.service << 'UNIT'
+[Unit]
+Description=Purga de cuentas Jitterx vencidas
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/jitterx-purge
+UNIT
+cat > /etc/systemd/system/jitterx-purge.timer << 'UNIT'
+[Unit]
+Description=Purga horaria de cuentas Jitterx
+[Timer]
+OnCalendar=hourly
+Persistent=true
+[Install]
+WantedBy=timers.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now jitterx-agent.service >/dev/null 2>&1
+systemctl restart jitterx-agent.service
+systemctl enable --now jitterx-purge.timer >/dev/null 2>&1
+
+if command -v ufw >/dev/null && ufw status 2>/dev/null | grep -q active; then
+  ufw allow "$AGENT_PORT"/tcp >/dev/null 2>&1 || true
+fi
+
+sleep 1
+if systemctl is-active --quiet jitterx-agent; then EST="ACTIVO"; else EST="ERROR (mira: journalctl -u jitterx-agent -n 30)"; fi
+
+IP=$(curl -s4 --max-time 5 ifconfig.me 2>/dev/null || echo "tu-ip")
+echo
+echo "============================================================"
+echo "  INSTALACION COMPLETA — Estado: $EST"
+echo "============================================================"
+echo
+echo "  Copia estas 2 variables en Vercel (Settings > Environment"
+echo "  Variables) y luego haz Redeploy:"
+echo
+echo "  AGENT_URL   = http://$HOST_DOMAIN:$AGENT_PORT"
+echo "  AGENT_TOKEN = $TOKEN"
+echo
+echo "  Prueba local:"
+echo "    curl -H \"x-agent-token: $TOKEN\" http://127.0.0.1:$AGENT_PORT/status"
+echo
+echo "  Comandos utiles:"
+echo "    systemctl status jitterx-agent     estado"
+echo "    journalctl -u jitterx-agent -f     logs en vivo"
+echo "    nano /etc/jitterx-agent.conf       cambiar limites"
+echo
+echo "  Si tu proveedor tiene firewall propio (Oracle, AWS, GCP),"
+echo "  abre tambien el puerto $AGENT_PORT/tcp en su panel."
+echo "============================================================"
+echo
