@@ -19,6 +19,9 @@ read -rp "Dominio publico del VPS [$DEFDOM]: " HOST_DOMAIN; HOST_DOMAIN=${HOST_D
 read -rp "Puerto WebSocket [80]: " WS_PORT; WS_PORT=${WS_PORT:-80}
 read -rp "Puerto SSL/TLS [443]: " SSL_PORT; SSL_PORT=${SSL_PORT:-443}
 read -rp "Puerto SSH [22]: " SSH_PORT; SSH_PORT=${SSH_PORT:-22}
+read -rp "Pais del servidor [Brasil]: " COUNTRY; COUNTRY=${COUNTRY:-Brasil}
+read -rp "Ciudad [Sao Paulo]: " CITY; CITY=${CITY:-Sao Paulo}
+read -rp "Codigo de bandera ISO [BR]: " FLAG; FLAG=${FLAG:-BR}
 read -rp "Maximo de cuentas activas [30]: " MAX_USERS; MAX_USERS=${MAX_USERS:-30}
 read -rp "Puerto del agente [8088]: " AGENT_PORT; AGENT_PORT=${AGENT_PORT:-8088}
 
@@ -62,6 +65,10 @@ MAX_LOGIN  = int(cfg.get("MAX_LOGIN", "1"))
 MAX_USERS  = int(cfg.get("MAX_USERS", "100"))
 PREFIX     = cfg.get("USER_PREFIX", "jx")
 DB         = "/etc/jitterx-users.json"
+
+COUNTRY    = cfg.get("COUNTRY", "Brasil")
+CITY       = cfg.get("CITY", "")
+FLAG       = cfg.get("FLAG", "BR")
 
 USER_RE = re.compile(r"^[a-z][a-z0-9]{2,15}$")
 RESERVED = {"root","admin","ubuntu","test","user","ssh","www","daemon","bin","sys"}
@@ -168,6 +175,83 @@ def find_by_device(device):
     return None
 
 
+def net_iface():
+    try:
+        with open("/proc/net/route") as f:
+            for line in f.readlines()[1:]:
+                p = line.split()
+                if p[1] == "00000000":
+                    return p[0]
+    except Exception:
+        pass
+    return "eth0"
+
+
+def rx_tx(iface):
+    try:
+        base = f"/sys/class/net/{iface}/statistics/"
+        return int(open(base + "rx_bytes").read()), int(open(base + "tx_bytes").read())
+    except Exception:
+        return 0, 0
+
+
+_last = {"t": 0.0, "rx": 0, "tx": 0, "mbps": 0.0}
+
+
+def throughput_mbps():
+    """Mbps en uso ahora mismo, medido entre dos llamadas consecutivas."""
+    iface = net_iface()
+    rx, tx = rx_tx(iface)
+    now = time.time()
+    dt = now - _last["t"]
+    if _last["t"] and 0.5 < dt < 300:
+        delta = (rx - _last["rx"]) + (tx - _last["tx"])
+        _last["mbps"] = round(max(0, delta) * 8 / dt / 1_000_000, 2)
+    _last.update({"t": now, "rx": rx, "tx": tx})
+    return _last["mbps"]
+
+
+def system_metrics():
+    m = {}
+    try:
+        m["load"] = round(os.getloadavg()[0], 2)
+        m["cores"] = os.cpu_count() or 1
+        m["cpu"] = min(100, round(m["load"] / m["cores"] * 100))
+    except Exception:
+        m["cpu"] = 0
+    try:
+        mem = {}
+        for line in open("/proc/meminfo"):
+            k, v = line.split(":", 1)
+            mem[k] = int(v.strip().split()[0])
+        total, avail = mem["MemTotal"], mem.get("MemAvailable", mem["MemFree"])
+        m["ram_total_mb"] = total // 1024
+        m["ram_used_mb"] = (total - avail) // 1024
+        m["ram"] = round((total - avail) / total * 100)
+    except Exception:
+        m["ram"] = 0
+    try:
+        st = os.statvfs("/")
+        m["disk"] = round((1 - st.f_bavail / st.f_blocks) * 100)
+    except Exception:
+        m["disk"] = 0
+    try:
+        m["uptime"] = int(float(open("/proc/uptime").read().split()[0]))
+    except Exception:
+        m["uptime"] = 0
+    m["mbps"] = throughput_mbps()
+    return m
+
+
+def online_users(db):
+    """Cuántas cuentas del panel tienen sesión abierta ahora."""
+    try:
+        out = sh("who").stdout.split()
+        return len({u for u in out if u in db})
+    except Exception:
+        return 0
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "jitterx"
 
@@ -191,8 +275,13 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(401, {"error": "No autorizado"})
         if self.path.startswith("/status"):
             db = purge_expired(load_db())
-            return self.reply(200, {"ok": True, "active": len(db), "max": MAX_USERS,
-                                    "host": HOST_DOM, "days": DAYS})
+            return self.reply(200, {
+                "ok": True, "active": len(db), "max": MAX_USERS, "online": online_users(db),
+                "host": HOST_DOM, "days": DAYS, "max_login": MAX_LOGIN,
+                "country": COUNTRY, "city": CITY, "flag": FLAG,
+                "ws_port": WS_PORT, "ssl_port": SSL_PORT, "ssh_port": SSH_PORT,
+                **system_metrics(),
+            })
         if self.path.startswith("/account"):
             device = self.headers.get("x-jx-device", "")
             return self.reply(200, {"account": find_by_device(device) if device else None})
@@ -233,6 +322,9 @@ DAYS=7
 MAX_LOGIN=1
 MAX_USERS=$MAX_USERS
 USER_PREFIX=jx
+COUNTRY=$COUNTRY
+CITY=$CITY
+FLAG=$FLAG
 CONF
 chmod 600 /etc/jitterx-agent.conf
 [ -f /etc/jitterx-users.json ] || echo '{}' > /etc/jitterx-users.json
