@@ -123,6 +123,19 @@
   .step h3{font-size:14px;font-weight:700;margin:6px 0 4px}
   .step p{font-size:13px;color:var(--muted)}
 
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;margin-bottom:20px}
+  .tabs button{flex:1;padding:11px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink2);font:600 14px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,color .15s}
+  .tabs button svg{width:16px;height:16px}
+  .tabs button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .pane[hidden]{display:none}
+  .cred{display:grid;gap:8px;margin-top:4px}
+  .cred .row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+  .cred .row span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:92px;flex:none}
+  .cred .row code{flex:1;min-width:0;font:600 14px "JetBrains Mono",monospace;word-break:break-all}
+  .cred .row button{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:4px;display:grid;place-items:center}
+  .cred .row button:hover{color:var(--accent)}
+  .cred .row button svg{width:16px;height:16px}
+  .payload{margin-top:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px;font:500 12px/1.7 "JetBrains Mono",monospace;color:var(--ink2);white-space:pre-wrap;word-break:break-all}
   footer{border-top:1px solid var(--line);padding:20px;text-align:center;font-size:12px;color:var(--muted)}
   footer b{color:var(--ink2);font-weight:600}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -151,6 +164,12 @@
     <div class="stat"><label>Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
   </section>
 
+  <div class="tabs" role="tablist">
+    <button id="tabDns" role="tab" aria-selected="true" aria-controls="paneDns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio DNS</button>
+    <button id="tabSsh" role="tab" aria-selected="false" aria-controls="paneSsh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
+  </div>
+
+  <div class="pane" id="paneDns" role="tabpanel">
   <div class="grid">
     <section class="card">
       <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Crear registro</h2>
@@ -185,6 +204,38 @@
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg><span>Propagación en menos de <b>1 minuto</b>.</span></li>
       </ul>
     </aside>
+  </div>
+
+  </div>
+
+  <div class="pane" id="paneSsh" role="tabpanel" hidden>
+    <div class="grid">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Crear cuenta SSH</h2>
+        <p class="sub">Cuenta SSH sobre WebSocket para tu app de túnel. Contraseña generada automáticamente.</p>
+        <div class="f">
+          <label for="user">Nombre de usuario</label>
+          <div class="field"><input id="user" placeholder="miusuario" maxlength="16" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+          <div class="hint">3 a 16 caracteres, empieza por letra, solo minúsculas y números.</div>
+        </div>
+        <button class="primary" id="goSsh"><span class="spinner"></span><span id="goSshText">Crear cuenta · 7 días</span></button>
+        <div class="msg" id="msgSsh"></div>
+      </section>
+
+      <aside class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 7 9 18l-5-5"/></svg>Tu cuenta</h2>
+        <p class="sub">Datos de acceso de este dispositivo.</p>
+        <div id="mySsh"></div>
+
+        <h2 style="margin-top:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Condiciones</h2>
+        <ul class="rules">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>La cuenta caduca a los <b>7 días</b>.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 cuenta por usuario</b> y <b>1 conexión</b> simultánea.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg><span>Acceso por <b>WebSocket</b>, sin shell (solo túnel).</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Prohibido spam, escaneo o abuso. Se suspende sin aviso.</span></li>
+        </ul>
+      </aside>
+    </div>
   </div>
 
   <section class="steps">
@@ -279,6 +330,79 @@ $('#go').onclick=async()=>{
     if(j.record){showRecord(j.record);lockButton(true)} else lockButton(false);
   }
 };
+/* ---------- pestañas ---------- */
+function tab(which){
+  const dns=which==='dns';
+  $('#tabDns').setAttribute('aria-selected',dns); $('#tabSsh').setAttribute('aria-selected',!dns);
+  $('#paneDns').hidden=!dns; $('#paneSsh').hidden=dns;
+  location.hash=dns?'':'#ssh';
+  if(!dns&&!sshLoaded) loadSsh();
+}
+$('#tabDns').onclick=()=>tab('dns');
+$('#tabSsh').onclick=()=>tab('ssh');
+
+/* ---------- cuentas SSH ---------- */
+let sshLoaded=false;
+const showMsgSsh=(cls,txt)=>{const m=$('#msgSsh');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+value+'</code><button data-copy="'+value+'" title="Copiar">'+copyIcon+'</button></div>';
+
+function showAccount(a){
+  if(!a){$('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.</div>';return}
+  const total=7*864e5,left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
+  const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
+  $('#mySsh').innerHTML=
+    '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill">Activa</span></div>'+
+    '<div style="padding:14px 16px"><div class="cred">'+
+      row('Host',a.host)+row('Usuario',a.username)+row('Contraseña',a.password)+
+      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+
+    '</div>'+
+    '<div class="payload">'+payload+'</div>'+
+    '</div>'+
+    '<div class="time"><small>Caduca el '+fmt(a.expires_at)+' · quedan <b>'+d+' d '+h+' h</b></small><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<div class="actions"><button class="btn" id="cpAll">'+copyIcon+'Copiar todo</button></div></div>';
+  $('#mySsh').querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);b.style.color='var(--ok)'});
+  $('#cpAll').onclick=e=>{
+    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port+'\nCaduca: '+fmt(a.expires_at));
+    e.currentTarget.lastChild.textContent='Copiado';
+  };
+}
+
+function lockSsh(locked){
+  const b=$('#goSsh'); b.disabled=locked; b.classList.remove('loading');
+  $('#goSshText').textContent=locked?'Ya tienes una cuenta activa':'Crear cuenta · 7 días';
+}
+
+async function loadSsh(){
+  sshLoaded=true;
+  try{
+    const s=await api('/api/ssh');
+    if(s.error) throw new Error(s.error);
+    const a=s.account||JSON.parse(localStorage.getItem('jx_ssh')||'null');
+    const valid=a&&a.expires_at>Date.now()?a:null;
+    if(s.account) localStorage.setItem('jx_ssh',JSON.stringify(s.account));
+    showAccount(valid); lockSsh(!!valid);
+  }catch(e){
+    showAccount(null); lockSsh(false);
+    showMsgSsh('err','No se pudo consultar el servidor. '+e.message);
+  }
+}
+
+$('#goSsh').onclick=async()=>{
+  const b=$('#goSsh'); b.disabled=true; b.classList.add('loading'); $('#goSshText').textContent='Creando…'; $('#msgSsh').className='msg';
+  const j=await api('/api/ssh',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({username:$('#user').value})}).catch(e=>({error:e.message}));
+  if(j.ok){
+    localStorage.setItem('jx_ssh',JSON.stringify(j.account));
+    showMsgSsh('ok','Cuenta creada. Guarda la contraseña: solo se muestra aquí.');
+    showAccount(j.account); lockSsh(true);
+  }else{
+    showMsgSsh('err',j.error||'Error desconocido');
+    if(j.account){showAccount(j.account);lockSsh(true)} else lockSsh(false);
+  }
+};
+
+if(location.hash==='#ssh') tab('ssh');
 load();
 </script>
 </body>
