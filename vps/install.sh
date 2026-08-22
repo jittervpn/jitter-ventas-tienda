@@ -65,10 +65,66 @@ MAX_LOGIN  = int(cfg.get("MAX_LOGIN", "1"))
 MAX_USERS  = int(cfg.get("MAX_USERS", "100"))
 PREFIX     = cfg.get("USER_PREFIX", "jx")
 DB         = "/etc/jitterx-users.json"
+AUDIT      = "/var/log/jitterx-audit.log"
+# Lista blanca opcional: si está vacía, se acepta cualquier IP con token válido
+ALLOWED_IPS = [x.strip() for x in cfg.get("ALLOWED_IPS", "").split(",") if x.strip()]
+MAX_FAILS   = int(cfg.get("MAX_FAILS", "5"))       # fallos de token antes de bloquear
+BAN_MINUTES = int(cfg.get("BAN_MINUTES", "60"))
+RATE_MAX    = int(cfg.get("RATE_MAX", "20"))       # peticiones por minuto y por IP
 
 COUNTRY    = cfg.get("COUNTRY", "Brasil")
 CITY       = cfg.get("CITY", "")
 FLAG       = cfg.get("FLAG", "BR")
+
+# ---------------- protección: baneos y límite de peticiones ----------------
+_fails = {}   # ip -> [contador, primer_intento]
+_bans = {}    # ip -> timestamp_fin
+_hits = {}    # ip -> [timestamps]
+_lock = __import__("threading").Lock()
+
+
+def audit(msg):
+    try:
+        with open(AUDIT, "a") as f:
+            f.write(f"{datetime.now(timezone.utc).isoformat()} {msg}\n")
+    except Exception:
+        pass
+
+
+def is_banned(ip):
+    with _lock:
+        until = _bans.get(ip, 0)
+        if until > time.time():
+            return True
+        _bans.pop(ip, None)
+        return False
+
+
+def note_fail(ip):
+    with _lock:
+        c, first = _fails.get(ip, (0, time.time()))
+        if time.time() - first > 600:
+            c, first = 0, time.time()
+        c += 1
+        _fails[ip] = (c, first)
+        if c >= MAX_FAILS:
+            _bans[ip] = time.time() + BAN_MINUTES * 60
+            _fails.pop(ip, None)
+            audit(f"BAN ip={ip} motivo=token_invalido intentos={c}")
+            return True
+    return False
+
+
+def rate_ok(ip):
+    now = time.time()
+    with _lock:
+        hits = [t for t in _hits.get(ip, []) if now - t < 60]
+        hits.append(now)
+        _hits[ip] = hits
+        if len(_hits) > 5000:
+            _hits.clear()
+        return len(hits) <= RATE_MAX
+
 
 USER_RE = re.compile(r"^[a-z][a-z0-9]{2,15}$")
 RESERVED = {"root","admin","ubuntu","test","user","ssh","www","daemon","bin","sys"}
@@ -266,13 +322,39 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @property
+    def peer(self):
+        return self.client_address[0]
+
     def authed(self):
         got = self.headers.get("x-agent-token", "")
-        return hmac.compare_digest(got, TOKEN)
+        ok = hmac.compare_digest(got, TOKEN)
+        if not ok:
+            note_fail(self.peer)
+        return ok
+
+    def guard(self):
+        """Devuelve True si la petición puede continuar."""
+        ip = self.peer
+        if ALLOWED_IPS and ip not in ALLOWED_IPS:
+            audit(f"RECHAZO ip={ip} motivo=fuera_de_lista")
+            self.reply(403, {"error": "Origen no permitido"})
+            return False
+        if is_banned(ip):
+            self.reply(429, {"error": "Demasiados intentos. Bloqueado temporalmente."})
+            return False
+        if not rate_ok(ip):
+            audit(f"RATE ip={ip}")
+            self.reply(429, {"error": "Demasiadas peticiones."})
+            return False
+        if not self.authed():
+            self.reply(401, {"error": "No autorizado"})
+            return False
+        return True
 
     def do_GET(self):
-        if not self.authed():
-            return self.reply(401, {"error": "No autorizado"})
+        if not self.guard():
+            return
         if self.path.startswith("/status"):
             db = purge_expired(load_db())
             return self.reply(200, {
@@ -288,8 +370,8 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(404, {"error": "Ruta no encontrada"})
 
     def do_POST(self):
-        if not self.authed():
-            return self.reply(401, {"error": "No autorizado"})
+        if not self.guard():
+            return
         if not self.path.startswith("/create"):
             return self.reply(404, {"error": "Ruta no encontrada"})
         try:
@@ -301,7 +383,10 @@ class Handler(BaseHTTPRequestHandler):
         device = str(data.get("device", "")).strip()
         if not device:
             return self.reply(400, {"error": "Falta el identificador de dispositivo"})
+        real_ip = self.headers.get("x-real-client-ip", "-")
         code, out = create_account(username, device)
+        if code == 201:
+            audit(f"CUENTA usuario={username} device={device[:8]} ip_usuario={real_ip} origen={self.peer}")
         self.reply(code, out)
 
 
@@ -322,6 +407,10 @@ DAYS=7
 MAX_LOGIN=1
 MAX_USERS=$MAX_USERS
 USER_PREFIX=jx
+MAX_FAILS=5
+BAN_MINUTES=60
+RATE_MAX=20
+ALLOWED_IPS=
 COUNTRY=$COUNTRY
 CITY=$CITY
 FLAG=$FLAG
@@ -330,6 +419,7 @@ chmod 600 /etc/jitterx-agent.conf
 [ -f /etc/jitterx-users.json ] || echo '{}' > /etc/jitterx-users.json
 chmod 600 /etc/jitterx-users.json
 touch /etc/security/limits.d/jitterx.conf
+touch /var/log/jitterx-audit.log && chmod 600 /var/log/jitterx-audit.log
 
 cat > /etc/systemd/system/jitterx-agent.service << 'UNIT'
 [Unit]
