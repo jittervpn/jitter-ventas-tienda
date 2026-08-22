@@ -1,0 +1,6 @@
+{
+  "name": "jitterx-panel-cloud",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
