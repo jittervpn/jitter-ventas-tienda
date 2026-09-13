@@ -41,7 +41,7 @@
   @media(max-width:480px){.status span{display:none}}
 
   /* ---------- layout ---------- */
-  main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:36px 20px 56px}
+  main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:28px 20px 40px}
   .hero{margin-bottom:28px}
   .eyebrow{display:inline-flex;max-width:100%;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(34,211,238,.3);border-radius:999px;background:rgba(34,211,238,.06);margin-bottom:14px}
   h1{font-size:clamp(26px,5vw,44px);overflow-wrap:anywhere;line-height:1.1;letter-spacing:-.03em;font-weight:800;max-width:720px}
@@ -167,7 +167,7 @@
   .bottomnav button[aria-selected=true]{color:var(--accent)}
   .bottomnav button[aria-selected=true] svg{transform:translateY(-1px)}
   .bottomnav button[aria-selected=true]::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-  body{padding-bottom:76px}
+  body{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
   @media(min-width:861px){
     .bottomnav{position:sticky;top:64px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:transparent;backdrop-filter:none}
     .bottomnav .in{max-width:520px;margin:0 auto 4px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -205,7 +205,7 @@
   .cred .row button:hover{color:var(--accent)}
   .cred .row button svg{width:16px;height:16px}
   .payload{margin-top:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px;font:500 12px/1.7 "JetBrains Mono",monospace;color:var(--ink2);white-space:pre-wrap;word-break:break-all}
-  footer{border-top:1px solid var(--line);padding:20px;text-align:center;font-size:12px;color:var(--muted)}
+  footer{border-top:1px solid var(--line);padding:20px;margin-bottom:8px;text-align:center;font-size:12px;color:var(--muted)}
   footer b{color:var(--ink2);font-weight:600}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -221,7 +221,7 @@
 </div></nav>
 
 <main>
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="eyebrow">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
       Registro A · gratis · 7 días
@@ -230,7 +230,7 @@
     <p class="lead">Elige un nombre, escribe la IP de tu servidor y listo. El registro se crea al instante en <span class="mono" id="zoneLead">tu dominio</span> y se elimina solo cuando expira.</p>
   </section>
 
-  <section class="stats">
+  <section class="stats" id="stats">
     <div class="stat"><label>Cuentas creadas</label><b id="total">—</b></div>
     <div class="stat"><label>Activas ahora</label><b id="active">—</b></div>
     <div class="stat"><label>Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
@@ -328,7 +328,7 @@
     </div>
   </div>
 
-  <section class="steps">
+  <section class="steps" id="steps">
     <div class="step"><i>01</i><h3>Elige un nombre</h3><p>Escribe el subdominio que quieres usar.</p></div>
     <div class="step"><i>02</i><h3>Pon la IP de tu VPS</h3><p>La IPv4 pública donde corre tu servidor.</p></div>
     <div class="step"><i>03</i><h3>Conéctate</h3><p>En menos de un minuto tu dominio ya resuelve.</p></div>
@@ -465,6 +465,10 @@ function tab(which){
   $('#navDns').setAttribute('aria-selected',which==='dns');
   $('#navPerfil').setAttribute('aria-selected',which==='perfil');
   history.replaceState(null,'','#'+which);
+  // El resumen superior solo acompaña a las vistas de creación
+  $('#hero').hidden = which==='perfil';
+  $('#stats').hidden = which==='perfil';
+  $('#steps').hidden = which==='perfil';
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
   if(which==='perfil') paintPerfil();
