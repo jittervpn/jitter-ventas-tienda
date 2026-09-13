@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0f1c">
+<meta http-equiv="cache-control" content="no-cache">
 <title>Jitterx Panel Cloud — Subdominios temporales para tu VPS</title>
 <meta name="description" content="Apunta un subdominio a la IP de tu VPS en segundos. Registro A gratuito durante 7 días.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -225,16 +226,16 @@
   <section class="hero" id="hero">
     <div class="eyebrow">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
-      Registro A · gratis · 7 días
+      <span id="heroTag">Registro A · gratis · 7 días</span>
     </div>
-    <h1>Apunta un subdominio a tu VPS <span>en segundos</span></h1>
-    <p class="lead">Elige un nombre, escribe la IP de tu servidor y listo. El registro se crea al instante en <span class="mono" id="zoneLead">tu dominio</span> y se elimina solo cuando expira.</p>
+    <h1 id="heroTitle">Apunta un subdominio a tu VPS <span>en segundos</span></h1>
+    <p class="lead" id="heroLead"></p>
   </section>
 
   <section class="stats" id="stats">
-    <div class="stat"><label>Cuentas creadas</label><b id="total">—</b></div>
-    <div class="stat"><label>Activas ahora</label><b id="active">—</b></div>
-    <div class="stat"><label>Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
+    <div class="stat"><label id="lbl1">Cuentas creadas</label><b id="total">—</b></div>
+    <div class="stat"><label id="lbl2">Activas ahora</label><b id="active">—</b></div>
+    <div class="stat"><label id="lbl3">Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
   </section>
 
   <div class="pane" id="paneDns" role="tabpanel">
@@ -370,7 +371,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · DNS temporal sobre Cloudflare · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v5 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -423,11 +424,9 @@ async function load(){
   try{
     const s=await api('/api/stats');
     if(s.error) throw new Error(s.error);
-    zone=s.zone||'';
+    ultimoDns=s; zone=s.zone||'';
     $('#suffix').textContent='.'+zone; $('#zoneLead').textContent=zone; updatePreview();
-    $('#total').textContent=s.total; $('#active').textContent=s.active;
-    $('#free').textContent=Math.max(0,s.max-s.active)+' / '+s.max;
-    $('#bar').style.width=Math.min(100,s.active/s.max*100)+'%';
+    if(vista==='dns') pintarStatsDns();
     setStatus('on','Sistema operativo');
     let remote=null;
     try{const m=await api('/api/me'); remote=m.record||null;}catch(e){console.warn('api/me:',e.message)}
@@ -470,6 +469,7 @@ function tab(which){
   $('#hero').hidden = which==='perfil';
   $('#stats').hidden = which==='perfil';
   $('#steps').hidden = which==='perfil';
+  pintarHero(which);
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
   if(which==='perfil') paintPerfil();
@@ -477,6 +477,35 @@ function tab(which){
 $('#navSsh').onclick=()=>tab('ssh');
 $('#navDns').onclick=()=>tab('dns');
 $('#navPerfil').onclick=()=>tab('perfil');
+
+/* ---------- cabecera contextual ---------- */
+const HERO={
+  ssh:{tag:'Cuenta SSH · gratis · 7 días',
+       title:'Túnel SSH sobre WebSocket <span>listo al instante</span>',
+       lead:'Crea tu usuario y contraseña para conectarte desde tu app de túnel. Sin configuración y sin esperas.',
+       l1:'Cuentas SSH creadas',l2:'Conectados ahora',l3:'Plazas disponibles'},
+  dns:{tag:'Registro A · gratis · 7 días',
+       title:'Apunta un subdominio a tu VPS <span>en segundos</span>',
+       lead:'Elige un nombre, escribe la IP de tu servidor y listo. El registro se crea al instante y se elimina solo cuando expira.',
+       l1:'Dominios creados',l2:'Activos ahora',l3:'Plazas disponibles'},
+};
+function pintarHero(which){
+  const h=HERO[which]; if(!h) return;
+  $('#heroTag').textContent=h.tag;
+  $('#heroTitle').innerHTML=h.title;
+  $('#heroLead').textContent=h.lead;
+  $('#lbl1').textContent=h.l1; $('#lbl2').textContent=h.l2; $('#lbl3').textContent=h.l3;
+  which==='ssh'?pintarStatsSsh():pintarStatsDns();
+}
+let ultimoDns=null, ultimoSsh=null;
+function pintarNums(total,activos,max){
+  $('#total').textContent=total??'—';
+  $('#active').textContent=activos??'—';
+  $('#free').textContent=(max!=null?Math.max(0,max-activos)+' / '+max:'—');
+  $('#bar').style.width=(max?Math.min(100,activos/max*100):0)+'%';
+}
+function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max):pintarNums(); }
+function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
 
 /* ---------- perfil ---------- */
 function paintPerfil(){
@@ -565,7 +594,7 @@ async function loadSsh(){
   try{
     const s=await api('/api/ssh');
     if(s.error) throw new Error(s.error);
-    renderServer(s);
+    ultimoSsh=s; renderServer(s); if(vista==='ssh') pintarStatsSsh();
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
     const a=s.account||JSON.parse(localStorage.getItem('jx_ssh')||'null');
     const valid=a&&a.expires_at>Date.now()?a:null;
@@ -579,7 +608,7 @@ async function loadSsh(){
 
 async function refreshServer(){
   if($('#paneSsh').hidden) return;
-  try{const s=await api('/api/ssh'); if(!s.error) renderServer(s);}catch{}
+  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;renderServer(s);if(vista==='ssh')pintarStatsSsh();}}catch{}
 }
 
 $('#goSsh').onclick=async()=>{
