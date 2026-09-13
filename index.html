@@ -371,10 +371,10 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v5 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v6 · <span id="year"></span></footer>
 
 <script>
-const $=s=>document.querySelector(s);
+const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
 // ID de dispositivo persistente (se envía en cada petición a la API)
 let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)jx_device=([^;]+)/)||[])[1]||'';
 if(!device){device=crypto.randomUUID();}
@@ -425,7 +425,7 @@ async function load(){
     const s=await api('/api/stats');
     if(s.error) throw new Error(s.error);
     ultimoDns=s; zone=s.zone||'';
-    $('#suffix').textContent='.'+zone; $('#zoneLead').textContent=zone; updatePreview();
+    $('#suffix').textContent='.'+zone; updatePreview();
     if(vista==='dns') pintarStatsDns();
     setStatus('on','Sistema operativo');
     let remote=null;
