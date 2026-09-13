@@ -123,6 +123,20 @@
   .step h3{font-size:14px;font-weight:700;margin:6px 0 4px}
   .step p{font-size:13px;color:var(--muted)}
 
+  .authbtns{display:flex;align-items:center;gap:8px}
+  .authbtns button{padding:8px 14px;border-radius:8px;font:600 13px Inter,sans-serif;cursor:pointer;border:1px solid var(--line2);background:transparent;color:var(--ink)}
+  .authbtns button.cta{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .authbtns .who{font:500 13px "JetBrains Mono",monospace;color:var(--ink2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:560px){.authbtns .who{display:none}}
+  .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,8,16,.72);backdrop-filter:blur(6px)}
+  .modal.open{display:flex}
+  .modal .box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line2);border-radius:var(--r);padding:26px;box-shadow:var(--shadow);max-height:92vh;overflow:auto}
+  .modal h3{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .modal p.s{color:var(--muted);font-size:14px;margin-top:4px}
+  .modal .x{float:right;background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px}
+  .switch{display:flex;gap:6px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:4px;margin:18px 0 6px}
+  .switch button{flex:1;padding:9px;border:0;border-radius:6px;background:transparent;color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer}
+  .switch button[aria-selected=true]{background:var(--card2);color:var(--ink)}
   .server{border:1px solid var(--line2);border-radius:var(--r2);background:var(--bg2);padding:14px;margin-bottom:18px;position:relative;overflow:hidden}
   .server.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
   .server .head{display:flex;align-items:flex-start;gap:12px}
@@ -167,7 +181,10 @@
 
 <nav class="nav"><div class="in">
   <a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a>
-  <div class="status" id="status"><b></b><span id="statusText">Conectando…</span></div>
+  <div class="authbtns" id="auth">
+    <div class="status" id="status"><b></b><span id="statusText">…</span></div>
+    <button class="cta" id="btnLogin">Entrar</button>
+  </div>
 </div></nav>
 
 <main>
@@ -272,6 +289,34 @@
     <div class="step"><i>03</i><h3>Conéctate</h3><p>En menos de un minuto tu dominio ya resuelve.</p></div>
   </section>
 </main>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <button class="x" id="mClose" aria-label="Cerrar">&times;</button>
+    <h3 id="mTitle">Entrar en tu cuenta</h3>
+    <p class="s" id="mSub">Accede para gestionar tus cuentas y compras.</p>
+    <div class="switch" role="tablist">
+      <button id="swLogin" aria-selected="true">Iniciar sesión</button>
+      <button id="swReg" aria-selected="false">Crear cuenta</button>
+    </div>
+    <div class="f" id="fNombre" hidden>
+      <label for="mNombre">Nombre</label>
+      <div class="field"><input id="mNombre" placeholder="Tu nombre" maxlength="60" autocomplete="name"></div>
+    </div>
+    <div class="f">
+      <label for="mEmail">Correo electrónico</label>
+      <div class="field"><input id="mEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" autocapitalize="none"></div>
+    </div>
+    <div class="f">
+      <label for="mPass">Contraseña</label>
+      <div class="field"><input id="mPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="hint" id="mHint" hidden>Mínimo 8 caracteres.</div>
+    </div>
+    <button class="primary" id="mGo"><span class="spinner"></span><span id="mGoText">Entrar</span></button>
+    <div style="text-align:center;margin-top:12px"><a href="#" id="mReset" style="color:var(--muted);font-size:13px;text-decoration:none">¿Olvidaste tu contraseña?</a></div>
+    <div class="msg" id="mMsg"></div>
+  </div>
+</div>
 
 <footer><b>Jitterx Panel Cloud</b> · DNS temporal sobre Cloudflare · <span id="year"></span></footer>
 
@@ -462,8 +507,128 @@ $('#goSsh').onclick=async()=>{
   }
 };
 
+/* ---------- sesión de usuario (Firebase Auth) ---------- */
+let sesion=null, modo='login', fbAuth=null, idToken=null;
+const showMsgM=(cls,txt)=>{const m=$('#mMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+
+const FB_ERRORES={
+  'auth/invalid-email':'El correo no tiene un formato válido.',
+  'auth/user-not-found':'Correo o contraseña incorrectos.',
+  'auth/wrong-password':'Correo o contraseña incorrectos.',
+  'auth/invalid-credential':'Correo o contraseña incorrectos.',
+  'auth/email-already-in-use':'Ya existe una cuenta con ese correo. Inicia sesión.',
+  'auth/weak-password':'La contraseña debe tener al menos 6 caracteres.',
+  'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
+  'auth/network-request-failed':'Sin conexión. Revisa tu red.',
+};
+
+function paintAuth(){
+  const box=$('#auth');
+  box.querySelectorAll('.who,#btnLogout,#btnLogin').forEach(n=>n.remove());
+  if(sesion){
+    const w=document.createElement('span'); w.className='who'; w.textContent=sesion.email; box.appendChild(w);
+    const b=document.createElement('button'); b.id='btnLogout'; b.textContent='Salir'; box.appendChild(b);
+    b.onclick=()=>window.fbSignOut&&window.fbSignOut();
+  }else{
+    const b=document.createElement('button'); b.id='btnLogin'; b.className='cta'; b.textContent='Entrar'; box.appendChild(b);
+    b.onclick=()=>openModal('login');
+  }
+}
+
+function setModo(m){
+  modo=m;
+  $('#swLogin').setAttribute('aria-selected',m==='login');
+  $('#swReg').setAttribute('aria-selected',m==='reg');
+  $('#fNombre').hidden=m==='login';
+  $('#mHint').hidden=m==='login';
+  $('#mTitle').textContent=m==='login'?'Entrar en tu cuenta':'Crear una cuenta';
+  $('#mSub').textContent=m==='login'?'Accede para gestionar tus cuentas y compras.':'Regístrate para comprar y renovar tus cuentas SSH.';
+  $('#mGoText').textContent=m==='login'?'Entrar':'Crear cuenta';
+  $('#mPass').autocomplete=m==='login'?'current-password':'new-password';
+  $('#mMsg').className='msg';
+}
+const openModal=m=>{setModo(m||'login');$('#modal').classList.add('open');setTimeout(()=>$('#mEmail').focus(),50)};
+const closeModal=()=>$('#modal').classList.remove('open');
+$('#mClose').onclick=closeModal;
+$('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+$('#swLogin').onclick=()=>setModo('login');
+$('#swReg').onclick=()=>setModo('reg');
+$('#mPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mGo').click()});
+$('#mReset').onclick=async e=>{
+  e.preventDefault();
+  const mail=$('#mEmail').value.trim();
+  if(!mail) return showMsgM('err','Escribe tu correo y vuelve a pulsar.');
+  try{ await window.fbResetPassword(mail); showMsgM('ok','Te enviamos un correo para restablecer la contraseña.'); }
+  catch(err){ showMsgM('err',FB_ERRORES[err.code]||'No se pudo enviar el correo.'); }
+};
+
+$('#mGo').onclick=async()=>{
+  const b=$('#mGo'); b.disabled=true; b.classList.add('loading'); $('#mMsg').className='msg';
+  try{
+    const mail=$('#mEmail').value.trim(), pass=$('#mPass').value;
+    if(modo==='reg'){
+      await window.fbRegister(mail,pass,$('#mNombre').value.trim());
+    }else{
+      await window.fbLogin(mail,pass);
+    }
+    closeModal(); $('#mPass').value='';
+  }catch(err){
+    showMsgM('err',FB_ERRORES[err.code]||err.message||'No se pudo completar la operación.');
+  }
+  b.disabled=false; b.classList.remove('loading');
+};
+
+// Llamado desde el módulo de Firebase cuando cambia el estado de sesión
+window.onAuthChange=async(user,getToken)=>{
+  if(!user){ sesion=null; idToken=null; paintAuth(); return; }
+  idToken=await getToken();
+  try{
+    const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
+    sesion=r.user||{email:user.email,uid:user.uid};
+  }catch{ sesion={email:user.email,uid:user.uid}; }
+  paintAuth();
+};
+
 if(location.hash==='#ssh') tab('ssh');
 load();
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+           createUserWithEmailAndPassword, updateProfile, signOut,
+           sendPasswordResetEmail, setPersistence, browserLocalPersistence }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBjVeMU56IryRsjXSnKz9t2bFxu8bMsO50",
+    authDomain: "shocktv-df24f.firebaseapp.com",
+    projectId: "shocktv-df24f",
+    storageBucket: "shocktv-df24f.firebasestorage.app",
+    messagingSenderId: "705716023961",
+    appId: "1:705716023961:web:11f72e57d37ceb111bbe08",
+    measurementId: "G-V3S1Z5W4YE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence);
+
+  window.fbLogin = (mail, pass) => signInWithEmailAndPassword(auth, mail, pass);
+  window.fbRegister = async (mail, pass, nombre) => {
+    const cred = await createUserWithEmailAndPassword(auth, mail, pass);
+    if (nombre) await updateProfile(cred.user, { displayName: nombre });
+    return cred;
+  };
+  window.fbResetPassword = (mail) => sendPasswordResetEmail(auth, mail);
+  window.fbToken = () => auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null);
+
+  onAuthStateChanged(auth, (user) => {
+    if (window.onAuthChange) window.onAuthChange(user, () => user.getIdToken());
+  });
+
+  // El botón "Salir" del panel usa esto
+  window.fbSignOut = () => signOut(auth);
 </script>
 </body>
 </html>

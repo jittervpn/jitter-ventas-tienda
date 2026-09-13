@@ -1,0 +1,27 @@
+// Firebase Console > Firestore Database > Reglas. Pega esto y publica.
+// Todo se escribe desde el servidor (Admin SDK, que ignora estas reglas).
+// El cliente solo puede LEER su propio perfil y sus cuentas.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /cuentas_ssh/{id} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /pagos/{id} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
