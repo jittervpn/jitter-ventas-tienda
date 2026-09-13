@@ -159,6 +159,39 @@
   .metrics div{text-align:center;min-width:0}
   .metrics span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .metrics b{font:600 14px "JetBrains Mono",monospace}
+  /* menú inferior tipo app */
+  .bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(10,15,28,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .bottomnav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+  .bottomnav button{background:transparent;border:0;cursor:pointer;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font:600 11px Inter,sans-serif;transition:color .15s;position:relative}
+  .bottomnav button svg{width:22px;height:22px;transition:transform .15s}
+  .bottomnav button[aria-selected=true]{color:var(--accent)}
+  .bottomnav button[aria-selected=true] svg{transform:translateY(-1px)}
+  .bottomnav button[aria-selected=true]::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  body{padding-bottom:76px}
+  @media(min-width:861px){
+    .bottomnav{position:sticky;top:64px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:transparent;backdrop-filter:none}
+    .bottomnav .in{max-width:520px;margin:0 auto 4px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;grid-template-columns:repeat(3,1fr);gap:6px}
+    .bottomnav button{flex-direction:row;padding:10px;border-radius:8px;font-size:14px}
+    .bottomnav button svg{width:16px;height:16px}
+    .bottomnav button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+    .bottomnav button[aria-selected=true]::before{display:none}
+    body{padding-bottom:0}
+  }
+  /* perfil */
+  .avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:800 24px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));flex:none}
+  .phead{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+  .phead .info{min-width:0}
+  .phead .info b{display:block;font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+  .phead .info small{color:var(--muted);font-size:13px;word-break:break-all}
+  .plist{display:grid;gap:8px;margin-top:16px}
+  .plist .it{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;font-size:14px}
+  .plist .it span{color:var(--muted);font-size:13px}
+  .plist .it b{font:600 13px "JetBrains Mono",monospace;text-align:right;word-break:break-all}
+  .danger{width:100%;margin-top:16px;padding:13px;border-radius:var(--r2);border:1px solid rgba(251,113,133,.4);background:rgba(251,113,133,.08);color:#ffd6dd;font:600 14px Inter,sans-serif;cursor:pointer}
+  .guest{text-align:center;padding:30px 16px}
+  .guest svg{width:44px;height:44px;color:var(--line2)}
+  .guest p{color:var(--muted);font-size:14px;margin:10px 0 16px}
+  .guest button{padding:12px 26px;border:0;border-radius:var(--r2);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font:700 14px Inter,sans-serif;cursor:pointer}
   .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;margin-bottom:20px}
   .tabs button{flex:1;padding:11px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink2);font:600 14px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,color .15s}
   .tabs button svg{width:16px;height:16px}
@@ -202,11 +235,6 @@
     <div class="stat"><label>Activas ahora</label><b id="active">—</b></div>
     <div class="stat"><label>Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
   </section>
-
-  <div class="tabs" role="tablist">
-    <button id="tabDns" role="tab" aria-selected="true" aria-controls="paneDns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio DNS</button>
-    <button id="tabSsh" role="tab" aria-selected="false" aria-controls="paneSsh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
-  </div>
 
   <div class="pane" id="paneDns" role="tabpanel">
   <div class="grid">
@@ -283,12 +311,35 @@
     </div>
   </div>
 
+  <div class="pane" id="panePerfil" hidden>
+    <div class="grid">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mi perfil</h2>
+        <div id="perfilBox"></div>
+      </section>
+      <aside class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Seguridad</h2>
+        <ul class="rules">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu contraseña la gestiona <b>Firebase</b>, no la almacenamos.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Sesión activa en este dispositivo.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Soporte: escribe desde el correo de tu cuenta.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
   <section class="steps">
     <div class="step"><i>01</i><h3>Elige un nombre</h3><p>Escribe el subdominio que quieres usar.</p></div>
     <div class="step"><i>02</i><h3>Pon la IP de tu VPS</h3><p>La IPv4 pública donde corre tu servidor.</p></div>
     <div class="step"><i>03</i><h3>Conéctate</h3><p>En menos de un minuto tu dominio ya resuelve.</p></div>
   </section>
 </main>
+
+<nav class="bottomnav"><div class="in">
+  <button id="navSsh" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
+  <button id="navDns" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
+  <button id="navPerfil" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
+</div></nav>
 
 <div class="modal" id="modal">
   <div class="box">
@@ -403,16 +454,49 @@ $('#go').onclick=async()=>{
     if(j.record){showRecord(j.record);lockButton(true)} else lockButton(false);
   }
 };
-/* ---------- pestañas ---------- */
+/* ---------- navegación inferior ---------- */
+const PANES={ssh:'paneSsh',dns:'paneDns',perfil:'panePerfil'};
+let vista='ssh';
 function tab(which){
-  const dns=which==='dns';
-  $('#tabDns').setAttribute('aria-selected',dns); $('#tabSsh').setAttribute('aria-selected',!dns);
-  $('#paneDns').hidden=!dns; $('#paneSsh').hidden=dns;
-  location.hash=dns?'':'#ssh';
-  if(!dns&&!sshLoaded) loadSsh();
+  if(!PANES[which]) which='ssh';
+  vista=which;
+  for(const [k,id] of Object.entries(PANES)) $('#'+id).hidden = k!==which;
+  $('#navSsh').setAttribute('aria-selected',which==='ssh');
+  $('#navDns').setAttribute('aria-selected',which==='dns');
+  $('#navPerfil').setAttribute('aria-selected',which==='perfil');
+  history.replaceState(null,'','#'+which);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(which==='ssh'&&!sshLoaded) loadSsh();
+  if(which==='perfil') paintPerfil();
 }
-$('#tabDns').onclick=()=>tab('dns');
-$('#tabSsh').onclick=()=>tab('ssh');
+$('#navSsh').onclick=()=>tab('ssh');
+$('#navDns').onclick=()=>tab('dns');
+$('#navPerfil').onclick=()=>tab('perfil');
+
+/* ---------- perfil ---------- */
+function paintPerfil(){
+  const box=$('#perfilBox');
+  if(!sesion){
+    box.innerHTML='<div class="guest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+      '<p>Inicia sesión para ver tu perfil, tus cuentas y tus compras.</p>'+
+      '<button id="pLogin">Entrar o registrarme</button></div>';
+    $('#pLogin').onclick=()=>openModal('login');
+    return;
+  }
+  const nombre=sesion.nombre||sesion.email.split('@')[0];
+  const ini=(nombre[0]||'U').toUpperCase();
+  const cuenta=JSON.parse(localStorage.getItem('jx_ssh')||'null');
+  const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
+  box.innerHTML=
+    '<div class="phead"><div class="avatar">'+ini+'</div><div class="info"><b>'+nombre+'</b><small>'+sesion.email+'</small></div></div>'+
+    '<div class="plist">'+
+      '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
+      '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
+      '<div class="it"><span>Plan</span><b>Gratuito · 7 días</b></div>'+
+    '</div>'+
+    '<button class="danger" id="pOut">Cerrar sesión</button>';
+  $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
+}
 
 /* ---------- cuentas SSH ---------- */
 let sshLoaded=false;
@@ -581,16 +665,16 @@ $('#mGo').onclick=async()=>{
 
 // Llamado desde el módulo de Firebase cuando cambia el estado de sesión
 window.onAuthChange=async(user,getToken)=>{
-  if(!user){ sesion=null; idToken=null; paintAuth(); return; }
+  if(!user){ sesion=null; idToken=null; paintAuth(); if(vista==='perfil') paintPerfil(); return; }
   idToken=await getToken();
   try{
     const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
     sesion=r.user||{email:user.email,uid:user.uid};
   }catch{ sesion={email:user.email,uid:user.uid}; }
-  paintAuth();
+  paintAuth(); if(vista==='perfil') paintPerfil();
 };
 
-if(location.hash==='#ssh') tab('ssh');
+tab((location.hash||'#ssh').slice(1));
 load();
 </script>
 <script type="module">
