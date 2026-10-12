@@ -4,7 +4,7 @@
 // en cualquier dispositivo, y no se puede saltar borrando datos del navegador.
 import { agentFetch } from "../lib/agent.js";
 import { limit, clientIp } from "../lib/ratelimit.js";
-import { currentUser, requireUser } from "../lib/firebase.js";
+import { currentUser, requireUser } from "../lib/fbverify.js";
 
 export default async function handler(req, res) {
   const over = limit(req, { max: req.method === "POST" ? 5 : 30, windowMs: 60000 });
