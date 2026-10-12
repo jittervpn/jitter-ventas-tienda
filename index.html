@@ -293,7 +293,8 @@
           <div class="field"><input id="user" placeholder="miusuario" maxlength="16" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
           <div class="hint">3 a 16 caracteres, empieza por letra, solo minúsculas y números.</div>
         </div>
-        <button class="primary" id="goSsh"><span class="spinner"></span><span id="goSshText">Crear cuenta · 7 días</span></button>
+        <div class="hint" id="sshGate" style="margin-top:14px" hidden>Necesitas una cuenta para crear tu acceso SSH. Es gratis y tarda un minuto.</div>
+        <button class="primary" id="goSsh"><span class="spinner"></span><span id="goSshText">Crear cuenta · 2 días</span></button>
         <div class="msg" id="msgSsh"></div>
       </section>
 
@@ -304,7 +305,7 @@
 
         <h2 style="margin-top:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Condiciones</h2>
         <ul class="rules">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>La cuenta caduca a los <b>7 días</b>.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>La cuenta caduca a los <b>2 días</b>.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 cuenta por usuario</b> y <b>1 conexión</b> simultánea.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg><span>Acceso por <b>WebSocket</b>, sin shell (solo túnel).</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Prohibido spam, escaneo o abuso. Se suspende sin aviso.</span></li>
@@ -371,7 +372,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v6 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v7 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
@@ -380,7 +381,8 @@ let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)
 if(!device){device=crypto.randomUUID();}
 localStorage.setItem('jx_device',device);
 const api=async(path,opts={})=>{
-  const r=await fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device}});
+  let tk=null; try{ tk=window.fbToken?await window.fbToken():null }catch{}
+  const r=await fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
   const txt=await r.text();
   try{return JSON.parse(txt)}catch{throw new Error(r.status===404?('No existe '+path+' en el servidor'):('Respuesta inválida del servidor ('+r.status+')'))}
 };
@@ -480,7 +482,7 @@ $('#navPerfil').onclick=()=>tab('perfil');
 
 /* ---------- cabecera contextual ---------- */
 const HERO={
-  ssh:{tag:'Cuenta SSH · gratis · 7 días',
+  ssh:{tag:'Cuenta SSH · gratis · 2 días',
        title:'Túnel SSH sobre WebSocket <span>listo al instante</span>',
        lead:'Crea tu usuario y contraseña para conectarte desde tu app de túnel. Sin configuración y sin esperas.',
        l1:'Cuentas SSH creadas',l2:'Conectados ahora',l3:'Plazas disponibles'},
@@ -519,28 +521,31 @@ function paintPerfil(){
   }
   const nombre=sesion.nombre||sesion.email.split('@')[0];
   const ini=(nombre[0]||'U').toUpperCase();
-  const cuenta=JSON.parse(localStorage.getItem('jx_ssh')||'null');
+  const cuenta=miCuentaSsh;
   const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
   box.innerHTML=
     '<div class="phead"><div class="avatar">'+ini+'</div><div class="info"><b>'+nombre+'</b><small>'+sesion.email+'</small></div></div>'+
     '<div class="plist">'+
       '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
-      '<div class="it"><span>Plan</span><b>Gratuito · 7 días</b></div>'+
+      '<div class="it"><span>Plan</span><b>Gratuito</b></div>'+
     '</div>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
 }
 
 /* ---------- cuentas SSH ---------- */
-let sshLoaded=false;
+let sshLoaded=false, miCuentaSsh=null, sshHas=false;
 const showMsgSsh=(cls,txt)=>{const m=$('#msgSsh');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
 const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+value+'</code><button data-copy="'+value+'" title="Copiar">'+copyIcon+'</button></div>';
 
 function showAccount(a){
-  if(!a){$('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.</div>';return}
-  const total=7*864e5,left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
+  miCuentaSsh=a||null;
+  if(!a){
+    const msg=sesion?'Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.':'Inicia sesión para crear y ver tu cuenta SSH.';
+    $('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>'+msg+'</div>';return}
+  const total=Math.max(864e5,(a.expires_at-(a.created_at||a.expires_at-2*864e5))),left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
   const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
   $('#mySsh').innerHTML=
     '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill">Activa</span></div>'+
@@ -559,9 +564,13 @@ function showAccount(a){
   };
 }
 
-function lockSsh(locked){
-  const b=$('#goSsh'); b.disabled=locked; b.classList.remove('loading');
-  $('#goSshText').textContent=locked?'Ya tienes una cuenta activa':'Crear cuenta · 7 días';
+function lockSsh(locked){ sshHas=locked; refreshSshButton(); }
+function refreshSshButton(){
+  const b=$('#goSsh'); b.classList.remove('loading');
+  $('#sshGate').hidden=!!sesion;
+  if(!sesion){ b.disabled=false; $('#goSshText').textContent='Inicia sesión para crear tu cuenta'; return; }
+  b.disabled=sshHas;
+  $('#goSshText').textContent=sshHas?'Ya tienes una cuenta activa':'Crear cuenta · 2 días';
 }
 
 const FLAGS={BR:'🇧🇷',US:'🇺🇸',ES:'🇪🇸',AR:'🇦🇷',MX:'🇲🇽',CL:'🇨🇱',CO:'🇨🇴',PE:'🇵🇪',DE:'🇩🇪',FR:'🇫🇷',NL:'🇳🇱',SG:'🇸🇬',JP:'🇯🇵'};
@@ -596,9 +605,8 @@ async function loadSsh(){
     if(s.error) throw new Error(s.error);
     ultimoSsh=s; renderServer(s); if(vista==='ssh') pintarStatsSsh();
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
-    const a=s.account||JSON.parse(localStorage.getItem('jx_ssh')||'null');
+    const a=s.account||null;
     const valid=a&&a.expires_at>Date.now()?a:null;
-    if(s.account) localStorage.setItem('jx_ssh',JSON.stringify(s.account));
     showAccount(valid); lockSsh(!!valid);
   }catch(e){
     showAccount(null); lockSsh(false);
@@ -612,14 +620,15 @@ async function refreshServer(){
 }
 
 $('#goSsh').onclick=async()=>{
+  if(!sesion){ openModal('login'); return; }
   const b=$('#goSsh'); b.disabled=true; b.classList.add('loading'); $('#goSshText').textContent='Creando…'; $('#msgSsh').className='msg';
   const j=await api('/api/ssh',{method:'POST',headers:{'content-type':'application/json'},
     body:JSON.stringify({username:$('#user').value})}).catch(e=>({error:e.message}));
   if(j.ok){
-    localStorage.setItem('jx_ssh',JSON.stringify(j.account));
     showMsgSsh('ok','Cuenta creada. Guarda la contraseña: solo se muestra aquí.');
     showAccount(j.account); lockSsh(true); refreshServer();
   }else{
+    if(j.error&&/inicia sesi/i.test(j.error)){ lockSsh(false); openModal('login'); }
     showMsgSsh('err',j.error||'Error desconocido');
     if(j.account){showAccount(j.account);lockSsh(true)} else lockSsh(false);
   }
@@ -699,13 +708,15 @@ $('#mGo').onclick=async()=>{
 
 // Llamado desde el módulo de Firebase cuando cambia el estado de sesión
 window.onAuthChange=async(user,getToken)=>{
-  if(!user){ sesion=null; idToken=null; paintAuth(); if(vista==='perfil') paintPerfil(); return; }
+  if(!user){ sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
   idToken=await getToken();
   try{
     const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
     sesion=r.user||{email:user.email,uid:user.uid};
   }catch{ sesion={email:user.email,uid:user.uid}; }
-  paintAuth(); if(vista==='perfil') paintPerfil();
+  paintAuth(); sshLoaded=false;
+  if(vista==='ssh') loadSsh(); else refreshSshButton();
+  if(vista==='perfil') paintPerfil();
 };
 
 tab((location.hash||'#ssh').slice(1));
