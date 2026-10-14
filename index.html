@@ -528,10 +528,51 @@ function paintPerfil(){
     '<div class="plist">'+
       '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
-      '<div class="it"><span>Plan</span><b>Gratuito</b></div>'+
+      '<div class="it"><span>Plan</span><b id="planNombre">Gratuito</b></div>'+
+    '</div>'+
+    '<div class="msg" id="msgPago"></div>'+
+    '<h2 style="margin-top:22px;font-size:16px">Ampliar a 30 días</h2>'+
+    '<p class="sub">Pago seguro con Mercado Pago. Se suma a lo que ya tengas activo.</p>'+
+    '<div class="actions" style="padding:0;border:0">'+
+      '<button class="btn" data-plan="ssh_30">Cuenta SSH · 30 días</button>'+
+      '<button class="btn" data-plan="dns_30">Subdominio · 30 días</button>'+
     '</div>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
+  box.querySelectorAll('button[data-plan]').forEach(b=>b.onclick=()=>comprar(b));
+  cargarPlan();
+  avisoPago();
+}
+
+/* ---------- pagos (Mercado Pago) ---------- */
+async function comprar(btn){
+  const txt=btn.textContent; btn.disabled=true; btn.textContent='Abriendo Mercado Pago…';
+  try{
+    const j=await api('/api/pagos/crear',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({plan:btn.dataset.plan})});
+    if(!j.ok||!j.init_point) throw new Error(j.error||'No se pudo iniciar el pago');
+    location.href=j.init_point;
+  }catch(e){
+    const m=$('#msgPago'); m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+e.message+'</span>';
+    btn.disabled=false; btn.textContent=txt;
+  }
+}
+async function cargarPlan(){
+  try{
+    const e=await api('/api/pagos/estado'); if(e.error) return;
+    const ahora=Date.now(), act=[];
+    if(e.ssh_expires_at>ahora) act.push('SSH hasta '+new Date(e.ssh_expires_at).toLocaleDateString('es'));
+    if(e.dns_expires_at>ahora) act.push('Dominio hasta '+new Date(e.dns_expires_at).toLocaleDateString('es'));
+    if(act.length) $('#planNombre').textContent=act.join(' · ');
+  }catch{}
+}
+function avisoPago(){
+  const q=new URLSearchParams(location.search).get('pago'); if(!q) return;
+  const t={ok:['ok','Pago recibido. Tu plan se activa en unos segundos.'],
+           pendiente:['ok','Tu pago está pendiente. Se activará cuando Mercado Pago lo confirme.'],
+           error:['err','El pago no se completó. Puedes intentarlo de nuevo.']}[q];
+  if(!t) return;
+  const m=$('#msgPago'); m.className='msg '+t[0]; m.innerHTML=(t[0]==='ok'?ICON_OK:ICON_ERR)+'<span>'+t[1]+'</span>';
+  history.replaceState(null,'',location.pathname+'#perfil');
 }
 
 /* ---------- cuentas SSH ---------- */
