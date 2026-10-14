@@ -5,6 +5,7 @@
 import { agentFetch } from "../lib/agent.js";
 import { limit, clientIp } from "../lib/ratelimit.js";
 import { currentUser, requireUser } from "../lib/fbverify.js";
+import { beneficios } from "../lib/firestore.js";
 
 export default async function handler(req, res) {
   const over = limit(req, { max: req.method === "POST" ? 5 : 30, windowMs: 60000 });
@@ -25,8 +26,15 @@ export default async function handler(req, res) {
       if (!u) return;
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
       const username = String(body.username || "").trim().toLowerCase();
+      // Si el usuario pagó un plan SSH vigente, la cuenta dura hasta que termine ese plan.
+      let days;
+      try {
+        const b = await beneficios(u.uid);
+        if (b.ssh_expires_at > Date.now()) days = Math.max(1, Math.ceil((b.ssh_expires_at - Date.now()) / 864e5));
+      } catch (e) { console.warn("beneficios:", e.message); }
       const { status, data } = await agentFetch("/create", {
-        method: "POST", device: u.uid, clientIp: clientIp(req), body: { username, device: u.uid },
+        method: "POST", device: u.uid, clientIp: clientIp(req),
+        body: { username, device: u.uid, ...(days ? { days } : {}) },
       });
       return res.status(status).json(data);
     }
