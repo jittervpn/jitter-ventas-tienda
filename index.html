@@ -803,6 +803,14 @@ $('#mGo').onclick=async()=>{
   b.disabled=false; b.classList.remove('loading');
 };
 
+
+/* ---------- confirmar pago al volver de Mercado Pago (no depende del webhook) ---------- */
+async function confirmarPago(){
+  if(!window._payId||!sesion) return;
+  const id=window._payId; window._payId=null;
+  const j=await api('/api/confirmar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payment_id:id})}).catch(()=>({}));
+  if(j.entregada){ showMsgSsh('ok','Pago aprobado. Tu cuenta Premium ya está activa.'); sshLoaded=false; loadSsh(); }
+}
 // Llamado desde el módulo de Firebase cuando cambia el estado de sesión
 window.onAuthChange=async(user,getToken)=>{
   if(!user){ sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
@@ -811,13 +819,14 @@ window.onAuthChange=async(user,getToken)=>{
     const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
     sesion=r.user||{email:user.email,uid:user.uid};
   }catch{ sesion={email:user.email,uid:user.uid}; }
-  paintAuth(); sshLoaded=false;
+  paintAuth(); sshLoaded=false; confirmarPago();
   if(vista==='ssh') loadSsh(); else refreshSshButton();
   if(vista==='perfil') paintPerfil();
 };
 
 fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
+window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
 try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
 tab((location.hash||'#ssh').slice(1));
