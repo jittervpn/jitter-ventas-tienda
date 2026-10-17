@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1c">
+<meta http-equiv="cache-control" content="no-cache">
+<title>Jitterx Panel Cloud — Subdominios temporales para tu VPS</title>
+<meta name="description" content="Apunta un subdominio a la IP de tu VPS en segundos. Registro A gratuito durante 7 días.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f1c; --bg2:#0e1526; --card:#111a2e; --card2:#15203a; --line:#1f2c49; --line2:#2b3a5e;
+    --ink:#eef2fb; --ink2:#aab6d3; --muted:#6b7a9c;
+    --accent:#22d3ee; --accent2:#0ea5e9; --ok:#34d399; --err:#fb7185; --warn:#fbbf24;
+    --r:16px; --r2:10px; --shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  html{-webkit-text-size-adjust:100%}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(900px 500px at 85% -10%,rgba(34,211,238,.12),transparent 60%),
+      radial-gradient(700px 500px at -10% 110%,rgba(14,165,233,.08),transparent 60%),
+      linear-gradient(var(--bg2) 1px,transparent 1px) 0 0/100% 56px,
+      linear-gradient(90deg,var(--bg2) 1px,transparent 1px) 0 0/56px 100%}
+  a{color:inherit}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+  /* ---------- nav ---------- */
+  .nav{position:sticky;width:100%;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(10,15,28,.75);border-bottom:1px solid var(--line)}
+  .nav .in{max-width:1100px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px;text-decoration:none}
+  .logo i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font-style:normal;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(34,211,238,.35)}
+  .logo small{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:-2px}
+  .status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2);white-space:nowrap}
+  .status b{width:8px;height:8px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 3px rgba(107,122,156,.2)}
+  .status.on b{background:var(--ok);box-shadow:0 0 0 3px rgba(52,211,153,.2)}
+  .status.off b{background:var(--err);box-shadow:0 0 0 3px rgba(251,113,133,.2)}
+  @media(max-width:480px){.status span{display:none}}
+
+  /* ---------- layout ---------- */
+  main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:28px 20px 40px}
+  .hero{margin-bottom:28px}
+  .eyebrow{display:inline-flex;max-width:100%;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(34,211,238,.3);border-radius:999px;background:rgba(34,211,238,.06);margin-bottom:14px}
+  h1{font-size:clamp(26px,5vw,44px);overflow-wrap:anywhere;line-height:1.1;letter-spacing:-.03em;font-weight:800;max-width:720px}
+  h1 span{background:linear-gradient(90deg,var(--accent),#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--ink2);max-width:620px;margin-top:12px;font-size:16px}
+
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0}
+  .stat{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:14px 16px}
+  .stat label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+  .stat .bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:10px}
+  .stat .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  @media(max-width:640px){.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
+  @media(max-width:480px){.card{padding:20px}}
+  .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .card h2 svg{width:20px;height:20px;color:var(--accent);flex:none}
+  .card p.sub{color:var(--muted);font-size:14px;margin-bottom:18px}
+
+  /* ---------- form ---------- */
+  .f{margin-top:16px}
+  .f label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:7px}
+  .field{display:flex;align-items:stretch;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+  .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
+  .field input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);padding:13px 14px;font:500 15px "JetBrains Mono",monospace}
+  .field input::placeholder{color:var(--muted)}
+  .field .sfx{display:flex;align-items:center;padding:0 14px;color:var(--ink2);font:500 14px "JetBrains Mono",monospace;background:var(--card2);border-left:1px solid var(--line2);white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .preview{margin-top:16px;padding:12px 14px;border-radius:var(--r2);background:var(--bg2);border:1px dashed var(--line2);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .preview code{min-width:0;font-family:"JetBrains Mono",monospace;color:var(--ink);font-size:13px;word-break:break-all}
+  .preview .arrow{color:var(--accent)}
+  button.primary{margin-top:20px;width:100%;padding:15px 18px;border:0;border-radius:var(--r2);cursor:pointer;font:700 15px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(34,211,238,.28);transition:transform .12s,box-shadow .12s,opacity .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+  button.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 30px rgba(34,211,238,.36)}
+  button.primary:active:not(:disabled){transform:translateY(0)}
+  button.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+  .spinner{width:16px;height:16px;border:2px solid rgba(4,18,26,.35);border-top-color:#04121a;border-radius:50%;animation:spin .7s linear infinite;display:none}
+  button.loading .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .msg{margin-top:16px;padding:12px 14px;border-radius:var(--r2);font-size:14px;display:none;gap:10px;align-items:flex-start;line-height:1.5}
+  .msg svg{width:18px;height:18px;flex:none;margin-top:1px}
+  .msg.err{display:flex;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.35);color:#ffd6dd}
+  .msg.ok{display:flex;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35);color:#d1fae5}
+
+  /* ---------- record ---------- */
+  .empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:26px 10px;color:var(--muted);font-size:14px;border:1px dashed var(--line2);border-radius:var(--r2);background:var(--bg2)}
+  .empty svg{width:36px;height:36px;color:var(--line2)}
+  .rec{border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;background:var(--bg2)}
+  .rec .top{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .rec .top .name{font:600 15px "JetBrains Mono",monospace;color:var(--accent);word-break:break-all}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(52,211,153,.12);color:var(--ok);border:1px solid rgba(52,211,153,.3);white-space:nowrap}
+  .rec dl{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .rec dl>div{padding:12px 16px;border-bottom:1px solid var(--line)}
+  .rec dl>div:nth-child(odd){border-right:1px solid var(--line)}
+  .rec dt{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .rec dd{font:500 14px "JetBrains Mono",monospace;margin-top:3px;word-break:break-all}
+  .rec .time{padding:14px 16px}
+  .rec .time .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
+  .rec .time .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--accent))}
+  .rec .time small{color:var(--muted);font-size:12px}
+  .actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .btn{flex:1;min-width:120px;padding:10px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:600 13px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,border-color .15s}
+  .btn:hover{background:var(--line);border-color:var(--accent)}
+  .btn svg{width:15px;height:15px}
+
+  /* ---------- rules / steps ---------- */
+  .rules{list-style:none;display:grid;gap:10px;margin-top:4px}
+  .rules li{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--ink2)}
+  .rules li svg{width:18px;height:18px;color:var(--accent);flex:none;margin-top:2px}
+  .rules b{color:var(--ink);font-weight:600}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px}
+  .step i{font-style:normal;font:600 12px "JetBrains Mono",monospace;color:var(--accent)}
+  .step h3{font-size:14px;font-weight:700;margin:6px 0 4px}
+  .step p{font-size:13px;color:var(--muted)}
+
+  .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .prod{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2);padding:18px;display:flex;flex-direction:column;gap:8px}
+  .prod .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(34,211,238,.1);color:var(--accent);border:1px solid rgba(34,211,238,.3)}
+  .prod h3{font-size:17px;font-weight:700}.prod p{color:var(--muted);font-size:13px;flex:1}
+  .prod .price{font:800 24px Inter,sans-serif}.prod .price small{font-size:12px;color:var(--muted);font-weight:500}
+  .prod button{margin:0;padding:11px;font-size:14px}
+  .cart .ln{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .cart .ln button{background:transparent;border:0;color:var(--err);cursor:pointer;font-size:18px;width:auto;margin:0;padding:0 6px}
+  .cart .tot{display:flex;justify-content:space-between;font:700 17px Inter,sans-serif;padding:14px 0 4px}
+  details.guide{margin-top:16px;border:1px solid var(--line2);border-radius:var(--r2);background:var(--bg2)}
+  details.guide summary{cursor:pointer;padding:13px 14px;font:600 14px Inter,sans-serif;list-style:none}
+  details.guide ol{padding:0 14px 14px 32px;color:var(--ink2);font-size:13.5px;display:grid;gap:6px}
+  .authbtns{display:flex;align-items:center;gap:8px}
+  .authbtns button{padding:8px 14px;border-radius:8px;font:600 13px Inter,sans-serif;cursor:pointer;border:1px solid var(--line2);background:transparent;color:var(--ink)}
+  .authbtns button.cta{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .authbtns .who{font:500 13px "JetBrains Mono",monospace;color:var(--ink2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:560px){.authbtns .who{display:none}}
+  .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,8,16,.72);backdrop-filter:blur(6px)}
+  .modal.open{display:flex}
+  .modal .box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line2);border-radius:var(--r);padding:26px;box-shadow:var(--shadow);max-height:92vh;overflow:auto}
+  .modal h3{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .modal p.s{color:var(--muted);font-size:14px;margin-top:4px}
+  .modal .x{float:right;background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px}
+  .switch{display:flex;gap:6px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:4px;margin:18px 0 6px}
+  .switch button{flex:1;padding:9px;border:0;border-radius:6px;background:transparent;color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer}
+  .switch button[aria-selected=true]{background:var(--card2);color:var(--ink)}
+  .server{border:1px solid var(--line2);border-radius:var(--r2);background:var(--bg2);padding:14px;margin-bottom:18px;position:relative;overflow:hidden}
+  .server.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+  .server .head{display:flex;align-items:flex-start;gap:12px}
+  .server .flag{font-size:30px;line-height:1;flex:none}
+  .server .who{flex:1;min-width:0}
+  .server .who b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .server .who small{color:var(--muted);font-size:13px}
+  .server .num{text-align:right;flex:none}
+  .server .num .sp{display:flex;align-items:center;justify-content:flex-end;gap:6px;font:700 15px "JetBrains Mono",monospace;color:var(--ok)}
+  .server .num .sp svg{width:15px;height:15px}
+  .server .num .cap{font:500 13px "JetBrains Mono",monospace;color:var(--ink2);margin-top:2px}
+  .server .track{height:7px;border-radius:4px;background:var(--line);overflow:hidden;margin:12px 0 8px}
+  .server .track i{display:block;height:100%;width:0;border-radius:4px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .server .note{font-size:12.5px;text-align:right;font-weight:500}
+  .lv-ok{color:var(--ok)} .lv-mid{color:var(--warn)} .lv-hi{color:var(--err)}
+  .bg-ok{background:linear-gradient(90deg,var(--ok),var(--accent))}
+  .bg-mid{background:linear-gradient(90deg,var(--warn),#f59e0b)}
+  .bg-hi{background:linear-gradient(90deg,var(--err),#e11d48)}
+  .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .metrics div{text-align:center;min-width:0}
+  .metrics span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .metrics b{font:600 14px "JetBrains Mono",monospace}
+  /* menú inferior tipo app */
+  .bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(10,15,28,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .bottomnav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+  .bottomnav button{background:transparent;border:0;cursor:pointer;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font:600 11px Inter,sans-serif;transition:color .15s;position:relative}
+  .bottomnav button svg{width:22px;height:22px;transition:transform .15s}
+  .bottomnav button[aria-selected=true]{color:var(--accent)}
+  .bottomnav button[aria-selected=true] svg{transform:translateY(-1px)}
+  .bottomnav button[aria-selected=true]::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  body{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+  @media(min-width:861px){
+    .bottomnav{position:sticky;top:64px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:transparent;backdrop-filter:none}
+    .bottomnav .in{max-width:520px;margin:0 auto 4px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;grid-template-columns:repeat(4,1fr);gap:6px}
+    .bottomnav button{flex-direction:row;padding:10px;border-radius:8px;font-size:14px}
+    .bottomnav button svg{width:16px;height:16px}
+    .bottomnav button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+    .bottomnav button[aria-selected=true]::before{display:none}
+    body{padding-bottom:0}
+  }
+  /* perfil */
+  .avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:800 24px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));flex:none}
+  .phead{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+  .phead .info{min-width:0}
+  .phead .info b{display:block;font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+  .phead .info small{color:var(--muted);font-size:13px;word-break:break-all}
+  .plist{display:grid;gap:8px;margin-top:16px}
+  .plist .it{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;font-size:14px}
+  .plist .it span{color:var(--muted);font-size:13px}
+  .plist .it b{font:600 13px "JetBrains Mono",monospace;text-align:right;word-break:break-all}
+  .danger{width:100%;margin-top:16px;padding:13px;border-radius:var(--r2);border:1px solid rgba(251,113,133,.4);background:rgba(251,113,133,.08);color:#ffd6dd;font:600 14px Inter,sans-serif;cursor:pointer}
+  .guest{text-align:center;padding:30px 16px}
+  .guest svg{width:44px;height:44px;color:var(--line2)}
+  .guest p{color:var(--muted);font-size:14px;margin:10px 0 16px}
+  .guest button{padding:12px 26px;border:0;border-radius:var(--r2);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font:700 14px Inter,sans-serif;cursor:pointer}
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;margin-bottom:20px}
+  .tabs button{flex:1;padding:11px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink2);font:600 14px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,color .15s}
+  .tabs button svg{width:16px;height:16px}
+  .tabs button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .pane[hidden]{display:none}
+  .cred{display:grid;gap:8px;margin-top:4px}
+  .cred .row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+  .cred .row span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:92px;flex:none}
+  .cred .row code{flex:1;min-width:0;font:600 14px "JetBrains Mono",monospace;word-break:break-all}
+  .cred .row button{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:4px;display:grid;place-items:center}
+  .cred .row button:hover{color:var(--accent)}
+  .cred .row button svg{width:16px;height:16px}
+  .payload{margin-top:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px;font:500 12px/1.7 "JetBrains Mono",monospace;color:var(--ink2);white-space:pre-wrap;word-break:break-all}
+  footer{border-top:1px solid var(--line);padding:20px;margin-bottom:8px;text-align:center;font-size:12px;color:var(--muted)}
+  footer b{color:var(--ink2);font-weight:600}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="in">
+  <a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a>
+  <div class="authbtns" id="auth">
+    <div class="status" id="status"><b></b><span id="statusText">…</span></div>
+    <button class="cta" id="btnLogin">Entrar</button>
+  </div>
+</div></nav>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="eyebrow">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+      <span id="heroTag">Registro A · gratis · 7 días</span>
+    </div>
+    <h1 id="heroTitle">Apunta un subdominio a tu VPS <span>en segundos</span></h1>
+    <p class="lead" id="heroLead"></p>
+  </section>
+
+  <section class="stats" id="stats">
+    <div class="stat"><label id="lbl1">Cuentas creadas</label><b id="total">—</b></div>
+    <div class="stat"><label id="lbl2">Activas ahora</label><b id="active">—</b></div>
+    <div class="stat"><label id="lbl3">Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
+  </section>
+
+  <div class="pane" id="paneDns" role="tabpanel">
+  <div class="grid">
+    <section class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Crear registro</h2>
+      <p class="sub">Solo letras minúsculas, números y guiones. IPv4 pública.</p>
+
+      <div class="f">
+        <label for="sub">Subdominio</label>
+        <div class="field"><input id="sub" placeholder="mi-servidor" maxlength="32" autocomplete="off" autocapitalize="none" spellcheck="false"><span class="sfx" id="suffix">.…</span></div>
+        <div class="hint">Entre 2 y 32 caracteres.</div>
+      </div>
+      <div class="f">
+        <label for="ip">IP pública del VPS</label>
+        <div class="field"><input id="ip" placeholder="203.0.113.10" inputmode="decimal" autocomplete="off"></div>
+      </div>
+
+      <div class="preview"><span>Resultado:</span><code id="pvName">mi-servidor.…</code><span class="arrow">→</span><code id="pvIp">0.0.0.0</code></div>
+
+      <button class="primary" id="go"><span class="spinner"></span><span id="goText">Crear registro A · 7 días</span></button>
+      <div class="msg" id="msg"></div>
+    </section>
+
+    <aside class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 9 18l-5-5"/></svg>Tu registro</h2>
+      <p class="sub">Se muestra el registro activo de este dispositivo.</p>
+      <div id="mine"></div>
+
+      <h2 style="margin-top:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Reglas</h2>
+      <ul class="rules">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Cada registro dura <b>7 días</b> y se elimina automáticamente.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 registro por usuario</b> cada 7 días.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Solo IPv4. Modo <b>DNS only</b>, sin proxy de Cloudflare.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg><span>Propagación en menos de <b>1 minuto</b>.</span></li>
+      </ul>
+    </aside>
+  </div>
+
+  </div>
+
+  <div class="pane" id="paneSsh" role="tabpanel" hidden>
+    <div class="grid">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Crear cuenta SSH</h2>
+        <p class="sub">Cuenta SSH sobre WebSocket para tu app de túnel. Contraseña generada automáticamente.</p>
+        <label style="display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:14px 0 8px">Servidor</label>
+        <div class="server sel" id="server">
+          <div class="head"><div class="flag">🌐</div><div class="who"><b>Cargando…</b><small>—</small></div>
+            <div class="num"><div class="sp">—</div><div class="cap">—</div></div></div>
+          <div class="track"><i></i></div><div class="note">—</div>
+        </div>
+        <div class="f">
+          <label for="user">Nombre de usuario</label>
+          <div class="field"><input id="user" placeholder="miusuario" maxlength="16" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+          <div class="hint">3 a 16 caracteres, empieza por letra, solo minúsculas y números.</div>
+        </div>
+        <div class="hint" id="sshGate" style="margin-top:14px" hidden>Necesitas una cuenta para crear tu acceso SSH. Es gratis y tarda un minuto.</div>
+        <button class="primary" id="goSsh"><span class="spinner"></span><span id="goSshText">Crear cuenta · 2 días</span></button>
+        <div class="msg" id="msgSsh"></div>
+        <details class="guide"><summary>Cómo conectarte (HTTP Custom, NetMod…)</summary><ol>
+          <li>Crea tu cuenta y copia <b>host, usuario y contraseña</b>.</li>
+          <li>En la app elige modo <b>SSH + WebSocket</b>, puerto <b>80</b> (o 443 con SSL).</li>
+          <li>Pega el <b>payload</b> que aparece en "Tu cuenta" y pulsa conectar.</li>
+          <li>Si dice <i>Permission denied</i>: revisa mayúsculas, o que la cuenta no haya vencido. Solo se permite 1 conexión a la vez.</li></ol></details>
+      </section>
+
+      <aside class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 7 9 18l-5-5"/></svg>Tu cuenta</h2>
+        <p class="sub">Datos de acceso de este dispositivo.</p>
+        <div id="mySsh"></div>
+
+        <h2 style="margin-top:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Condiciones</h2>
+        <ul class="rules">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>La cuenta caduca a los <b>2 días</b>.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 cuenta por usuario</b> y <b>1 conexión</b> simultánea.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg><span>Acceso por <b>WebSocket</b>, sin shell (solo túnel).</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Prohibido spam, escaneo o abuso. Se suspende sin aviso.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <div class="pane" id="paneTienda" hidden>
+    <div class="grid">
+      <section class="card"><h2>Planes y cuentas</h2><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
+      <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
+        <button class="primary" id="pay">Pagar con tarjeta</button>
+        <div id="brickBox" style="margin-top:14px"></div>
+        <div style="text-align:center;margin-top:12px"><a href="#" id="payAlt" style="color:var(--muted);font-size:13px">Prefiero pagar en la página de Mercado Pago</a></div><div class="msg" id="msgPay"></div></aside>
+    </div>
+  </div>
+
+  <div class="pane" id="panePerfil" hidden>
+    <div class="grid">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mi perfil</h2>
+        <div id="perfilBox"></div>
+      </section>
+      <aside class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Seguridad</h2>
+        <ul class="rules">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu contraseña la gestiona <b>Firebase</b>, no la almacenamos.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Sesión activa en este dispositivo.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Soporte: escribe desde el correo de tu cuenta.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <section class="steps" id="steps">
+    <div class="step"><i>01</i><h3>Elige un nombre</h3><p>Escribe el subdominio que quieres usar.</p></div>
+    <div class="step"><i>02</i><h3>Pon la IP de tu VPS</h3><p>La IPv4 pública donde corre tu servidor.</p></div>
+    <div class="step"><i>03</i><h3>Conéctate</h3><p>En menos de un minuto tu dominio ya resuelve.</p></div>
+  </section>
+</main>
+
+<nav class="bottomnav"><div class="in">
+  <button id="navTienda" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Tienda</button>
+  <button id="navSsh" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
+  <button id="navDns" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
+  <button id="navPerfil" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
+</div></nav>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <button class="x" id="mClose" aria-label="Cerrar">&times;</button>
+    <h3 id="mTitle">Entrar en tu cuenta</h3>
+    <p class="s" id="mSub">Accede para gestionar tus cuentas y compras.</p>
+    <div class="switch" role="tablist">
+      <button id="swLogin" aria-selected="true">Iniciar sesión</button>
+      <button id="swReg" aria-selected="false">Crear cuenta</button>
+    </div>
+    <div class="f" id="fNombre" hidden>
+      <label for="mNombre">Nombre</label>
+      <div class="field"><input id="mNombre" placeholder="Tu nombre" maxlength="60" autocomplete="name"></div>
+    </div>
+    <div class="f">
+      <label for="mEmail">Correo electrónico</label>
+      <div class="field"><input id="mEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" autocapitalize="none"></div>
+    </div>
+    <div class="f">
+      <label for="mPass">Contraseña</label>
+      <div class="field"><input id="mPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="hint" id="mHint" hidden>Mínimo 8 caracteres.</div>
+    </div>
+    <button class="primary" id="mGo"><span class="spinner"></span><span id="mGoText">Entrar</span></button>
+    <div style="text-align:center;margin-top:12px"><a href="#" id="mReset" style="color:var(--muted);font-size:13px;text-decoration:none">¿Olvidaste tu contraseña?</a></div>
+    <div class="msg" id="mMsg"></div>
+  </div>
+</div>
+
+<footer><b>Jitterx Panel Cloud</b> · v12 · <span id="year"></span></footer>
+
+<script>
+const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
+// ID de dispositivo persistente (se envía en cada petición a la API)
+let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)jx_device=([^;]+)/)||[])[1]||'';
+if(!device){device=crypto.randomUUID();}
+localStorage.setItem('jx_device',device);
+const api=async(path,opts={})=>{
+  let tk=null; try{ tk=window.fbToken?await window.fbToken():null }catch{}
+  const r=await fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
+  const txt=await r.text();
+  try{return JSON.parse(txt)}catch{throw new Error(r.status===404?('No existe '+path+' en el servidor'):('Respuesta inválida del servidor ('+r.status+')'))}
+};
+
+const ICON_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+const ICON_ERR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+let zone='';
+$('#year').textContent=new Date().getFullYear();
+
+const fmt=t=>new Date(t).toLocaleString('es',{dateStyle:'medium',timeStyle:'short'});
+const setStatus=(cls,txt)=>{$('#status').className='status '+cls;$('#statusText').textContent=txt};
+const showMsg=(cls,txt)=>{const m=$('#msg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+
+function updatePreview(){
+  const s=$('#sub').value.trim().toLowerCase()||'mi-servidor';
+  $('#pvName').textContent=s+'.'+(zone||'…');
+  $('#pvIp').textContent=$('#ip').value.trim()||'0.0.0.0';
+}
+$('#sub').addEventListener('input',updatePreview);
+$('#ip').addEventListener('input',updatePreview);
+
+function lockButton(locked){
+  const b=$('#go'); b.disabled=locked; b.classList.remove('loading');
+  $('#goText').textContent=locked?'Ya tienes un registro activo':'Crear registro A · 7 días';
+}
+
+function showRecord(r){
+  if(!r){$('#mine').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>Todavía no has creado ningún registro.<br>Aparecerá aquí en cuanto lo hagas.</div>';return}
+  const total=7*864e5,left=Math.max(0,r.expiresAt-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
+  $('#mine').innerHTML=
+    '<div class="rec"><div class="top"><span class="name">'+r.name+'</span><span class="pill">Activo</span></div>'+
+    '<dl><div><dt>Tipo</dt><dd>A</dd></div><div><dt>Apunta a</dt><dd>'+r.ip+'</dd></div>'+
+    '<div><dt>Creado</dt><dd>'+(r.createdAt?fmt(r.createdAt):'—')+'</dd></div><div><dt>Expira</dt><dd>'+fmt(r.expiresAt)+'</dd></div></dl>'+
+    '<div class="time"><small>Tiempo restante: <b>'+d+' d '+h+' h</b></small><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<div class="actions"><button class="btn" id="cp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar dominio</button>'+
+    '<a class="btn" href="http://'+r.name+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>Abrir</a></div></div>';
+  $('#cp').onclick=e=>{navigator.clipboard.writeText(r.name);e.currentTarget.lastChild.textContent='Copiado';};
+}
+
+async function load(){
+  try{
+    const s=await api('/api/stats');
+    if(s.error) throw new Error(s.error);
+    ultimoDns=s; zone=s.zone||'';
+    $('#suffix').textContent='.'+zone; updatePreview();
+    if(vista==='dns') pintarStatsDns();
+    setStatus('on','Sistema operativo');
+    let remote=null;
+    try{const m=await api('/api/me'); remote=m.record||null;}catch(e){console.warn('api/me:',e.message)}
+    const rec=remote||JSON.parse(localStorage.getItem('jx_record')||'null');
+    const valid=rec&&rec.expiresAt>Date.now()?rec:null;
+    if(remote) localStorage.setItem('jx_record',JSON.stringify(remote));
+    showRecord(valid); lockButton(!!valid);
+  }catch(e){
+    setStatus('off','Sin conexión con la API');
+    showRecord(null);
+    showMsg('err','La API no responde. '+(e.message||'Revisa la configuración en Vercel y vuelve a desplegar.'));
+  }
+}
+
+$('#go').onclick=async()=>{
+  const b=$('#go'); b.disabled=true; b.classList.add('loading'); $('#goText').textContent='Creando…'; $('#msg').className='msg';
+  const j=await api('/api/create',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({subdomain:$('#sub').value,ip:$('#ip').value})}).catch(e=>({error:e.message}));
+  if(j.ok){
+    localStorage.setItem('jx_record',JSON.stringify(j.record));
+    showMsg('ok','Registro creado: <b>'+j.record.name+'</b> → '+j.record.ip+'. Estará activo en menos de un minuto.');
+    showRecord(j.record); lockButton(true); load();
+  }else{
+    showMsg('err',j.error||'Error desconocido');
+    if(j.record){showRecord(j.record);lockButton(true)} else lockButton(false);
+  }
+};
+/* ---------- navegación inferior ---------- */
+const PANES={tienda:'paneTienda',ssh:'paneSsh',dns:'paneDns',perfil:'panePerfil'};
+let vista='ssh';
+function tab(which){
+  if(!PANES[which]) which='ssh';
+  vista=which;
+  for(const [k,id] of Object.entries(PANES)) $('#'+id).hidden = k!==which;
+  $('#navTienda').setAttribute('aria-selected',which==='tienda');
+  $('#navSsh').setAttribute('aria-selected',which==='ssh');
+  $('#navDns').setAttribute('aria-selected',which==='dns');
+  $('#navPerfil').setAttribute('aria-selected',which==='perfil');
+  history.replaceState(null,'','#'+which);
+  // El resumen superior solo acompaña a las vistas de creación
+  $('#hero').hidden = which==='perfil'||which==='tienda';
+  $('#stats').hidden = which==='perfil'||which==='tienda';
+  $('#steps').hidden = which==='perfil'||which==='tienda';
+  pintarHero(which);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(which==='ssh'&&!sshLoaded) loadSsh();
+  if(which==='perfil') paintPerfil();
+  if(which==='tienda') paintTienda();
+}
+$('#navTienda').onclick=()=>tab('tienda');
+$('#navSsh').onclick=()=>tab('ssh');
+$('#navDns').onclick=()=>tab('dns');
+$('#navPerfil').onclick=()=>tab('perfil');
+
+/* ---------- cabecera contextual ---------- */
+const HERO={
+  ssh:{tag:'Cuenta SSH · gratis · 2 días',
+       title:'Túnel SSH sobre WebSocket <span>listo al instante</span>',
+       lead:'Crea tu usuario y contraseña para conectarte desde tu app de túnel. Sin configuración y sin esperas.',
+       l1:'Cuentas SSH creadas',l2:'Conectados ahora',l3:'Plazas disponibles'},
+  dns:{tag:'Registro A · gratis · 7 días',
+       title:'Apunta un subdominio a tu VPS <span>en segundos</span>',
+       lead:'Elige un nombre, escribe la IP de tu servidor y listo. El registro se crea al instante y se elimina solo cuando expira.',
+       l1:'Dominios creados',l2:'Activos ahora',l3:'Plazas disponibles'},
+};
+function pintarHero(which){
+  const h=HERO[which]; if(!h) return;
+  $('#heroTag').textContent=h.tag;
+  $('#heroTitle').innerHTML=h.title;
+  $('#heroLead').textContent=h.lead;
+  $('#lbl1').textContent=h.l1; $('#lbl2').textContent=h.l2; $('#lbl3').textContent=h.l3;
+  which==='ssh'?pintarStatsSsh():pintarStatsDns();
+}
+let ultimoDns=null, ultimoSsh=null;
+function pintarNums(total,activos,max){
+  $('#total').textContent=total??'—';
+  $('#active').textContent=activos??'—';
+  $('#free').textContent=(max!=null?Math.max(0,max-activos)+' / '+max:'—');
+  $('#bar').style.width=(max?Math.min(100,activos/max*100):0)+'%';
+}
+function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max):pintarNums(); }
+function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
+
+/* ---------- tienda ---------- */
+let MONEDA='ARS', CATALOGO=[]; // se cargan desde /api/catalog (fuente única)
+let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]');
+const money=n=>{if(!n)return 'Gratis';try{return new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n)}catch{return n+' '+MONEDA}};
+function paintTienda(){
+  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('')||(window._planesError?'<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>':'<div class="empty">Cargando planes…</div>');
+  $('#prods').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=CATALOGO.find(x=>x.id===b.dataset.id);if(c.ir)return tab(c.ir);carrito.push(c.id);saveCart()});
+  paintCart();
+}
+function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));if(typeof cerrarBrick==='function')cerrarBrick();paintCart()}
+function paintCart(){
+  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), tot=it.reduce((a,c)=>a+c.precio,0);
+  $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>':'<div class="empty">Tu carrito está vacío.</div>';
+  $('#cartBox').querySelectorAll('button').forEach(b=>b.onclick=()=>{carrito.splice(+b.dataset.i,1);saveCart()});
+  $('#pay').disabled=!it.length;
+}
+window.pagarRedirect=async()=>{
+  if(!sesion) return openModal('login');
+  const b=$('#pay'),m=$('#msgPay'); b.disabled=true; b.classList.add('loading'); m.className='msg';
+  const j=await api('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito})}).catch(e=>({error:e.message}));
+  if(j.init_point){ location.href=j.init_point; return; }
+  b.classList.remove('loading'); b.disabled=!carrito.length;
+  m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+(j.error||'No se pudo iniciar el pago.')+'</span>';
+};
+
+/* ---------- pago con tarjeta (Checkout Bricks) ---------- */
+var PUBKEY='', mpSdk=null, mpInst=null, brickCtl=null;
+const LOC={ARS:'es-AR',BRL:'pt-BR',CLP:'es-CL',COP:'es-CO',MXN:'es-MX',PEN:'es-PE',UYU:'es-UY'};
+const cargarSdk=()=>mpSdk||(mpSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://sdk.mercadopago.com/js/v2';s.onload=ok;s.onerror=()=>{mpSdk=null;ko(new Error('No se pudo cargar el módulo de pago'))};document.head.appendChild(s)}));
+function cerrarBrick(){if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null}const b=document.getElementById('brickBox');if(b)b.innerHTML=''}
+const msgPago=m=>{const e=$('#msgPay');e.className='msg err';e.innerHTML=ICON_ERR+'<span>'+m+'</span>'};
+const RECHAZO={cc_rejected_insufficient_amount:'Fondos insuficientes en la tarjeta.',cc_rejected_bad_filled_card_number:'Revisa el número de la tarjeta.',cc_rejected_bad_filled_date:'Revisa la fecha de vencimiento.',cc_rejected_bad_filled_security_code:'Revisa el código de seguridad.',cc_rejected_high_risk:'Pago rechazado por seguridad. Prueba con otra tarjeta.',cc_rejected_card_disabled:'La tarjeta está inhabilitada para compras online.'};
+async function iniciarTarjeta(){
+  if(!sesion) return openModal('login');
+  $('#msgPay').className='msg';
+  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), total=it.reduce((a,c)=>a+c.precio,0);
+  if(!it.length) return;
+  if(!PUBKEY) return msgPago('Falta configurar MP_PUBLIC_KEY en el servidor.');
+  try{
+    await cargarSdk(); cerrarBrick();
+    mpInst=mpInst||new MercadoPago(PUBKEY,{locale:LOC[MONEDA]||'es-AR'});
+    brickCtl=await mpInst.bricks().create('cardPayment','brickBox',{
+      initialization:{amount:total,payer:{email:sesion.email}},
+      customization:{paymentMethods:{minInstallments:1,maxInstallments:1},visual:{style:{theme:'dark'}}},
+      callbacks:{
+        onReady:()=>{},
+        onError:e=>console.error('Brick',e),
+        onSubmit:fd=>new Promise(async(ok,ko)=>{
+          const j=await api('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito,formData:fd,key:crypto.randomUUID()})}).catch(e=>({error:e.message}));
+          if(j.status==='approved'){ok();carrito=[];saveCart();tab('ssh');sshLoaded=false;loadSsh();showMsgSsh('ok','Pago aprobado. '+(j.entregada?'Tu cuenta ya está en "Tu cuenta".':'Estamos creando tu cuenta; aparecerá en unos segundos.'));if(!j.entregada){let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}}
+          else{ko();msgPago(j.error||RECHAZO[j.detalle]||'El pago fue rechazado. Prueba con otra tarjeta.')}
+        })
+      }
+    });
+  }catch(e){msgPago(e.message||'No se pudo abrir el formulario de pago.')}
+}
+$('#pay').onclick=iniciarTarjeta;
+$('#payAlt').onclick=e=>{e.preventDefault();pagarRedirect()};
+
+/* ---------- perfil ---------- */
+function paintPerfil(){
+  const box=$('#perfilBox');
+  if(!sesion){
+    box.innerHTML='<div class="guest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+      '<p>Inicia sesión para ver tu perfil, tus cuentas y tus compras.</p>'+
+      '<button id="pLogin">Entrar o registrarme</button></div>';
+    $('#pLogin').onclick=()=>openModal('login');
+    return;
+  }
+  const nombre=sesion.nombre||sesion.email.split('@')[0];
+  const ini=(nombre[0]||'U').toUpperCase();
+  const cuenta=miCuentaSsh, vigente=!!(cuenta&&cuenta.expires_at>Date.now());
+  const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
+  box.innerHTML=
+    '<div class="phead"><div class="avatar">'+ini+'</div><div class="info"><b>'+nombre+'</b><small>'+sesion.email+'</small></div></div>'+
+    '<div class="plist">'+
+      '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
+      '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
+      '<div class="it"><span>Plan</span><b>'+(vigente&&cuenta.plan==='premium'?'Premium ★':'Gratuito')+'</b></div>'+
+      (vigente?'<div class="it"><span>Días restantes</span><b>'+Math.ceil((cuenta.expires_at-Date.now())/864e5)+'</b></div>':'')+
+    '</div>'+
+    '<button class="danger" id="pOut">Cerrar sesión</button>';
+  $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
+}
+
+/* ---------- cuentas SSH ---------- */
+let sshLoaded=false, miCuentaSsh=null, sshHas=false;
+const showMsgSsh=(cls,txt)=>{const m=$('#msgSsh');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+value+'</code><button data-copy="'+value+'" title="Copiar">'+copyIcon+'</button></div>';
+
+function showAccount(a){
+  miCuentaSsh=a||null;
+  if(!a){
+    const msg=sesion?'Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.':'Inicia sesión para crear y ver tu cuenta SSH.';
+    $('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>'+msg+'</div>';return}
+  const total=Math.max(864e5,(a.expires_at-(a.created_at||a.expires_at-2*864e5))),left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
+  const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
+  $('#mySsh').innerHTML=
+    '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill">Activa</span></div>'+
+    '<div style="padding:14px 16px"><div class="cred">'+
+      row('Host',a.host)+row('Usuario',a.username)+row('Contraseña',a.password)+
+      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+
+    '</div>'+
+    '<div class="payload">'+payload+'</div>'+
+    '</div>'+
+    '<div class="time"><small>Caduca el '+fmt(a.expires_at)+' · quedan <b>'+d+' d '+h+' h</b></small><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<div class="actions"><button class="btn" id="cpAll">'+copyIcon+'Copiar todo</button></div></div>';
+  $('#mySsh').querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);b.style.color='var(--ok)'});
+  $('#cpAll').onclick=e=>{
+    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port+'\nCaduca: '+fmt(a.expires_at));
+    e.currentTarget.lastChild.textContent='Copiado';
+  };
+}
+
+function lockSsh(locked){ sshHas=locked; refreshSshButton(); }
+function refreshSshButton(){
+  const b=$('#goSsh'); b.classList.remove('loading');
+  $('#sshGate').hidden=!!sesion;
+  if(!sesion){ b.disabled=false; $('#goSshText').textContent='Inicia sesión para crear tu cuenta'; return; }
+  b.disabled=sshHas;
+  $('#goSshText').textContent=sshHas?'Ya tienes una cuenta activa':'Crear cuenta · 2 días';
+}
+
+const FLAGS={BR:'🇧🇷',US:'🇺🇸',ES:'🇪🇸',AR:'🇦🇷',MX:'🇲🇽',CL:'🇨🇱',CO:'🇨🇴',PE:'🇵🇪',DE:'🇩🇪',FR:'🇫🇷',NL:'🇳🇱',SG:'🇸🇬',JP:'🇯🇵'};
+const SPEED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20a8 8 0 1 1 8-8"/><path d="m12 12 4-3"/></svg>';
+
+function renderServer(s){
+  const used=s.active||0,max=s.max||1,pct=Math.min(100,Math.round(used/max*100));
+  const carga=Math.max(pct,s.cpu||0,s.ram||0);
+  const lv=carga>=85?'hi':carga>=60?'mid':'ok';
+  const nota=lv==='hi'?'Servidor muy saturado, posible lentitud':lv==='mid'?'Carga moderada, rendimiento normal':'Excelente velocidad y latencia';
+  const el=$('#server');
+  el.querySelector('.flag').textContent=FLAGS[(s.flag||'').toUpperCase()]||'🌐';
+  el.querySelector('.who b').textContent=s.country||'Servidor';
+  el.querySelector('.who small').textContent=(s.city?s.city+' · ':'')+(s.host||'');
+  el.querySelector('.sp').className='sp lv-'+lv;
+  el.querySelector('.sp').innerHTML=SPEED+' '+(s.mbps!=null?s.mbps.toFixed(2):'0.00')+' Mbps';
+  el.querySelector('.cap').textContent=used+'/'+max;
+  const bar=el.querySelector('.track i'); bar.className='bg-'+lv; bar.style.width=Math.max(2,pct)+'%';
+  const note=el.querySelector('.note'); note.className='note lv-'+lv; note.textContent=nota;
+  let m=el.querySelector('.metrics');
+  if(!m){m=document.createElement('div');m.className='metrics';el.appendChild(m)}
+  const up=s.uptime?(s.uptime>=86400?Math.floor(s.uptime/86400)+'d':Math.floor(s.uptime/3600)+'h'):'—';
+  m.innerHTML='<div><span>CPU</span><b class="lv-'+(s.cpu>=85?'hi':s.cpu>=60?'mid':'ok')+'">'+(s.cpu||0)+'%</b></div>'+
+              '<div><span>RAM</span><b class="lv-'+(s.ram>=85?'hi':s.ram>=60?'mid':'ok')+'">'+(s.ram||0)+'%</b></div>'+
+              '<div><span>Uptime</span><b>'+up+'</b></div>';
+}
+
+async function loadSsh(){
+  sshLoaded=true;
+  try{
+    const s=await api('/api/ssh');
+    if(s.error) throw new Error(s.error);
+    ultimoSsh=s; try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{} renderServer(s); if(vista==='ssh') pintarStatsSsh();
+    clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
+    const a=s.account||null;
+    const valid=a&&a.expires_at>Date.now()?a:null;
+    showAccount(valid); lockSsh(!!valid); if(vista==='perfil') paintPerfil();
+  }catch(e){
+    showAccount(null); lockSsh(false);
+    showMsgSsh('err','No se pudo consultar el servidor. '+e.message);
+  }
+}
+
+async function refreshServer(){
+  if($('#paneSsh').hidden||document.hidden) return;
+  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;renderServer(s);if(vista==='ssh')pintarStatsSsh();}}catch{}
+}
+
+$('#goSsh').onclick=async()=>{
+  if(!sesion){ openModal('login'); return; }
+  const b=$('#goSsh'); b.disabled=true; b.classList.add('loading'); $('#goSshText').textContent='Creando…'; $('#msgSsh').className='msg';
+  const j=await api('/api/ssh',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({username:$('#user').value})}).catch(e=>({error:e.message}));
+  if(j.ok){
+    showMsgSsh('ok','Cuenta creada. Guarda la contraseña: solo se muestra aquí.');
+    showAccount(j.account); lockSsh(true); refreshServer();
+  }else{
+    if(j.error&&/inicia sesi/i.test(j.error)){ lockSsh(false); openModal('login'); }
+    showMsgSsh('err',j.error||'Error desconocido');
+    if(j.account){showAccount(j.account);lockSsh(true)} else lockSsh(false);
+  }
+};
+
+/* ---------- sesión de usuario (Firebase Auth) ---------- */
+let sesion=null, modo='login', fbAuth=null, idToken=null;
+const showMsgM=(cls,txt)=>{const m=$('#mMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+
+const FB_ERRORES={
+  'auth/invalid-email':'El correo no tiene un formato válido.',
+  'auth/user-not-found':'Correo o contraseña incorrectos.',
+  'auth/wrong-password':'Correo o contraseña incorrectos.',
+  'auth/invalid-credential':'Correo o contraseña incorrectos.',
+  'auth/email-already-in-use':'Ya existe una cuenta con ese correo. Inicia sesión.',
+  'auth/weak-password':'La contraseña debe tener al menos 6 caracteres.',
+  'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
+  'auth/network-request-failed':'Sin conexión. Revisa tu red.',
+};
+
+function paintAuth(){
+  const box=$('#auth');
+  box.querySelectorAll('.who,#btnLogout,#btnLogin').forEach(n=>n.remove());
+  if(sesion){
+    const w=document.createElement('span'); w.className='who'; w.textContent=sesion.email; box.appendChild(w);
+    const b=document.createElement('button'); b.id='btnLogout'; b.textContent='Salir'; box.appendChild(b);
+    b.onclick=()=>window.fbSignOut&&window.fbSignOut();
+  }else{
+    const b=document.createElement('button'); b.id='btnLogin'; b.className='cta'; b.textContent='Entrar'; box.appendChild(b);
+    b.onclick=()=>openModal('login');
+  }
+}
+
+function setModo(m){
+  modo=m;
+  $('#swLogin').setAttribute('aria-selected',m==='login');
+  $('#swReg').setAttribute('aria-selected',m==='reg');
+  $('#fNombre').hidden=m==='login';
+  $('#mHint').hidden=m==='login';
+  $('#mTitle').textContent=m==='login'?'Entrar en tu cuenta':'Crear una cuenta';
+  $('#mSub').textContent=m==='login'?'Accede para gestionar tus cuentas y compras.':'Regístrate para comprar y renovar tus cuentas SSH.';
+  $('#mGoText').textContent=m==='login'?'Entrar':'Crear cuenta';
+  $('#mPass').autocomplete=m==='login'?'current-password':'new-password';
+  $('#mMsg').className='msg';
+}
+const openModal=m=>{setModo(m||'login');$('#modal').classList.add('open');setTimeout(()=>$('#mEmail').focus(),50)};
+const closeModal=()=>$('#modal').classList.remove('open');
+$('#mClose').onclick=closeModal;
+$('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+$('#swLogin').onclick=()=>setModo('login');
+$('#swReg').onclick=()=>setModo('reg');
+$('#mPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mGo').click()});
+$('#mReset').onclick=async e=>{
+  e.preventDefault();
+  const mail=$('#mEmail').value.trim();
+  if(!mail) return showMsgM('err','Escribe tu correo y vuelve a pulsar.');
+  try{ await window.fbResetPassword(mail); showMsgM('ok','Te enviamos un correo para restablecer la contraseña.'); }
+  catch(err){ showMsgM('err',FB_ERRORES[err.code]||'No se pudo enviar el correo.'); }
+};
+
+$('#mGo').onclick=async()=>{
+  const b=$('#mGo'); b.disabled=true; b.classList.add('loading'); $('#mMsg').className='msg';
+  try{
+    const mail=$('#mEmail').value.trim(), pass=$('#mPass').value;
+    if(modo==='reg'){
+      await window.fbRegister(mail,pass,$('#mNombre').value.trim());
+    }else{
+      await window.fbLogin(mail,pass);
+    }
+    closeModal(); $('#mPass').value='';
+  }catch(err){
+    showMsgM('err',FB_ERRORES[err.code]||err.message||'No se pudo completar la operación.');
+  }
+  b.disabled=false; b.classList.remove('loading');
+};
+
+// Llamado desde el módulo de Firebase cuando cambia el estado de sesión
+window.onAuthChange=async(user,getToken)=>{
+  if(!user){ sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
+  idToken=await getToken();
+  try{
+    const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
+    sesion=r.user||{email:user.email,uid:user.uid};
+  }catch{ sesion={email:user.email,uid:user.uid}; }
+  paintAuth(); sshLoaded=false;
+  if(vista==='ssh') loadSsh(); else refreshSshButton();
+  if(vista==='perfil') paintPerfil();
+};
+
+fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
+const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
+if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
+try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
+tab((location.hash||'#ssh').slice(1));
+if(pagoQ==='ok'){showMsgSsh('ok','Pago recibido. Estamos creando tu cuenta; aparecerá en "Tu cuenta" en unos segundos.');let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}
+else if(pagoQ){showMsgSsh('err',pagoQ==='pendiente'?'Tu pago está pendiente. Cuando se acredite, la cuenta se creará sola.':'El pago no se completó. No se te ha cobrado.')}
+load();
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+           createUserWithEmailAndPassword, updateProfile, signOut,
+           sendPasswordResetEmail, setPersistence, browserLocalPersistence }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBjVeMU56IryRsjXSnKz9t2bFxu8bMsO50",
+    authDomain: "shocktv-df24f.firebaseapp.com",
+    projectId: "shocktv-df24f",
+    storageBucket: "shocktv-df24f.firebasestorage.app",
+    messagingSenderId: "705716023961",
+    appId: "1:705716023961:web:11f72e57d37ceb111bbe08",
+    measurementId: "G-V3S1Z5W4YE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence);
+
+  window.fbLogin = (mail, pass) => signInWithEmailAndPassword(auth, mail, pass);
+  window.fbRegister = async (mail, pass, nombre) => {
+    const cred = await createUserWithEmailAndPassword(auth, mail, pass);
+    if (nombre) await updateProfile(cred.user, { displayName: nombre });
+    return cred;
+  };
+  window.fbResetPassword = (mail) => sendPasswordResetEmail(auth, mail);
+  window.fbToken = () => auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null);
+
+  onAuthStateChanged(auth, (user) => {
+    if (window.onAuthChange) window.onAuthChange(user, () => user.getIdToken());
+  });
+
+  // El botón "Salir" del panel usa esto
+  window.fbSignOut = () => signOut(auth);
+</script>
+</body>
+</html>
