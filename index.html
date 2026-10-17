@@ -398,7 +398,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v8 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v9 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
@@ -539,30 +539,28 @@ function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.ma
 function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
 
 /* ---------- tienda ---------- */
-const MONEDA='USD';
-const CATALOGO=[ // EDITA precios y textos aquí (precio 0 = gratis)
-  {id:'ssh2',  tag:'Gratis',  nombre:'SSH 2 días',  desc:'Prueba sin costo. 1 conexión, WebSocket.',precio:0,ir:'ssh'},
-  {id:'ssh30', tag:'Popular', nombre:'SSH 30 días', desc:'Un mes completo. 1 conexión simultánea.',precio:3},
-  {id:'ssh30x2',tag:'Pro',    nombre:'SSH 30 días x2',desc:'Un mes con 2 conexiones simultáneas.',precio:5},
-  {id:'dns30', tag:'Dominio', nombre:'Dominio 30 días',desc:'Subdominio apuntando a tu VPS por 30 días.',precio:2},
-];
-let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]').filter(i=>CATALOGO.some(c=>c.id===i));
+let MONEDA='ARS', CATALOGO=[]; // se cargan desde /api/catalog (fuente única)
+let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]');
 const money=n=>n?new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n):'Gratis';
 function paintTienda(){
-  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('');
+  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('')||'<div class="empty">Cargando planes…</div>';
   $('#prods').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=CATALOGO.find(x=>x.id===b.dataset.id);if(c.ir)return tab(c.ir);carrito.push(c.id);saveCart()});
   paintCart();
 }
 function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));paintCart()}
 function paintCart(){
-  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)), tot=it.reduce((a,c)=>a+c.precio,0);
+  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), tot=it.reduce((a,c)=>a+c.precio,0);
   $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>':'<div class="empty">Tu carrito está vacío.</div>';
   $('#cartBox').querySelectorAll('button').forEach(b=>b.onclick=()=>{carrito.splice(+b.dataset.i,1);saveCart()});
   $('#pay').disabled=!it.length;
 }
-$('#pay').onclick=()=>{
+$('#pay').onclick=async()=>{
   if(!sesion) return openModal('login');
-  const m=$('#msgPay');m.className='msg err';m.innerHTML=ICON_ERR+'<span>El pago con Mercado Pago se activa en la próxima actualización. Tu carrito queda guardado.</span>';
+  const b=$('#pay'),m=$('#msgPay'); b.disabled=true; b.classList.add('loading'); m.className='msg';
+  const j=await api('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito})}).catch(e=>({error:e.message}));
+  if(j.init_point){ location.href=j.init_point; return; }
+  b.classList.remove('loading'); b.disabled=!carrito.length;
+  m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+(j.error||'No se pudo iniciar el pago.')+'</span>';
 };
 
 /* ---------- perfil ---------- */
@@ -775,8 +773,13 @@ window.onAuthChange=async(user,getToken)=>{
   if(vista==='perfil') paintPerfil();
 };
 
+fetch('/api/catalog').then(r=>r.json()).then(c=>{MONEDA=c.moneda;CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{});
+const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
+if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
 try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
 tab((location.hash||'#ssh').slice(1));
+if(pagoQ==='ok'){showMsgSsh('ok','Pago recibido. Estamos creando tu cuenta; aparecerá en "Tu cuenta" en unos segundos.');let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}
+else if(pagoQ){showMsgSsh('err',pagoQ==='pendiente'?'Tu pago está pendiente. Cuando se acredite, la cuenta se creará sola.':'El pago no se completó. No se te ha cobrado.')}
 load();
 </script>
 <script type="module">
