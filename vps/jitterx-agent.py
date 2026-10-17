@@ -182,6 +182,7 @@ def create_account(username, device, days=None, ref="", max_login=None, paid=Fal
         f.write(f"{username} hard maxlogins {eff_login}\n")
 
     rec = {"password": password, "device": device, "ref": ref or "",
+           "plan": "premium" if paid else "gratis", "max_login": eff_login,
            "created_at": time.time(), "expires_at": expires.timestamp()}
     db[username] = rec
     save_db(db)
@@ -194,7 +195,8 @@ def public(name, rec):
         "host": HOST_DOM, "ws_port": WS_PORT, "ssl_port": SSL_PORT, "ssh_port": SSH_PORT,
         "created_at": int(rec["created_at"] * 1000),
         "expires_at": int(rec["expires_at"] * 1000),
-        "max_login": MAX_LOGIN,
+        "max_login": rec.get("max_login", MAX_LOGIN),
+        "plan": rec.get("plan", "gratis"),
     }
 
 
@@ -202,7 +204,7 @@ def find_by_device(device):
     db = purge_expired(load_db())
     mine = [(rec["expires_at"], name, rec) for name, rec in db.items() if rec.get("device") == device]
     if mine:
-        _, name, rec = max(mine)
+        _, name, rec = max(mine, key=lambda m: (m[2].get("plan") == "premium", m[0]))
         return public(name, rec)
     return None
 
