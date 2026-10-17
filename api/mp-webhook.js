@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { agentFetch } from "../lib/agent.js";
 import { clean } from "../lib/cf.js";
-import { MONEDA, pagados } from "../lib/catalog.js";
+import { MONEDA, pagados } from "../lib/precios.js";
 
 function firmaOk(req, dataId) {
   const secret = clean(process.env.MP_WEBHOOK_SECRET);
