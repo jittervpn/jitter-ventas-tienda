@@ -197,6 +197,8 @@
   .phead .info{min-width:0}
   .phead .info b{display:block;font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
   .phead .info small{color:var(--muted);font-size:13px;word-break:break-all}
+  .pill.prem{background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.35)}
+  .upg{width:100%;margin-top:14px;padding:13px;border-radius:10px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.1);color:#fbbf24;font:600 14px inherit;cursor:pointer}
   .plist{display:grid;gap:8px;margin-top:16px}
   .plist .it{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;font-size:14px}
   .plist .it span{color:var(--muted);font-size:13px}
@@ -619,9 +621,13 @@ function paintPerfil(){
       '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
       '<div class="it"><span>Plan</span><b>'+(vigente&&cuenta.plan==='premium'?'Premium ★':'Gratuito')+'</b></div>'+
-      (vigente?'<div class="it"><span>Días restantes</span><b>'+Math.ceil((cuenta.expires_at-Date.now())/864e5)+'</b></div>':'')+
+      (vigente?'<div class="it"><span>Días restantes</span><b>'+Math.ceil((cuenta.expires_at-Date.now())/864e5)+'</b></div>'+
+        '<div class="it"><span>Vence el</span><b>'+fmt(cuenta.expires_at)+'</b></div>'+
+        '<div class="it"><span>Conexiones simultáneas</span><b>'+(cuenta.max_login||1)+'</b></div>':'')+
     '</div>'+
+    '<button class="upg" id="pUpg">'+(vigente&&cuenta.plan==='premium'?'Renovar o ampliar mi plan':'Mejorar a Premium ★')+'</button>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
+  $('#pUpg').onclick=()=>tab('tienda');
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
 }
 
@@ -639,10 +645,10 @@ function showAccount(a){
   const total=Math.max(864e5,(a.expires_at-(a.created_at||a.expires_at-2*864e5))),left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
   const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
   $('#mySsh').innerHTML=
-    '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill">Activa</span></div>'+
+    '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Activa')+'</span></div>'+
     '<div style="padding:14px 16px"><div class="cred">'+
       row('Host',a.host)+row('Usuario',a.username)+row('Contraseña',a.password)+
-      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+
+      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+(a.max_login?row('Conexiones',a.max_login):'')+
     '</div>'+
     '<div class="payload">'+payload+'</div>'+
     '</div>'+
