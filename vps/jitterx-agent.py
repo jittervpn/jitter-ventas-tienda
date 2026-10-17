@@ -6,7 +6,7 @@ con expiración automática y límite de conexiones simultáneas.
 
 Instalar con install.sh. Config en /etc/jitterx-agent.conf
 """
-import json, os, re, subprocess, secrets, string, hmac, time
+import json, os, re, subprocess, secrets, string, hmac, time, threading
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -27,6 +27,7 @@ SSH_PORT   = cfg.get("SSH_PORT", "22")
 DAYS       = int(cfg.get("DAYS", "2"))
 MAX_LOGIN  = int(cfg.get("MAX_LOGIN", "1"))
 MAX_USERS  = int(cfg.get("MAX_USERS", "100"))
+PAID_RESERVE = int(cfg.get("PAID_RESERVE", "20"))   # plazas extra solo para cuentas pagas
 PREFIX     = cfg.get("USER_PREFIX", "jx")
 DB         = "/etc/jitterx-users.json"
 AUDIT      = "/var/log/jitterx-audit.log"
@@ -137,7 +138,15 @@ def gen_password(n=10):
     return "".join(secrets.choice(alphabet) for _ in range(n))
 
 
-def create_account(username, device, days=None, ref="", max_login=None, paid=False):
+_LOCK = threading.Lock()
+
+
+def create_account(*a, **k):
+    with _LOCK:  # una creación a la vez: evita cuentas duplicadas si llegan dos avisos del mismo pago
+        return _create_account(*a, **k)
+
+
+def _create_account(username, device, days=None, ref="", max_login=None, paid=False):
     db = purge_expired(load_db())
     if ref:  # idempotente: si MP reenvía el aviso, no se duplica la cuenta
         for name, rec in db.items():
@@ -146,7 +155,8 @@ def create_account(username, device, days=None, ref="", max_login=None, paid=Fal
     eff_days = min(max(int(days or DAYS), 1), 60) if paid else DAYS
     eff_login = min(max(int(max_login or MAX_LOGIN), 1), 5) if paid else MAX_LOGIN
 
-    if len(db) >= MAX_USERS:
+    # Los clientes que pagan tienen plazas reservadas: no se quedan fuera aunque las cuentas gratis llenen el servidor
+    if len(db) >= MAX_USERS + (PAID_RESERVE if paid else 0):
         return 503, {"error": "El servidor alcanzó el límite de cuentas. Inténtalo más tarde."}
 
     # 1 cuenta por dispositivo
