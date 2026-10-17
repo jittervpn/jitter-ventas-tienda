@@ -2,6 +2,7 @@ import { checkEnv, clean, listActive, getTotal } from "../lib/cf.js";
 import { limit } from "../lib/ratelimit.js";
 
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=30");
   const over = limit(req, { max: 30, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
   const err = checkEnv();
