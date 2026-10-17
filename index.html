@@ -335,7 +335,9 @@
     <div class="grid">
       <section class="card"><h2>Planes y cuentas</h2><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
       <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
-        <button class="primary" id="pay">Pagar con Mercado Pago</button><div class="msg" id="msgPay"></div></aside>
+        <button class="primary" id="pay">Pagar con tarjeta</button>
+        <div id="brickBox" style="margin-top:14px"></div>
+        <div style="text-align:center;margin-top:12px"><a href="#" id="payAlt" style="color:var(--muted);font-size:13px">Prefiero pagar en la página de Mercado Pago</a></div><div class="msg" id="msgPay"></div></aside>
     </div>
   </div>
 
@@ -398,7 +400,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v10 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v12 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
@@ -541,20 +543,20 @@ function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,
 /* ---------- tienda ---------- */
 let MONEDA='ARS', CATALOGO=[]; // se cargan desde /api/catalog (fuente única)
 let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]');
-const money=n=>n?new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n):'Gratis';
+const money=n=>{if(!n)return 'Gratis';try{return new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n)}catch{return n+' '+MONEDA}};
 function paintTienda(){
   $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('')||(window._planesError?'<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>':'<div class="empty">Cargando planes…</div>');
   $('#prods').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=CATALOGO.find(x=>x.id===b.dataset.id);if(c.ir)return tab(c.ir);carrito.push(c.id);saveCart()});
   paintCart();
 }
-function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));paintCart()}
+function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));if(typeof cerrarBrick==='function')cerrarBrick();paintCart()}
 function paintCart(){
   const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), tot=it.reduce((a,c)=>a+c.precio,0);
   $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>':'<div class="empty">Tu carrito está vacío.</div>';
   $('#cartBox').querySelectorAll('button').forEach(b=>b.onclick=()=>{carrito.splice(+b.dataset.i,1);saveCart()});
   $('#pay').disabled=!it.length;
 }
-$('#pay').onclick=async()=>{
+window.pagarRedirect=async()=>{
   if(!sesion) return openModal('login');
   const b=$('#pay'),m=$('#msgPay'); b.disabled=true; b.classList.add('loading'); m.className='msg';
   const j=await api('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito})}).catch(e=>({error:e.message}));
@@ -562,6 +564,40 @@ $('#pay').onclick=async()=>{
   b.classList.remove('loading'); b.disabled=!carrito.length;
   m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+(j.error||'No se pudo iniciar el pago.')+'</span>';
 };
+
+/* ---------- pago con tarjeta (Checkout Bricks) ---------- */
+var PUBKEY='', mpSdk=null, mpInst=null, brickCtl=null;
+const LOC={ARS:'es-AR',BRL:'pt-BR',CLP:'es-CL',COP:'es-CO',MXN:'es-MX',PEN:'es-PE',UYU:'es-UY'};
+const cargarSdk=()=>mpSdk||(mpSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://sdk.mercadopago.com/js/v2';s.onload=ok;s.onerror=()=>{mpSdk=null;ko(new Error('No se pudo cargar el módulo de pago'))};document.head.appendChild(s)}));
+function cerrarBrick(){if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null}const b=document.getElementById('brickBox');if(b)b.innerHTML=''}
+const msgPago=m=>{const e=$('#msgPay');e.className='msg err';e.innerHTML=ICON_ERR+'<span>'+m+'</span>'};
+const RECHAZO={cc_rejected_insufficient_amount:'Fondos insuficientes en la tarjeta.',cc_rejected_bad_filled_card_number:'Revisa el número de la tarjeta.',cc_rejected_bad_filled_date:'Revisa la fecha de vencimiento.',cc_rejected_bad_filled_security_code:'Revisa el código de seguridad.',cc_rejected_high_risk:'Pago rechazado por seguridad. Prueba con otra tarjeta.',cc_rejected_card_disabled:'La tarjeta está inhabilitada para compras online.'};
+async function iniciarTarjeta(){
+  if(!sesion) return openModal('login');
+  $('#msgPay').className='msg';
+  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), total=it.reduce((a,c)=>a+c.precio,0);
+  if(!it.length) return;
+  if(!PUBKEY) return msgPago('Falta configurar MP_PUBLIC_KEY en el servidor.');
+  try{
+    await cargarSdk(); cerrarBrick();
+    mpInst=mpInst||new MercadoPago(PUBKEY,{locale:LOC[MONEDA]||'es-AR'});
+    brickCtl=await mpInst.bricks().create('cardPayment','brickBox',{
+      initialization:{amount:total,payer:{email:sesion.email}},
+      customization:{paymentMethods:{minInstallments:1,maxInstallments:1},visual:{style:{theme:'dark'}}},
+      callbacks:{
+        onReady:()=>{},
+        onError:e=>console.error('Brick',e),
+        onSubmit:fd=>new Promise(async(ok,ko)=>{
+          const j=await api('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito,formData:fd,key:crypto.randomUUID()})}).catch(e=>({error:e.message}));
+          if(j.status==='approved'){ok();carrito=[];saveCart();tab('ssh');sshLoaded=false;loadSsh();showMsgSsh('ok','Pago aprobado. '+(j.entregada?'Tu cuenta ya está en "Tu cuenta".':'Estamos creando tu cuenta; aparecerá en unos segundos.'));if(!j.entregada){let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}}
+          else{ko();msgPago(j.error||RECHAZO[j.detalle]||'El pago fue rechazado. Prueba con otra tarjeta.')}
+        })
+      }
+    });
+  }catch(e){msgPago(e.message||'No se pudo abrir el formulario de pago.')}
+}
+$('#pay').onclick=iniciarTarjeta;
+$('#payAlt').onclick=e=>{e.preventDefault();pagarRedirect()};
 
 /* ---------- perfil ---------- */
 function paintPerfil(){
@@ -575,14 +611,15 @@ function paintPerfil(){
   }
   const nombre=sesion.nombre||sesion.email.split('@')[0];
   const ini=(nombre[0]||'U').toUpperCase();
-  const cuenta=miCuentaSsh;
+  const cuenta=miCuentaSsh, vigente=!!(cuenta&&cuenta.expires_at>Date.now());
   const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
   box.innerHTML=
     '<div class="phead"><div class="avatar">'+ini+'</div><div class="info"><b>'+nombre+'</b><small>'+sesion.email+'</small></div></div>'+
     '<div class="plist">'+
       '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
-      '<div class="it"><span>Plan</span><b>Gratuito</b></div>'+
+      '<div class="it"><span>Plan</span><b>'+(vigente&&cuenta.plan==='premium'?'Premium ★':'Gratuito')+'</b></div>'+
+      (vigente?'<div class="it"><span>Días restantes</span><b>'+Math.ceil((cuenta.expires_at-Date.now())/864e5)+'</b></div>':'')+
     '</div>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
@@ -661,7 +698,7 @@ async function loadSsh(){
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
     const a=s.account||null;
     const valid=a&&a.expires_at>Date.now()?a:null;
-    showAccount(valid); lockSsh(!!valid);
+    showAccount(valid); lockSsh(!!valid); if(vista==='perfil') paintPerfil();
   }catch(e){
     showAccount(null); lockSsh(false);
     showMsgSsh('err','No se pudo consultar el servidor. '+e.message);
@@ -773,7 +810,7 @@ window.onAuthChange=async(user,getToken)=>{
   if(vista==='perfil') paintPerfil();
 };
 
-fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
+fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
 try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
