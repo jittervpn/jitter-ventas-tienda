@@ -1,7 +1,5 @@
-// Catálogo de planes. El precio SIEMPRE se define acá (servidor),
-// nunca se acepta un precio que venga del navegador.
-// >>> Editá precios y títulos a gusto (moneda: ARS). <<<
-export const PLANES = {
-  ssh_30: { titulo: "Cuenta SSH · 30 días", precio: 3000, dias: 30, campo: "ssh_expires_at" },
-  dns_30: { titulo: "Subdominio · 30 días", precio: 1500, dias: 30, campo: "dns_expires_at" },
-};
+import { MONEDA, CATALOGO } from "../lib/precios.js";
+export default function handler(req, res) {
+  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  res.status(200).json({ moneda: MONEDA, items: CATALOGO.map(({ id, tag, nombre, desc, precio, ir }) => ({ id, tag, nombre, desc, precio, ir })) });
+}
