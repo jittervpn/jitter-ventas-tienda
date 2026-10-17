@@ -410,9 +410,11 @@ const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},s
 let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)jx_device=([^;]+)/)||[])[1]||'';
 if(!device){device=crypto.randomUUID();}
 localStorage.setItem('jx_device',device);
+// Si la web está alojada fuera de Vercel (cPanel), la API sigue en Vercel
+const API_BASE=(/vercel\.app$|^localhost$/.test(location.hostname))?'':'https://jitter-ventas-tienda.vercel.app';
 const api=async(path,opts={})=>{
   let tk=null; try{ tk=window.fbToken?await window.fbToken():null }catch{}
-  const r=await fetch(path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
+  const r=await fetch(API_BASE+path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
   const txt=await r.text();
   try{return JSON.parse(txt)}catch{throw new Error(r.status===404?('No existe '+path+' en el servidor'):('Respuesta inválida del servidor ('+r.status+')'))}
 };
@@ -816,7 +818,7 @@ window.onAuthChange=async(user,getToken)=>{
   if(!user){ sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
   idToken=await getToken();
   try{
-    const r=await fetch('/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
+    const r=await fetch(API_BASE+'/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
     sesion=r.user||{email:user.email,uid:user.uid};
   }catch{ sesion={email:user.email,uid:user.uid}; }
   paintAuth(); sshLoaded=false; confirmarPago();
@@ -824,7 +826,7 @@ window.onAuthChange=async(user,getToken)=>{
   if(vista==='perfil') paintPerfil();
 };
 
-fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
+fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
