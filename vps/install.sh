@@ -173,25 +173,36 @@ def gen_password(n=10):
     return "".join(secrets.choice(alphabet) for _ in range(n))
 
 
-def create_account(username, device):
+def create_account(username, device, days=None, ref="", max_login=None, paid=False):
     db = purge_expired(load_db())
+    if ref:  # idempotente: si MP reenvía el aviso, no se duplica la cuenta
+        for name, rec in db.items():
+            if rec.get("ref") == ref:
+                return 200, {"ok": True, "account": public(name, rec)}
+    eff_days = min(max(int(days or DAYS), 1), 60) if paid else DAYS
+    eff_login = min(max(int(max_login or MAX_LOGIN), 1), 5) if paid else MAX_LOGIN
 
     if len(db) >= MAX_USERS:
         return 503, {"error": "El servidor alcanzó el límite de cuentas. Inténtalo más tarde."}
 
     # 1 cuenta por dispositivo
-    for name, rec in db.items():
+    for name, rec in (db.items() if not paid else []):
         if rec.get("device") == device:
             return 429, {"error": "Ya tienes una cuenta activa. Podrás crear otra cuando expire.",
                          "account": public(name, rec)}
 
+    if paid and not username:
+        while True:
+            username = "jx" + "".join(secrets.choice(string.digits) for _ in range(6))
+            if username not in db and not system_user_exists(username):
+                break
     if not USER_RE.match(username):
         return 400, {"error": "Usuario inválido: 3-16 caracteres, empieza por letra, solo minúsculas y números."}
     if username in RESERVED or username in db or system_user_exists(username):
         return 409, {"error": "Ese usuario ya está en uso, elige otro."}
 
     password = gen_password()
-    expires = datetime.now(timezone.utc) + timedelta(days=DAYS)
+    expires = datetime.now(timezone.utc) + timedelta(days=eff_days)
     exp_str = expires.strftime("%Y-%m-%d")
 
     r = sh("useradd", "-M", "-N", "-s", "/bin/false", "-e", exp_str, username)
@@ -204,9 +215,9 @@ def create_account(username, device):
 
     # Límite de conexiones simultáneas
     with open("/etc/security/limits.d/jitterx.conf", "a") as f:
-        f.write(f"{username} hard maxlogins {MAX_LOGIN}\n")
+        f.write(f"{username} hard maxlogins {eff_login}\n")
 
-    rec = {"password": password, "device": device,
+    rec = {"password": password, "device": device, "ref": ref or "",
            "created_at": time.time(), "expires_at": expires.timestamp()}
     db[username] = rec
     save_db(db)
@@ -225,9 +236,10 @@ def public(name, rec):
 
 def find_by_device(device):
     db = purge_expired(load_db())
-    for name, rec in db.items():
-        if rec.get("device") == device:
-            return public(name, rec)
+    mine = [(rec["expires_at"], name, rec) for name, rec in db.items() if rec.get("device") == device]
+    if mine:
+        _, name, rec = max(mine)
+        return public(name, rec)
     return None
 
 
@@ -384,7 +396,7 @@ class Handler(BaseHTTPRequestHandler):
         if not device:
             return self.reply(400, {"error": "Falta el identificador de dispositivo"})
         real_ip = self.headers.get("x-real-client-ip", "-")
-        code, out = create_account(username, device)
+        code, out = create_account(username, device, days=data.get("days"), ref=str(data.get("ref", "")).strip(), max_login=data.get("max_login"), paid=bool(data.get("paid")))
         if code == 201:
             audit(f"CUENTA usuario={username} device={device[:8]} ip_usuario={real_ip} origen={self.peer}")
         self.reply(code, out)
