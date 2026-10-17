@@ -398,7 +398,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v9 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v10 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
@@ -543,7 +543,7 @@ let MONEDA='ARS', CATALOGO=[]; // se cargan desde /api/catalog (fuente única)
 let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]');
 const money=n=>n?new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n):'Gratis';
 function paintTienda(){
-  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('')||'<div class="empty">Cargando planes…</div>';
+  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('')||(window._planesError?'<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>':'<div class="empty">Cargando planes…</div>');
   $('#prods').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=CATALOGO.find(x=>x.id===b.dataset.id);if(c.ir)return tab(c.ir);carrito.push(c.id);saveCart()});
   paintCart();
 }
@@ -773,7 +773,7 @@ window.onAuthChange=async(user,getToken)=>{
   if(vista==='perfil') paintPerfil();
 };
 
-fetch('/api/catalog').then(r=>r.json()).then(c=>{MONEDA=c.moneda;CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{});
+fetch('/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
 try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
