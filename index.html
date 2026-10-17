@@ -125,6 +125,18 @@
   .step h3{font-size:14px;font-weight:700;margin:6px 0 4px}
   .step p{font-size:13px;color:var(--muted)}
 
+  .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .prod{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2);padding:18px;display:flex;flex-direction:column;gap:8px}
+  .prod .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(34,211,238,.1);color:var(--accent);border:1px solid rgba(34,211,238,.3)}
+  .prod h3{font-size:17px;font-weight:700}.prod p{color:var(--muted);font-size:13px;flex:1}
+  .prod .price{font:800 24px Inter,sans-serif}.prod .price small{font-size:12px;color:var(--muted);font-weight:500}
+  .prod button{margin:0;padding:11px;font-size:14px}
+  .cart .ln{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .cart .ln button{background:transparent;border:0;color:var(--err);cursor:pointer;font-size:18px;width:auto;margin:0;padding:0 6px}
+  .cart .tot{display:flex;justify-content:space-between;font:700 17px Inter,sans-serif;padding:14px 0 4px}
+  details.guide{margin-top:16px;border:1px solid var(--line2);border-radius:var(--r2);background:var(--bg2)}
+  details.guide summary{cursor:pointer;padding:13px 14px;font:600 14px Inter,sans-serif;list-style:none}
+  details.guide ol{padding:0 14px 14px 32px;color:var(--ink2);font-size:13.5px;display:grid;gap:6px}
   .authbtns{display:flex;align-items:center;gap:8px}
   .authbtns button{padding:8px 14px;border-radius:8px;font:600 13px Inter,sans-serif;cursor:pointer;border:1px solid var(--line2);background:transparent;color:var(--ink)}
   .authbtns button.cta{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
@@ -163,7 +175,7 @@
   .metrics b{font:600 14px "JetBrains Mono",monospace}
   /* menú inferior tipo app */
   .bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(10,15,28,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-  .bottomnav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+  .bottomnav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
   .bottomnav button{background:transparent;border:0;cursor:pointer;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font:600 11px Inter,sans-serif;transition:color .15s;position:relative}
   .bottomnav button svg{width:22px;height:22px;transition:transform .15s}
   .bottomnav button[aria-selected=true]{color:var(--accent)}
@@ -172,7 +184,7 @@
   body{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
   @media(min-width:861px){
     .bottomnav{position:sticky;top:64px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:transparent;backdrop-filter:none}
-    .bottomnav .in{max-width:520px;margin:0 auto 4px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;grid-template-columns:repeat(3,1fr);gap:6px}
+    .bottomnav .in{max-width:520px;margin:0 auto 4px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:5px;grid-template-columns:repeat(4,1fr);gap:6px}
     .bottomnav button{flex-direction:row;padding:10px;border-radius:8px;font-size:14px}
     .bottomnav button svg{width:16px;height:16px}
     .bottomnav button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
@@ -296,6 +308,11 @@
         <div class="hint" id="sshGate" style="margin-top:14px" hidden>Necesitas una cuenta para crear tu acceso SSH. Es gratis y tarda un minuto.</div>
         <button class="primary" id="goSsh"><span class="spinner"></span><span id="goSshText">Crear cuenta · 2 días</span></button>
         <div class="msg" id="msgSsh"></div>
+        <details class="guide"><summary>Cómo conectarte (HTTP Custom, NetMod…)</summary><ol>
+          <li>Crea tu cuenta y copia <b>host, usuario y contraseña</b>.</li>
+          <li>En la app elige modo <b>SSH + WebSocket</b>, puerto <b>80</b> (o 443 con SSL).</li>
+          <li>Pega el <b>payload</b> que aparece en "Tu cuenta" y pulsa conectar.</li>
+          <li>Si dice <i>Permission denied</i>: revisa mayúsculas, o que la cuenta no haya vencido. Solo se permite 1 conexión a la vez.</li></ol></details>
       </section>
 
       <aside class="card">
@@ -311,6 +328,14 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Prohibido spam, escaneo o abuso. Se suspende sin aviso.</span></li>
         </ul>
       </aside>
+    </div>
+  </div>
+
+  <div class="pane" id="paneTienda" hidden>
+    <div class="grid">
+      <section class="card"><h2>Planes y cuentas</h2><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
+      <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
+        <button class="primary" id="pay">Pagar con Mercado Pago</button><div class="msg" id="msgPay"></div></aside>
     </div>
   </div>
 
@@ -339,6 +364,7 @@
 </main>
 
 <nav class="bottomnav"><div class="in">
+  <button id="navTienda" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Tienda</button>
   <button id="navSsh" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
   <button id="navDns" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
   <button id="navPerfil" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
@@ -372,7 +398,7 @@
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v7 · <span id="year"></span></footer>
+<footer><b>Jitterx Panel Cloud</b> · v8 · <span id="year"></span></footer>
 
 <script>
 const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},setAttribute(){},querySelectorAll:()=>[],querySelector:()=>null};
@@ -457,25 +483,28 @@ $('#go').onclick=async()=>{
   }
 };
 /* ---------- navegación inferior ---------- */
-const PANES={ssh:'paneSsh',dns:'paneDns',perfil:'panePerfil'};
+const PANES={tienda:'paneTienda',ssh:'paneSsh',dns:'paneDns',perfil:'panePerfil'};
 let vista='ssh';
 function tab(which){
   if(!PANES[which]) which='ssh';
   vista=which;
   for(const [k,id] of Object.entries(PANES)) $('#'+id).hidden = k!==which;
+  $('#navTienda').setAttribute('aria-selected',which==='tienda');
   $('#navSsh').setAttribute('aria-selected',which==='ssh');
   $('#navDns').setAttribute('aria-selected',which==='dns');
   $('#navPerfil').setAttribute('aria-selected',which==='perfil');
   history.replaceState(null,'','#'+which);
   // El resumen superior solo acompaña a las vistas de creación
-  $('#hero').hidden = which==='perfil';
-  $('#stats').hidden = which==='perfil';
-  $('#steps').hidden = which==='perfil';
+  $('#hero').hidden = which==='perfil'||which==='tienda';
+  $('#stats').hidden = which==='perfil'||which==='tienda';
+  $('#steps').hidden = which==='perfil'||which==='tienda';
   pintarHero(which);
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
   if(which==='perfil') paintPerfil();
+  if(which==='tienda') paintTienda();
 }
+$('#navTienda').onclick=()=>tab('tienda');
 $('#navSsh').onclick=()=>tab('ssh');
 $('#navDns').onclick=()=>tab('dns');
 $('#navPerfil').onclick=()=>tab('perfil');
@@ -509,6 +538,33 @@ function pintarNums(total,activos,max){
 function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max):pintarNums(); }
 function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
 
+/* ---------- tienda ---------- */
+const MONEDA='USD';
+const CATALOGO=[ // EDITA precios y textos aquí (precio 0 = gratis)
+  {id:'ssh2',  tag:'Gratis',  nombre:'SSH 2 días',  desc:'Prueba sin costo. 1 conexión, WebSocket.',precio:0,ir:'ssh'},
+  {id:'ssh30', tag:'Popular', nombre:'SSH 30 días', desc:'Un mes completo. 1 conexión simultánea.',precio:3},
+  {id:'ssh30x2',tag:'Pro',    nombre:'SSH 30 días x2',desc:'Un mes con 2 conexiones simultáneas.',precio:5},
+  {id:'dns30', tag:'Dominio', nombre:'Dominio 30 días',desc:'Subdominio apuntando a tu VPS por 30 días.',precio:2},
+];
+let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]').filter(i=>CATALOGO.some(c=>c.id===i));
+const money=n=>n?new Intl.NumberFormat('es',{style:'currency',currency:MONEDA}).format(n):'Gratis';
+function paintTienda(){
+  $('#prods').innerHTML=CATALOGO.map(c=>'<div class="prod"><span class="tag">'+c.tag+'</span><h3>'+c.nombre+'</h3><p>'+c.desc+'</p><div class="price">'+money(c.precio)+(c.precio?' <small>/ cuenta</small>':'')+'</div><button class="primary" data-id="'+c.id+'">'+(c.ir?'Crear ahora':'Añadir al carrito')+'</button></div>').join('');
+  $('#prods').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=CATALOGO.find(x=>x.id===b.dataset.id);if(c.ir)return tab(c.ir);carrito.push(c.id);saveCart()});
+  paintCart();
+}
+function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));paintCart()}
+function paintCart(){
+  const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)), tot=it.reduce((a,c)=>a+c.precio,0);
+  $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>':'<div class="empty">Tu carrito está vacío.</div>';
+  $('#cartBox').querySelectorAll('button').forEach(b=>b.onclick=()=>{carrito.splice(+b.dataset.i,1);saveCart()});
+  $('#pay').disabled=!it.length;
+}
+$('#pay').onclick=()=>{
+  if(!sesion) return openModal('login');
+  const m=$('#msgPay');m.className='msg err';m.innerHTML=ICON_ERR+'<span>El pago con Mercado Pago se activa en la próxima actualización. Tu carrito queda guardado.</span>';
+};
+
 /* ---------- perfil ---------- */
 function paintPerfil(){
   const box=$('#perfilBox');
@@ -528,51 +584,10 @@ function paintPerfil(){
     '<div class="plist">'+
       '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
-      '<div class="it"><span>Plan</span><b id="planNombre">Gratuito</b></div>'+
-    '</div>'+
-    '<div class="msg" id="msgPago"></div>'+
-    '<h2 style="margin-top:22px;font-size:16px">Ampliar a 30 días</h2>'+
-    '<p class="sub">Pago seguro con Mercado Pago. Se suma a lo que ya tengas activo.</p>'+
-    '<div class="actions" style="padding:0;border:0">'+
-      '<button class="btn" data-plan="ssh_30">Cuenta SSH · 30 días</button>'+
-      '<button class="btn" data-plan="dns_30">Subdominio · 30 días</button>'+
+      '<div class="it"><span>Plan</span><b>Gratuito</b></div>'+
     '</div>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
-  box.querySelectorAll('button[data-plan]').forEach(b=>b.onclick=()=>comprar(b));
-  cargarPlan();
-  avisoPago();
-}
-
-/* ---------- pagos (Mercado Pago) ---------- */
-async function comprar(btn){
-  const txt=btn.textContent; btn.disabled=true; btn.textContent='Abriendo Mercado Pago…';
-  try{
-    const j=await api('/api/pagos/crear',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({plan:btn.dataset.plan})});
-    if(!j.ok||!j.init_point) throw new Error(j.error||'No se pudo iniciar el pago');
-    location.href=j.init_point;
-  }catch(e){
-    const m=$('#msgPago'); m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+e.message+'</span>';
-    btn.disabled=false; btn.textContent=txt;
-  }
-}
-async function cargarPlan(){
-  try{
-    const e=await api('/api/pagos/estado'); if(e.error) return;
-    const ahora=Date.now(), act=[];
-    if(e.ssh_expires_at>ahora) act.push('SSH hasta '+new Date(e.ssh_expires_at).toLocaleDateString('es'));
-    if(e.dns_expires_at>ahora) act.push('Dominio hasta '+new Date(e.dns_expires_at).toLocaleDateString('es'));
-    if(act.length) $('#planNombre').textContent=act.join(' · ');
-  }catch{}
-}
-function avisoPago(){
-  const q=new URLSearchParams(location.search).get('pago'); if(!q) return;
-  const t={ok:['ok','Pago recibido. Tu plan se activa en unos segundos.'],
-           pendiente:['ok','Tu pago está pendiente. Se activará cuando Mercado Pago lo confirme.'],
-           error:['err','El pago no se completó. Puedes intentarlo de nuevo.']}[q];
-  if(!t) return;
-  const m=$('#msgPago'); m.className='msg '+t[0]; m.innerHTML=(t[0]==='ok'?ICON_OK:ICON_ERR)+'<span>'+t[1]+'</span>';
-  history.replaceState(null,'',location.pathname+'#perfil');
 }
 
 /* ---------- cuentas SSH ---------- */
@@ -644,7 +659,7 @@ async function loadSsh(){
   try{
     const s=await api('/api/ssh');
     if(s.error) throw new Error(s.error);
-    ultimoSsh=s; renderServer(s); if(vista==='ssh') pintarStatsSsh();
+    ultimoSsh=s; try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{} renderServer(s); if(vista==='ssh') pintarStatsSsh();
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
     const a=s.account||null;
     const valid=a&&a.expires_at>Date.now()?a:null;
@@ -656,7 +671,7 @@ async function loadSsh(){
 }
 
 async function refreshServer(){
-  if($('#paneSsh').hidden) return;
+  if($('#paneSsh').hidden||document.hidden) return;
   try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;renderServer(s);if(vista==='ssh')pintarStatsSsh();}}catch{}
 }
 
@@ -760,6 +775,7 @@ window.onAuthChange=async(user,getToken)=>{
   if(vista==='perfil') paintPerfil();
 };
 
+try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
 tab((location.hash||'#ssh').slice(1));
 load();
 </script>
