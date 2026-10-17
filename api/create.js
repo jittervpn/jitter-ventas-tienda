@@ -1,7 +1,5 @@
 import crypto from "node:crypto";
 import { limit } from "../lib/ratelimit.js";
-import { currentUser } from "../lib/fbverify.js";
-import { beneficios } from "../lib/firestore.js";
 import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 const isValidIPv4 = (ip) =>
@@ -42,13 +40,7 @@ export default async function handler(req, res) {
     if (taken.length) return res.status(409).json({ error: "Ese subdominio ya está en uso." });
 
     const now = Date.now();
-    // Con plan DNS pago vigente el registro dura hasta que termine el plan; si no, 7 días.
-    let ttl = SEVEN_DAYS_MS;
-    try {
-      const u = await currentUser(req);
-      if (u) { const b = await beneficios(u.uid); if (b.dns_expires_at > now) ttl = b.dns_expires_at - now; }
-    } catch (e) { console.warn("beneficios:", e.message); }
-    const expiresAt = now + ttl;
+    const expiresAt = now + SEVEN_DAYS_MS;
     const dns = await cfRequest(`/zones/${zone}/dns_records`, {
       method: "POST",
       body: JSON.stringify({ type: "A", name: fqdn, content: ip, ttl: 60, proxied: false, comment: makeComment(id, expiresAt) }),
