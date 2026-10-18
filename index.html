@@ -212,6 +212,26 @@
   .tabs button{flex:1;padding:11px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink2);font:600 14px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,color .15s}
   .tabs button svg{width:16px;height:16px}
   .tabs button[aria-selected=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .burger{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+  .burger svg{width:20px;height:20px}
+  .dbg{position:fixed;inset:0;z-index:60;background:rgba(5,8,16,.6);opacity:0;pointer-events:none;transition:opacity .2s}
+  .drawer{position:fixed;top:0;bottom:0;left:0;z-index:61;width:min(84vw,310px);background:var(--bg2);border-right:1px solid var(--line);transform:translateX(-100%);transition:transform .22s;display:flex;flex-direction:column;gap:4px;padding:18px 14px calc(18px + env(safe-area-inset-bottom));overflow-y:auto}
+  body.dopen .drawer{transform:none}
+  body.dopen .dbg{opacity:1;pointer-events:auto}
+  .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .dhead b{font:700 16px Inter,sans-serif}
+  .dhead button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:18px;cursor:pointer}
+  .dsec{margin:14px 6px 4px;font:600 11px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .dlink{display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px;border:0;border-radius:10px;background:transparent;color:var(--ink2);font:600 15px Inter,sans-serif;cursor:pointer;text-align:left}
+  .dlink svg{width:18px;height:18px;flex:none}
+  .dlink[aria-current=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  .dcount{margin:12px 2px 4px;padding:14px;border-radius:12px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.08)}
+  .dcount small{display:block;color:var(--muted);font-size:12px}
+  .dcount b{display:block;font:700 30px "JetBrains Mono",monospace;color:#fbbf24;line-height:1.2}
+  .dcount em{font-style:normal;font-size:12px;color:var(--ink2)}
+  .dfoot{margin-top:auto;padding-top:14px}
+  .dfoot .dlink{border:1px solid var(--line);justify-content:center}
+  .pstat{display:inline-block;margin:2px 0 10px;padding:6px 12px;border-radius:999px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.08);color:#fbbf24;font:600 13px Inter,sans-serif}
   .pane[hidden]{display:none}
   .cred{display:grid;gap:8px;margin-top:4px}
   .cred .row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
@@ -229,7 +249,7 @@
 <body>
 
 <nav class="nav"><div class="in">
-  <a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a>
+  <div style="display:flex;align-items:center;gap:10px"><button class="burger" id="burger" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a></div>
   <div class="authbtns" id="auth">
     <div class="status" id="status"><b></b><span id="statusText">…</span></div>
     <button class="cta" id="btnLogin">Entrar</button>
@@ -335,7 +355,7 @@
 
   <div class="pane" id="paneTienda" hidden>
     <div class="grid">
-      <section class="card"><h2>Planes y cuentas</h2><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
+      <section class="card"><h2>Planes y cuentas</h2><div class="pstat" id="tPremium" hidden>💎 <span id="tPremN">0</span> clientes ya tienen Premium</div><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
       <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
         <button class="primary" id="pay">Pagar con tarjeta</button>
         <div id="brickBox" style="margin-top:14px"></div>
@@ -373,6 +393,19 @@
   <button id="navDns" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
   <button id="navPerfil" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
 </div></nav>
+
+<div class="dbg" id="dbg"></div>
+<aside class="drawer" id="drawer" aria-label="Menú">
+  <div class="dhead"><b>Menú</b><button id="dclose" aria-label="Cerrar">✕</button></div>
+  <div class="dsec">Secciones</div>
+  <button class="dlink" data-tab="tienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Tienda</button>
+  <button class="dlink" data-tab="ssh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
+  <button class="dlink" data-tab="dns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
+  <button class="dlink" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
+  <div class="dsec">Comunidad</div>
+  <div class="dcount"><small>Clientes Premium</small><b id="dPremN">—</b><em id="dPremA"></em></div>
+  <div class="dfoot"><button class="dlink" id="dAuth">Entrar</button></div>
+</aside>
 
 <div class="modal" id="modal">
   <div class="box">
@@ -491,6 +524,27 @@ $('#go').onclick=async()=>{
 /* ---------- navegación inferior ---------- */
 const PANES={tienda:'paneTienda',ssh:'paneSsh',dns:'paneDns',perfil:'panePerfil'};
 let vista='ssh';
+
+/* ---------- menú lateral + contador Premium ---------- */
+function pintarPremium(s){
+  if(!s||s.premium_sold==null) return;
+  $('#dPremN').textContent=s.premium_sold;
+  $('#dPremA').textContent=s.premium_active!=null?(s.premium_active+' activos ahora'):'';
+  $('#tPremN').textContent=s.premium_sold; $('#tPremium').hidden=!s.premium_sold;
+}
+function abrirMenu(open){
+  document.body.classList.toggle('dopen',open);
+  if(!open) return;
+  const lg=!!sesion; $('#dAuth').textContent=lg?'Cerrar sesión':'Entrar';
+  document.querySelectorAll('.dlink[data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===vista));
+  api('/api/ssh').then(pintarPremium).catch(()=>{});
+}
+$("#burger").onclick=()=>abrirMenu(true);
+$('#dclose').onclick=$('#dbg').onclick=()=>abrirMenu(false);
+document.addEventListener('keydown',e=>{ if(e.key==="Escape") abrirMenu(false); });
+document.querySelectorAll('.dlink[data-tab]').forEach(b=>b.onclick=()=>{ abrirMenu(false); tab(b.dataset.tab); });
+$("#dAuth").onclick=()=>{ abrirMenu(false); const b=document.querySelector('#btnLogout,#btnLogin'); if(b) b.click(); };
+
 function tab(which){
   if(!PANES[which]) which='ssh';
   vista=which;
@@ -508,7 +562,7 @@ function tab(which){
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
   if(which==='perfil') paintPerfil();
-  if(which==='tienda') paintTienda();
+  if(which==='tienda'){ paintTienda(); api('/api/ssh').then(pintarPremium).catch(()=>{}); }
 }
 $('#navTienda').onclick=()=>tab('tienda');
 $('#navSsh').onclick=()=>tab('ssh');
@@ -676,6 +730,7 @@ const FLAGS={BR:'🇧🇷',US:'🇺🇸',ES:'🇪🇸',AR:'🇦🇷',MX:'🇲�
 const SPEED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20a8 8 0 1 1 8-8"/><path d="m12 12 4-3"/></svg>';
 
 function renderServer(s){
+  pintarPremium(s);
   const used=s.active||0,max=s.max||1,pct=Math.min(100,Math.round(used/max*100));
   const carga=Math.max(pct,s.cpu||0,s.ram||0);
   const lv=carga>=85?'hi':carga>=60?'mid':'ok';
