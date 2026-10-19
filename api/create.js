@@ -3,6 +3,7 @@ import { limit } from "../lib/ratelimit.js";
 import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 import { cors } from "../lib/cors.js";
+import { requireUser } from "../lib/fbverify.js";
 const isValidIPv4 = (ip) =>
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip);
 const isValidSub = (s) => /^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$/.test(s);
@@ -13,6 +14,8 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
   const over = limit(req, { max: 5, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
+  const user = await requireUser(req, res);
+  if (!user) return;
   const err = checkEnv();
   if (err) return res.status(500).json({ error: err });
 
@@ -23,9 +26,7 @@ export default async function handler(req, res) {
   if (RESERVED.has(sub)) return res.status(400).json({ error: "Ese subdominio está reservado." });
   if (!isValidIPv4(ip)) return res.status(400).json({ error: "IP inválida. Usa una IPv4 pública, por ejemplo 203.0.113.10." });
 
-  let device = req.headers["x-jx-device"] || getCookie(req, "jx_device");
-  if (!device) device = crypto.randomUUID();
-  res.setHeader("set-cookie", `jx_device=${device}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`);
+  const device = "u:" + user.uid; // un registro por usuario verificado; no se puede saltar cambiando el identificador del navegador
   const id = identity({ ...req, headers: { ...req.headers, "x-jx-device": device } });
   const fqdn = `${sub}.${clean(process.env.ZONE_NAME)}`;
 

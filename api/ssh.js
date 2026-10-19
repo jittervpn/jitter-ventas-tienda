@@ -4,7 +4,7 @@
 // en cualquier dispositivo, y no se puede saltar borrando datos del navegador.
 import { agentFetch } from "../lib/agent.js";
 import { limit, clientIp } from "../lib/ratelimit.js";
-import { currentUser, requireUser } from "../lib/fbverify.js";
+import { currentUser, requireUser, usuarioValido } from "../lib/fbverify.js";
 
 import { cors } from "../lib/cors.js";
 export default async function handler(req, res) {
@@ -14,7 +14,8 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === "GET") {
-      const u = await currentUser(req).catch(() => null);
+      const cu = await currentUser(req).catch(() => null);
+      const u = usuarioValido(cu) ? cu : null;
       const [status, account] = await Promise.all([
         agentFetch("/status"),
         u ? agentFetch("/account", { device: u.uid }) : Promise.resolve({ data: { account: null } }),
@@ -25,6 +26,8 @@ export default async function handler(req, res) {
     if (req.method === "POST") {
       const u = await requireUser(req, res);   // responde 401/403 por sí solo
       if (!u) return;
+      const overU = limit(req, { max: 3, windowMs: 60000, key: "u:" + u.uid });
+      if (overU) return res.status(429).json({ error: overU });
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
       const username = String(body.username || "").trim().toLowerCase();
       const { status, data } = await agentFetch("/create", {
