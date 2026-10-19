@@ -27,6 +27,7 @@ SSH_PORT   = cfg.get("SSH_PORT", "22")
 DAYS       = int(cfg.get("DAYS", "2"))
 MAX_LOGIN  = int(cfg.get("MAX_LOGIN", "1"))
 MAX_USERS  = int(cfg.get("MAX_USERS", "100"))
+FREE_PER_IP = int(cfg.get("FREE_PER_IP", "3"))     # cuentas gratis máx. por IP en 24 h (redes móviles comparten IP: no bajar mucho)
 PAID_RESERVE = int(cfg.get("PAID_RESERVE", "20"))   # plazas extra solo para cuentas pagas
 PREFIX     = cfg.get("USER_PREFIX", "jx")
 DB         = "/etc/jitterx-users.json"
@@ -147,7 +148,7 @@ def create_account(*a, **k):
         return _create_account(*a, **k)
 
 
-def _create_account(username, device, days=None, ref="", max_login=None, paid=False):
+def _create_account(username, device, days=None, ref="", max_login=None, paid=False, ip=""):
     db = purge_expired(load_db())
     if ref:  # idempotente: si MP reenvía el aviso, no se duplica la cuenta
         for name, rec in db.items():
@@ -165,6 +166,13 @@ def _create_account(username, device, days=None, ref="", max_login=None, paid=Fa
         if rec.get("device") == device:
             return 429, {"error": "Ya tienes una cuenta activa. Podrás crear otra cuando expire.",
                          "account": public(name, rec)}
+
+    # Tope de cuentas gratis por IP y día (persistente: sale de las cuentas guardadas en disco)
+    if not paid and ip:
+        desde = time.time() - 86400
+        n = sum(1 for r in db.values() if r.get("ip") == ip and r.get("plan") != "premium" and r.get("created_at", 0) >= desde)
+        if n >= FREE_PER_IP:
+            return 429, {"error": "Se alcanzó el límite de cuentas gratis desde tu red hoy. Inténtalo mañana o compra un plan Premium."}
 
     if paid and not username:
         while True:
@@ -197,7 +205,7 @@ def _create_account(username, device, days=None, ref="", max_login=None, paid=Fa
         f.write(f"{username} hard maxlogins {eff_login}\n")
 
     rec = {"password": password, "device": device, "ref": ref or "",
-           "plan": "premium" if paid else "gratis", "max_login": eff_login,
+           "plan": "premium" if paid else "gratis", "max_login": eff_login, "ip": ip,
            "created_at": time.time(), "expires_at": expires.timestamp()}
     db[username] = rec
     save_db(db)
@@ -399,7 +407,7 @@ class Handler(BaseHTTPRequestHandler):
         if not device:
             return self.reply(400, {"error": "Falta el identificador de dispositivo"})
         real_ip = self.headers.get("x-real-client-ip", "-")
-        code, out = create_account(username, device, days=data.get("days"), ref=str(data.get("ref", "")).strip(), max_login=data.get("max_login"), paid=bool(data.get("paid")))
+        code, out = create_account(username, device, days=data.get("days"), ref=str(data.get("ref", "")).strip(), max_login=data.get("max_login"), paid=bool(data.get("paid")), ip=(real_ip if real_ip != "-" else ""))
         if code == 201:
             audit(f"CUENTA usuario={username} device={device[:8]} ip_usuario={real_ip} origen={self.peer}")
         self.reply(code, out)
