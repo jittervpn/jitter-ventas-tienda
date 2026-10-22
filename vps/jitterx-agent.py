@@ -6,7 +6,8 @@ con expiración automática y límite de conexiones simultáneas.
 
 Instalar con install.sh. Config en /etc/jitterx-agent.conf
 """
-import json, os, re, subprocess, secrets, string, hmac, time, threading
+import json, os, re, subprocess, secrets, string, hmac, time, threading, uuid, tempfile
+from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -328,6 +329,170 @@ def online_users(db):
         return 0
 
 
+# ---------------- V2Ray (Xray: VLESS por WebSocket) ----------------
+# Las cuentas viven en /etc/jitterx-v2.json (fuente de verdad). Xray se mantiene al dia por su API,
+# SIN reiniciarlo: cada 30 s se borran las vencidas y se recargan las vigentes (asi se recupera solo si Xray se reinicia).
+V2DB      = "/etc/jitterx-v2.json"
+XRAY_BIN  = cfg.get("XRAY_BIN", "/usr/local/bin/xray")
+XRAY_API  = cfg.get("XRAY_API", "127.0.0.1:10085")
+XRAY_TAG  = cfg.get("XRAY_TAG", "vless-ws")
+XRAY_PORT = int(cfg.get("XRAY_PORT", "10000"))
+V2_PATH   = cfg.get("V2_PATH", "/vless")
+V2_DAYS   = int(cfg.get("V2_DAYS", str(DAYS)))
+V2_MAX    = int(cfg.get("V2_MAX_USERS", "100"))
+V2_OFF    = cfg.get("V2RAY", "auto").lower() in ("0", "off", "no")
+_v2lock = threading.Lock()
+_v2state = {"ok": False}
+
+
+def v2_load():
+    try:
+        return json.load(open(V2DB))
+    except Exception:
+        return {}
+
+
+def v2_save(db):
+    tmp = V2DB + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(db, f, indent=1)
+    os.replace(tmp, V2DB)
+    os.chmod(V2DB, 0o600)
+
+
+def xray_api(*args, timeout=8):
+    try:
+        r = subprocess.run([XRAY_BIN, "api", *args], capture_output=True, text=True, timeout=timeout)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+    except Exception as e:
+        return 1, str(e)
+
+
+def xray_add(clients):
+    """Agrega clientes a Xray sin reiniciarlo. Devuelve (ok, salida). Los repetidos dan aviso pero no impiden agregar el resto."""
+    body = {"inbounds": [{"tag": XRAY_TAG, "protocol": "vless", "port": XRAY_PORT,
+                          "settings": {"clients": clients, "decryption": "none"}}]}
+    fd, path = tempfile.mkstemp(suffix=".json")  # la extension .json es necesaria: Xray detecta el formato por ella
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(body, f)
+        code, out = xray_api("adu", "-s", XRAY_API, path)
+    finally:
+        try:
+            os.unlink(path)
+        except Exception:
+            pass
+    return code == 0 and "failed to dial" not in out, out
+
+
+def xray_remove(email):
+    return xray_api("rmu", "-s", XRAY_API, f"-tag={XRAY_TAG}", email)[0] == 0
+
+
+def v2_probe():
+    if V2_OFF or not os.path.exists(XRAY_BIN):
+        _v2state["ok"] = False
+    else:
+        _v2state["ok"] = xray_api("statssys", "-s", XRAY_API, timeout=4)[0] == 0
+    return _v2state["ok"]
+
+
+def v2_valid(db):
+    now = time.time()
+    return {k: r for k, r in db.items() if r["expires_at"] > now}
+
+
+def v2_links(rec):
+    host = HOST_DOM
+    etiqueta = quote(f"Jitterx-{CITY or COUNTRY}")
+    path = quote(V2_PATH, safe="")
+    base = f"vless://{rec['uuid']}@{host}"
+    return {
+        "ws": f"{base}:{WS_PORT}?encryption=none&type=ws&path={path}&host={host}#{etiqueta}-{WS_PORT}",
+        "tls": f"{base}:{SSL_PORT}?encryption=none&security=tls&sni={host}&allowInsecure=1&insecure=1&type=ws&path={path}&host={host}#{etiqueta}-{SSL_PORT}",
+    }
+
+
+def v2_public(name, rec):
+    return {
+        "type": "v2ray", "username": name, "uuid": rec["uuid"], "host": HOST_DOM,
+        "ws_port": WS_PORT, "ssl_port": SSL_PORT, "path": V2_PATH, "plan": "gratis",
+        "created_at": int(rec["created_at"] * 1000), "expires_at": int(rec["expires_at"] * 1000),
+        "links": v2_links(rec),
+    }
+
+
+def v2_find(device):
+    mine = [(r["expires_at"], n, r) for n, r in v2_valid(v2_load()).items() if r.get("device") == device]
+    if not mine:
+        return None
+    _, name, rec = max(mine)
+    return v2_public(name, rec)
+
+
+def v2_create(device, ip=""):
+    with _v2lock:
+        if not _v2state["ok"] and not v2_probe():
+            return 503, {"error": "V2Ray no está disponible en este servidor."}
+        db = v2_load()
+        valid = v2_valid(db)
+        mine = v2_find(device)
+        if mine:
+            return 409, {"error": "Ya tienes una cuenta V2Ray activa en este servidor.", "account": mine}
+        if len(valid) >= V2_MAX:
+            return 503, {"error": "El servidor alcanzó el máximo de cuentas V2Ray."}
+        if ip:
+            desde = time.time() - 86400
+            n = sum(1 for r in valid.values() if r.get("ip") == ip and r.get("created_at", 0) >= desde)
+            if n >= FREE_PER_IP:
+                return 429, {"error": "Se alcanzó el límite de cuentas V2Ray desde tu red hoy. Inténtalo mañana."}
+        while True:
+            name = "vx" + "".join(secrets.choice(string.digits) for _ in range(6))
+            if name not in db:
+                break
+        uid = str(uuid.uuid4())
+        ok, out = xray_add([{"id": uid, "email": name, "level": 0}])
+        if not ok or "result: ok" not in out:
+            return 502, {"error": "No se pudo crear la cuenta en Xray."}
+        rec = {"uuid": uid, "device": device, "ip": ip, "created_at": time.time(),
+               "expires_at": (datetime.now(timezone.utc) + timedelta(days=V2_DAYS)).timestamp()}
+        db[name] = rec
+        v2_save(db)
+        return 201, {"ok": True, "account": v2_public(name, rec)}
+
+
+def v2_purge():
+    with _v2lock:
+        db = v2_load()
+        now = time.time()
+        changed = False
+        for name, rec in list(db.items()):
+            if rec["expires_at"] <= now:
+                xray_remove(name)
+                del db[name]
+                changed = True
+        if changed:
+            v2_save(db)
+
+
+def v2_sync():
+    with _v2lock:
+        valid = v2_valid(v2_load())
+        if valid:
+            xray_add([{"id": r["uuid"], "email": n, "level": 0} for n, r in valid.items()])
+
+
+def v2_worker():
+    while True:
+        try:
+            if v2_probe():
+                v2_purge()
+                v2_sync()
+        except Exception:
+            pass
+        time.sleep(30)
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "jitterx"
 
@@ -384,17 +549,38 @@ class Handler(BaseHTTPRequestHandler):
                 "premium_sold": max(int(load_stats().get("premium_sold", 0)), prem_active),
                 "host": HOST_DOM, "days": DAYS, "max_login": MAX_LOGIN,
                 "country": COUNTRY, "city": CITY, "flag": FLAG,
+                "v2ray": {"enabled": bool(_v2state["ok"]), "active": len(v2_valid(v2_load())), "max": V2_MAX},
                 "ws_port": WS_PORT, "ssl_port": SSL_PORT, "ssh_port": SSH_PORT,
                 **system_metrics(),
             })
+        if self.path.startswith("/v2/account"):
+            device = self.headers.get("x-jx-device", "")
+            return self.reply(200, {"account": v2_find(device) if device else None})
         if self.path.startswith("/account"):
             device = self.headers.get("x-jx-device", "")
             return self.reply(200, {"account": find_by_device(device) if device else None})
         self.reply(404, {"error": "Ruta no encontrada"})
 
+    def v2_create_req(self):
+        try:
+            n = int(self.headers.get("content-length", 0))
+            data = json.loads(self.rfile.read(n) or b"{}")
+        except Exception:
+            return self.reply(400, {"error": "JSON inválido"})
+        device = str(data.get("device", "")).strip()
+        if not device:
+            return self.reply(400, {"error": "Falta el identificador de dispositivo"})
+        real_ip = self.headers.get("x-real-client-ip", "-")
+        code, out = v2_create(device, ip=(real_ip if real_ip != "-" else ""))
+        if code == 201:
+            audit(f"V2RAY usuario={out['account']['username']} device={device[:8]} ip_usuario={real_ip} origen={self.peer}")
+        self.reply(code, out)
+
     def do_POST(self):
         if not self.guard():
             return
+        if self.path.startswith("/v2/create"):
+            return self.v2_create_req()
         if not self.path.startswith("/create"):
             return self.reply(404, {"error": "Ruta no encontrada"})
         try:
@@ -415,4 +601,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     purge_expired(load_db())
+    v2_probe()
+    threading.Thread(target=v2_worker, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
