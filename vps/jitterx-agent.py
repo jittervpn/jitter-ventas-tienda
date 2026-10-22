@@ -6,7 +6,7 @@ con expiración automática y límite de conexiones simultáneas.
 
 Instalar con install.sh. Config en /etc/jitterx-agent.conf
 """
-import json, os, re, subprocess, secrets, string, hmac, time, threading
+import json, os, re, subprocess, secrets, string, hmac, time, threading, uuid, shutil, tempfile
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -38,6 +38,15 @@ ALLOWED_IPS = [x.strip() for x in cfg.get("ALLOWED_IPS", "").split(",") if x.str
 MAX_FAILS   = int(cfg.get("MAX_FAILS", "5"))       # fallos de token antes de bloquear
 BAN_MINUTES = int(cfg.get("BAN_MINUTES", "60"))
 RATE_MAX    = int(cfg.get("RATE_MAX", "20"))       # peticiones por minuto y por IP
+
+# ---- V2Ray (Xray, VLESS por WebSocket): se activa solo si Xray existe en el VPS ----
+V2_ENABLED = cfg.get("V2_ENABLED", "1") != "0"
+XRAY_BIN   = cfg.get("XRAY_BIN") or shutil.which("xray") or "/usr/local/bin/xray"
+XRAY_API   = cfg.get("XRAY_API", "127.0.0.1:10085")
+V2_TAG     = cfg.get("V2_TAG", "vless-ws")
+V2_PATH    = cfg.get("V2_PATH", "/vless")
+V2_PORT    = int(cfg.get("V2_PORT", "10000"))
+XRAY_SVC   = cfg.get("XRAY_SERVICE", "xray")
 
 COUNTRY    = cfg.get("COUNTRY", "Brasil")
 CITY       = cfg.get("CITY", "")
@@ -120,6 +129,106 @@ def system_user_exists(name):
     return sh("id", "-u", name).returncode == 0
 
 
+# ---------------- V2Ray / Xray ----------------
+_pending = set()   # usuarios cuyo alta en Xray falló: se reintenta en el bucle de sincronización
+
+
+def xray_ready():
+    return V2_ENABLED and os.path.exists(XRAY_BIN)
+
+
+def xray_add(name, uid):
+    """Da de alta al usuario en Xray en caliente. Devuelve True si quedó registrado (o ya existía)."""
+    if not xray_ready():
+        return False
+    fd, path = tempfile.mkstemp(suffix=".json", prefix="xadd-")   # 0600; la extensión .json la exige Xray
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump({"inbounds": [{"tag": V2_TAG, "protocol": "vless", "port": V2_PORT,
+                                     "settings": {"clients": [{"id": uid, "email": name, "level": 0}],
+                                                  "decryption": "none"}}]}, f)
+        r = subprocess.run([XRAY_BIN, "api", "adu", "-s", XRAY_API, path], capture_output=True, text=True, timeout=8)
+        out = (r.stdout + r.stderr).lower()
+        ok = r.returncode == 0 or "already exists" in out
+        if ok:
+            _pending.discard(name)
+        else:
+            _pending.add(name)
+            audit(f"XRAY alta fallida usuario={name} rc={r.returncode}")
+        return ok
+    except Exception as e:
+        _pending.add(name)
+        audit(f"XRAY alta error usuario={name} {e}")
+        return False
+    finally:
+        try:
+            os.remove(path)
+        except Exception:
+            pass
+
+
+def xray_remove(name):
+    if not xray_ready():
+        return
+    _pending.discard(name)
+    try:
+        subprocess.run([XRAY_BIN, "api", "rmu", "-s", XRAY_API, f"-tag={V2_TAG}", name],
+                       capture_output=True, text=True, timeout=8)
+    except Exception as e:
+        audit(f"XRAY baja error usuario={name} {e}")
+
+
+def xray_stamp():
+    """Marca de arranque de Xray: si cambia, Xray se reinició y perdió los usuarios dados de alta en caliente."""
+    try:
+        r = subprocess.run(["systemctl", "show", XRAY_SVC, "-p", "ActiveEnterTimestampMonotonic", "--value"],
+                           capture_output=True, text=True, timeout=5)
+        return r.stdout.strip()
+    except Exception:
+        return ""
+
+
+def xray_sync_all():
+    """Da de alta en Xray todas las cuentas activas. Las cuentas antiguas sin UUID reciben uno ahora."""
+    if not xray_ready():
+        return
+    with _LOCK:
+        db = purge_expired(load_db())
+        changed = False
+        for name, rec in db.items():
+            if not rec.get("uuid"):
+                rec["uuid"] = str(uuid.uuid4())
+                changed = True
+        if changed:
+            save_db(db)
+        items = [(n, r["uuid"]) for n, r in db.items()]
+    for name, uid in items:
+        xray_add(name, uid)
+
+
+def xray_watch():
+    """Hilo de fondo: re-sincroniza cuando Xray se reinicia, reintenta altas fallidas y purga cuentas vencidas."""
+    last = None
+    while True:
+        try:
+            cur = xray_stamp()
+            if cur != last and cur not in ("", "0"):
+                xray_sync_all()
+                last = cur
+            elif _pending:
+                db = load_db()
+                for name in list(_pending):
+                    if name in db and db[name].get("uuid"):
+                        xray_add(name, db[name]["uuid"])
+                    else:
+                        _pending.discard(name)
+            with _LOCK:
+                purge_expired(load_db())
+        except Exception as e:
+            audit(f"XRAY watch error {e}")
+        time.sleep(15)
+
+
 def purge_expired(db):
     """Borra del sistema los usuarios cuya fecha ya pasó."""
     now = time.time()
@@ -128,6 +237,7 @@ def purge_expired(db):
         if rec["expires_at"] <= now:
             sh("pkill", "-9", "-u", name)
             sh("userdel", "-r", name)
+            xray_remove(name)
             del db[name]
             changed = True
     if changed:
@@ -205,10 +315,13 @@ def _create_account(username, device, days=None, ref="", max_login=None, paid=Fa
         f.write(f"{username} hard maxlogins {eff_login}\n")
 
     rec = {"password": password, "device": device, "ref": ref or "",
+           "uuid": str(uuid.uuid4()) if xray_ready() else "",
            "plan": "premium" if paid else "gratis", "max_login": eff_login, "ip": ip,
            "created_at": time.time(), "expires_at": expires.timestamp()}
     db[username] = rec
     save_db(db)
+    if rec["uuid"]:
+        xray_add(username, rec["uuid"])   # si falla, la cuenta SSH sigue válida y el hilo de fondo reintenta
     if paid:
         bump_premium()
     return 201, {"ok": True, "account": public(username, rec)}
@@ -232,7 +345,9 @@ def bump_premium():
 
 
 def public(name, rec):
+    v2 = {"uuid": rec["uuid"], "v2_path": V2_PATH} if rec.get("uuid") else {}
     return {
+        **v2,
         "username": name, "password": rec["password"],
         "host": HOST_DOM, "ws_port": WS_PORT, "ssl_port": SSL_PORT, "ssh_port": SSH_PORT,
         "created_at": int(rec["created_at"] * 1000),
@@ -415,4 +530,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     purge_expired(load_db())
+    if xray_ready():
+        threading.Thread(target=xray_watch, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
