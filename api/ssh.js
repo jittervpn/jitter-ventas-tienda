@@ -41,3 +41,11 @@ export default async function handler(req, res) {
     res.status(502).json({ error: e.message });
   }
 }
+const PANEL = "https://project--c3546bd1-8ee0-47c8-a73a-a2b21ba32273.lovable.app/api/public/catalog";
+
+async function cargarCatalogo() {
+  const r = await fetch(PANEL, { headers: { "x-api-key": process.env.PANEL_API_KEY } });
+  if (!r.ok) throw new Error("Panel no responde");
+  return r.json(); // { servers: [...], domains: [...] }
+}
+
