@@ -4,27 +4,11 @@ import { randomUUID } from "node:crypto";
 import { requireUser } from "../lib/fbverify.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
-import { MONEDA, pagados } from "../lib/precios.js";
-import { agentFetch } from "../lib/agent.js";
+import { pagados } from "../lib/precios.js";
+import { serverValido } from "../lib/agent.js";
+import { entregar } from "../lib/entrega.js";
 
 import { cors } from "../lib/cors.js";
-// Crea en el VPS las cuentas del pago aprobado (idempotente por ref = id de pago + posición).
-async function entregar(pay) {
-  const [uid, lista] = String(pay.external_reference || "").split(":");
-  const items = pagados((lista || "").split(","));
-  const esperado = items.reduce((a, c) => a + (c?.precio || 0), 0);
-  if (!uid || !items.length || items.includes(undefined) || Math.abs(pay.transaction_amount - esperado) > 0.01 || pay.currency_id !== MONEDA) {
-    console.error("MP: pago aprobado que no coincide", pay.id, pay.transaction_amount, pay.currency_id);
-    return { ok: false };
-  }
-  for (let i = 0; i < items.length; i++) {
-    const c = items[i];
-    const r = await agentFetch("/create", { method: "POST", body: { device: uid, paid: true, username: "", days: c.days, max_login: c.maxLogin, ref: `${pay.id}-${i}` } });
-    if (r.status >= 300) { console.error("MP: el agente no pudo crear la cuenta", pay.id, r.status, r.data); return { ok: false }; }
-  }
-  return { ok: true };
-}
-
 export default async function handler(req, res) {
   if (cors(req, res)) return;
   try {
@@ -58,7 +42,7 @@ export default async function handler(req, res) {
         description: items.map((c) => c.nombre).join(", "),
         payment_method_id: fd.payment_method_id, issuer_id: fd.issuer_id,
         payer: { email: fd.payer?.email || user.email, identification: fd.payer?.identification },
-        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}`,
+        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}:${serverValido(b.server)}`,
         notification_url: `https://${req.headers.host}/api/mp-webhook`, binary_mode: true, statement_descriptor: "JITTERX",
       }),
     });

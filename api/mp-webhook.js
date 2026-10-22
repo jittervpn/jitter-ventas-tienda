@@ -1,9 +1,8 @@
 // Webhook de Mercado Pago. Nunca se fía de lo que recibe: consulta el pago a la API de MP,
 // exige estado "approved", importe y moneda correctos, y crea la cuenta (idempotente por pago).
 import crypto from "node:crypto";
-import { agentFetch } from "../lib/agent.js";
 import { clean } from "../lib/cf.js";
-import { MONEDA, pagados } from "../lib/precios.js";
+import { entregar } from "../lib/entrega.js";
 
 function firmaOk(req, dataId) {
   const secret = clean(process.env.MP_WEBHOOK_SECRET);
@@ -28,18 +27,9 @@ export default async function handler(req, res) {
     const pay = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(id)}`, { headers: { authorization: "Bearer " + token } }).then((r) => r.json());
     if (pay.status !== "approved") return res.status(200).json({ ignored: pay.status || "sin estado" });
 
-    const [uid, lista] = String(pay.external_reference || "").split(":");
-    const items = pagados((lista || "").split(","));
-    const esperado = items.reduce((a, c) => a + (c?.precio || 0), 0);
-    if (!uid || !items.length || items.includes(undefined) || Math.abs(pay.transaction_amount - esperado) > 0.01 || pay.currency_id !== MONEDA) {
-      console.error("MP: pago aprobado que no coincide", pay.id, pay.transaction_amount, pay.currency_id);
-      return res.status(200).json({ ignored: "no coincide" });
-    }
-    for (let i = 0; i < items.length; i++) {
-      const c = items[i];
-      const r = await agentFetch("/create", { method: "POST", body: { device: uid, paid: true, username: "", days: c.days, max_login: c.maxLogin, ref: `${pay.id}-${i}` } });
-      if (r.status >= 300) { console.error("MP: el agente no pudo crear la cuenta", pay.id, r.status, r.data); return res.status(500).json({ error: "Entrega pendiente, MP reintentará." }); }
-    }
+    const e = await entregar(pay);
+    if (e.ignorado) return res.status(200).json({ ignored: "no coincide" });
+    if (!e.ok) return res.status(500).json({ error: "Entrega pendiente, MP reintentará." });
     res.status(200).json({ ok: true });
   } catch (e) { console.error("MP webhook", e.message); res.status(500).json({ error: "Error procesando el pago" }); }
 }

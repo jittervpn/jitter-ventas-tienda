@@ -3,6 +3,7 @@ import { requireUser } from "../lib/fbverify.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { MONEDA, pagados } from "../lib/precios.js";
+import { serverValido } from "../lib/agent.js";
 
 import { cors } from "../lib/cors.js";
 export default async function handler(req, res) {
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         items: items.map((c) => ({ id: c.id, title: c.nombre, quantity: 1, currency_id: MONEDA, unit_price: c.precio })),
         payer: user.email ? { email: user.email } : undefined,
-        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}`,
+        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}:${serverValido(b.server)}`,
         notification_url: `https://${req.headers.host}/api/mp-webhook`,
         back_urls: { success: `${base}/?pago=ok`, failure: `${base}/?pago=error`, pending: `${base}/?pago=pendiente` },
         auto_return: "approved",
