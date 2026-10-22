@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0f1c">
 <meta http-equiv="cache-control" content="no-cache">
-<title>Jitterx Panel Cloud — Subdominios temporales para tu VPS</title>
-<meta name="description" content="Apunta un subdominio a la IP de tu VPS en segundos. Registro A gratuito durante 7 días.">
+<title>Jitterx Panel Cloud — Cuentas SSH y subdominios para tu VPS</title>
+<meta name="description" content="Cuentas SSH gratis y Premium para HTTP Custom y NetMod, y subdominios temporales para tu VPS. Compra con tarjeta o Mercado Pago.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -223,6 +223,25 @@
   .faq .gsec{margin:22px 4px 2px;font:700 12px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
   .tg{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 14px;border-radius:10px;background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff;text-decoration:none;font:700 14px Inter,sans-serif}
   .tg svg{width:20px;height:20px;flex:none}
+  .srvchips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer}
+  .chip small{color:var(--muted);font-weight:500}
+  .chip[aria-pressed=true]{border-color:var(--accent);color:var(--ink);background:rgba(34,211,238,.1)}
+  .chip:disabled{opacity:.5;cursor:not-allowed}
+  .srvpick{margin-top:12px}
+  .srvpick label{display:block;font:600 13px Inter,sans-serif;color:var(--ink2);margin-bottom:6px}
+  .srvpick select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink);font:500 14px Inter,sans-serif}
+  .srvtag{padding:10px 16px 0;color:var(--muted);font-size:12px}
+  .toast[hidden]{display:none}
+  .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);width:min(94vw,430px);z-index:80;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line2);box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;transition:transform .25s ease,opacity .25s}
+  .toast.show{transform:translate(-50%,0);opacity:1}
+  .toast .ti{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(52,211,153,.15);color:var(--ok);font-weight:700}
+  .toast .tx{flex:1;min-width:0}
+  .toast .tx b{display:block;font:700 14px Inter,sans-serif}
+  .toast .tx span{display:block;color:var(--ink2);font-size:13px;line-height:1.4}
+  .toast button.go{flex:none;padding:8px 12px;border-radius:9px;border:1px solid var(--accent);background:transparent;color:var(--accent);font:600 13px Inter,sans-serif;cursor:pointer}
+  .toast button.x{flex:none;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;padding:0 2px}
+  .rec .bar i.low{background:linear-gradient(90deg,#f59e0b,#ef4444)}
   .pane[hidden]{display:none}
   .cred{display:grid;gap:8px;margin-top:4px}
   .cred .row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
@@ -310,6 +329,7 @@
         <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Crear cuenta SSH</h2>
         <p class="sub">Cuenta SSH sobre WebSocket para tu app de túnel. Contraseña generada automáticamente.</p>
         <label style="display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:14px 0 8px">Servidor</label>
+        <div class="srvchips" id="srvChips" hidden></div>
         <div class="server sel" id="server">
           <div class="head"><div class="flag">🌐</div><div class="who"><b>Cargando…</b><small>—</small></div>
             <div class="num"><div class="sp">—</div><div class="cap">—</div></div></div>
@@ -327,7 +347,7 @@
           <li>Crea tu cuenta y copia <b>host, usuario y contraseña</b>.</li>
           <li>En la app elige modo <b>SSH + WebSocket</b>, puerto <b>80</b> (o 443 con SSL).</li>
           <li>Pega el <b>payload</b> que aparece en "Tu cuenta" y pulsa conectar.</li>
-          <li>Si dice <i>Permission denied</i>: revisa mayúsculas, o que la cuenta no haya vencido. Solo se permite 1 conexión a la vez.</li></ol></details>
+          <li>Si dice <i>Permission denied</i>: revisa mayúsculas, o que la cuenta no haya vencido. Solo se permite el número de conexiones simultáneas de tu plan.</li></ol></details>
       </section>
 
       <aside class="card">
@@ -338,7 +358,7 @@
         <h2 style="margin-top:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Condiciones</h2>
         <ul class="rules">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>La cuenta caduca a los <b>2 días</b>.</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 cuenta por usuario</b> y <b>1 conexión</b> simultánea.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>1 cuenta gratis por usuario y servidor</b> y <b>1 conexión</b> simultánea.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg><span>Acceso por <b>WebSocket</b>, sin shell (solo túnel).</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Prohibido spam, escaneo o abuso. Se suspende sin aviso.</span></li>
         </ul>
@@ -348,7 +368,7 @@
 
   <div class="pane" id="paneTienda" hidden>
     <div class="grid">
-      <section class="card"><h2>Planes y cuentas</h2><div class="pstat" id="tPremium" hidden>💎 <span id="tPremN">0</span> clientes ya tienen Premium</div><p class="sub">Elige tu plan. Los precios de ejemplo se editan en <span class="mono">CATALOGO</span>.</p><div class="prods" id="prods"></div></section>
+      <section class="card"><h2>Planes y cuentas</h2><div class="pstat" id="tPremium" hidden>💎 <span id="tPremN">0</span> clientes ya tienen Premium</div><p class="sub">Elige tu plan.</p><div class="prods" id="prods"></div></section>
       <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
         <button class="primary" id="pay">Pagar con tarjeta</button>
         <div id="brickBox" style="margin-top:14px"></div>
@@ -362,7 +382,7 @@
       <p class="sub">Todo lo que necesitas saber sobre las cuentas SSH, los pagos y los subdominios.</p>
       <div class="gsec">Cuentas SSH</div>
       <details><summary>¿Qué es una cuenta SSH?</summary><p>Es un usuario y una contraseña que te permiten conectarte a nuestro servidor desde apps como HTTP Custom o NetMod para navegar a través de él. Tus datos de acceso aparecen en la sección Cuenta SSH.</p></details>
-      <details><summary>¿Cuánto dura la cuenta gratis?</summary><p>Dura 2 días, con 1 conexión simultánea y una cuenta por dispositivo. Cuando expira puedes crear otra.</p></details>
+      <details><summary>¿Cuánto dura la cuenta gratis?</summary><p>Dura 2 días, con 1 conexión simultánea y una cuenta gratis por usuario y servidor. Cuando expira puedes crear otra.</p></details>
       <details><summary>¿Cómo me conecto?</summary><p>Abre tu app de túnel, crea un perfil con el servidor, el puerto, tu usuario y tu contraseña, y conecta. En Cuenta SSH tienes la guía &laquo;Cómo conectarte&raquo; con los pasos.</p></details>
       <details><summary>¿Puedo compartir mi cuenta?</summary><p>No. Es personal e intransferible, y el número de conexiones simultáneas está limitado según tu plan. El spam, los escaneos o el abuso suspenden la cuenta sin aviso.</p></details>
       <div class="gsec">Plan Premium y pagos</div>
@@ -389,7 +409,7 @@
         <ul class="rules">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu contraseña la gestiona <b>Firebase</b>, no la almacenamos.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Sesión activa en este dispositivo.</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Soporte: escribe desde el correo de tu cuenta.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Soporte: escríbenos por <a href="https://t.me/jitterxpanelcloud" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Telegram</a>.</span></li>
         </ul>
       </aside>
     </div>
@@ -402,6 +422,12 @@
   </section>
 </main>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <div class="ti">✓</div>
+  <div class="tx"><b id="toastT"></b><span id="toastD"></span></div>
+  <button class="go" id="toastGo">Ver perfil</button>
+  <button class="x" id="toastX" aria-label="Cerrar">✕</button>
+</div>
 <div class="dbg" id="dbg"></div>
 <aside class="drawer" id="drawer" aria-label="Menú">
   <div class="dhead"><b>Menú</b><button id="dclose" aria-label="Cerrar">✕</button></div>
@@ -565,7 +591,7 @@ function abrirMenu(open){
   if(!open) return;
   const lg=!!sesion; $('#dAuth').textContent=lg?'Cerrar sesión':'Entrar';
   document.querySelectorAll('.dlink[data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===vista));
-  api('/api/ssh').then(pintarPremium).catch(()=>{});
+  api('/api/ssh').then(s=>{pintarPremium(s);aplicarServidores(s)}).catch(()=>{});
 }
 $("#burger").onclick=()=>abrirMenu(true);
 $('#dclose').onclick=$('#dbg').onclick=()=>abrirMenu(false);
@@ -586,8 +612,8 @@ function tab(which){
   pintarHero(which);
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
-  if(which==='perfil') paintPerfil();
-  if(which==='tienda'){ paintTienda(); api('/api/ssh').then(pintarPremium).catch(()=>{}); }
+  if(which==='perfil'){ paintPerfil(); if(sesion&&!sshLoaded) loadSsh(); }
+  if(which==='tienda'){ paintTienda(); api('/api/ssh').then(s=>{pintarPremium(s);aplicarServidores(s)}).catch(()=>{}); }
 }
 
 /* ---------- cabecera contextual ---------- */
@@ -619,6 +645,61 @@ function pintarNums(total,activos,max){
 function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max):pintarNums(); }
 function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
 
+/* ---------- tiempo restante (misma cuenta en toda la web) y avisos tipo app ---------- */
+function restante(exp){
+  const left=Math.max(0,exp-Date.now()), d=Math.floor(left/864e5), h=Math.floor(left%864e5/36e5), m=Math.floor(left%36e5/6e4);
+  return {left,d,h,m,txt:left<=0?'Vencida':d>0?d+' d '+h+' h':h>0?h+' h '+m+' min':m+' min'};
+}
+let toastTimer;
+function cerrarToast(){ const t=$('#toast'); t.classList.remove('show'); setTimeout(()=>{t.hidden=true},250); }
+function avisar(titulo,texto,accion){
+  const t=$('#toast'); $('#toastT').textContent=titulo; $('#toastD').textContent=texto;
+  const go=$('#toastGo'); go.textContent=(accion&&accion.label)||'Ver perfil';
+  go.onclick=()=>{ cerrarToast(); if(accion&&accion.fn) accion.fn(); else tab('perfil'); };
+  t.hidden=false; requestAnimationFrame(()=>t.classList.add('show'));
+  clearTimeout(toastTimer); toastTimer=setTimeout(cerrarToast,9000);
+}
+$('#toastX').onclick=cerrarToast;
+const avisarPago=ok=>avisar('¡Pago aprobado!',ok?'Tu cuenta Premium ya está lista. Los días restantes se ven en tu Perfil.':'Estamos creando tu cuenta Premium. Cuando esté lista, verás los días restantes en tu Perfil.');
+function avisarVencimiento(lista){
+  for(const a of lista){
+    const r=restante(a.expires_at), k='jx_venc_'+a.username;
+    if(a.plan==='premium'&&r.left>0&&r.left<=3*864e5&&!sessionStorage.getItem(k)){
+      sessionStorage.setItem(k,'1');
+      return avisar('Tu cuenta Premium vence pronto','Te quedan '+r.txt+'. Renueva desde la Tienda para no quedarte sin servicio.',{label:'Renovar',fn:()=>tab('tienda')});
+    }
+  }
+}
+
+/* ---------- varios servidores (VPS) ---------- */
+var SERVERS=[], srvSel=null, misCuentas=[], cuentasCargando=false;
+try{ srvSel=localStorage.getItem('jx_srvsel') }catch{}
+const srvActual=()=>SERVERS.find(x=>x.id===srvSel)||null;
+const srvLabel=id=>{const s=SERVERS.find(x=>x.id===id);return s?((FLAGS[(s.flag||'').toUpperCase()]||'🌐')+' '+(s.city||s.country||('Servidor '+id))):('Servidor '+id)};
+const cuentaEn=id=>misCuentas.find(a=>!a.server||a.server===id)||null;
+function aplicarServidores(s){
+  SERVERS=(s&&s.servers)||[];
+  if(!SERVERS.some(x=>x.id===srvSel&&x.ok)) srvSel=(SERVERS.find(x=>x.ok)||SERVERS[0]||{}).id||null;
+  pintarChips(); paintCart();
+}
+function pintarChips(){
+  const box=$('#srvChips'); if(!box||!box.querySelectorAll) return;
+  box.hidden=SERVERS.length<2;
+  if(SERVERS.length<2){ box.innerHTML=''; return; }
+  box.innerHTML=SERVERS.map(s=>'<button class="chip" data-id="'+s.id+'" aria-pressed="'+(s.id===srvSel)+'"'+(s.ok?'':' disabled')+'>'+(FLAGS[(s.flag||'').toUpperCase()]||'🌐')+' <span>'+(s.city||s.country||('Servidor '+s.id))+'</span><small>'+(s.ok?((s.active||0)+'/'+(s.max||'?')):'sin conexión')+'</small></button>').join('');
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>elegirServidor(b.dataset.id));
+}
+function elegirServidor(id){
+  srvSel=id; try{localStorage.setItem('jx_srvsel',id)}catch{}
+  pintarChips(); paintCart();
+  const sv=srvActual(); if(sv) renderServer(sv);
+  recalcLock();
+}
+function cartSrvHtml(){
+  if(SERVERS.length<2) return '';
+  return '<div class="srvpick"><label for="cartSrv">Crear mi cuenta en</label><select id="cartSrv">'+SERVERS.map(s=>'<option value="'+s.id+'"'+(s.id===srvSel?' selected':'')+(s.ok?'':' disabled')+'>'+(FLAGS[(s.flag||'').toUpperCase()]||'🌐')+' '+(s.country||'Servidor')+(s.city?' · '+s.city:'')+(s.ok?' ('+(s.active||0)+'/'+(s.max||'?')+')':' — sin conexión')+'</option>').join('')+'</select></div>';
+}
+
 /* ---------- tienda ---------- */
 let MONEDA='ARS', CATALOGO=[]; // se cargan desde /api/catalog (fuente única)
 let carrito=JSON.parse(localStorage.getItem('jx_cart')||'[]');
@@ -631,14 +712,15 @@ function paintTienda(){
 function saveCart(){localStorage.setItem('jx_cart',JSON.stringify(carrito));if(typeof cerrarBrick==='function')cerrarBrick();paintCart()}
 function paintCart(){
   const it=carrito.map(id=>CATALOGO.find(c=>c.id===id)).filter(Boolean), tot=it.reduce((a,c)=>a+c.precio,0);
-  $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>':'<div class="empty">Tu carrito está vacío.</div>';
+  $('#cartBox').innerHTML=it.length?it.map((c,i)=>'<div class="ln"><span>'+c.nombre+'</span><span>'+money(c.precio)+'<button data-i="'+i+'" aria-label="Quitar">×</button></span></div>').join('')+'<div class="tot"><span>Total</span><span>'+money(tot)+'</span></div>'+cartSrvHtml():'<div class="empty">Tu carrito está vacío.</div>';
   $('#cartBox').querySelectorAll('button').forEach(b=>b.onclick=()=>{carrito.splice(+b.dataset.i,1);saveCart()});
+  const cs=$('#cartSrv'); if(cs&&cs.addEventListener) cs.onchange=e=>elegirServidor(e.target.value);
   $('#pay').disabled=!it.length;
 }
 window.pagarRedirect=async()=>{
   if(!sesion) return openModal('login');
   const b=$('#pay'),m=$('#msgPay'); b.disabled=true; b.classList.add('loading'); m.className='msg';
-  const j=await api('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito})}).catch(e=>({error:e.message}));
+  const j=await api('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito,server:srvSel})}).catch(e=>({error:e.message}));
   if(j.init_point){ location.href=j.init_point; return; }
   b.classList.remove('loading'); b.disabled=!carrito.length;
   m.className='msg err'; m.innerHTML=ICON_ERR+'<span>'+(j.error||'No se pudo iniciar el pago.')+'</span>';
@@ -667,8 +749,8 @@ async function iniciarTarjeta(){
         onReady:()=>{},
         onError:e=>console.error('Brick',e),
         onSubmit:fd=>new Promise(async(ok,ko)=>{
-          const j=await api('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito,formData:fd,key:crypto.randomUUID()})}).catch(e=>({error:e.message}));
-          if(j.status==='approved'){ok();carrito=[];saveCart();tab('ssh');sshLoaded=false;loadSsh();showMsgSsh('ok','Pago aprobado. '+(j.entregada?'Tu cuenta ya está en "Tu cuenta".':'Estamos creando tu cuenta; aparecerá en unos segundos.'));if(!j.entregada){let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}}
+          const j=await api('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:carrito,formData:fd,key:crypto.randomUUID(),server:srvSel})}).catch(e=>({error:e.message}));
+          if(j.status==='approved'){ok();carrito=[];saveCart();tab('ssh');sshLoaded=false;loadSsh();showMsgSsh('ok','Pago aprobado. '+(j.entregada?'Tu cuenta ya está en "Tu cuenta".':'Estamos creando tu cuenta; aparecerá en unos segundos.'));avisarPago(!!j.entregada);if(!j.entregada){let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}}
           else{ko();msgPago(j.error||RECHAZO[j.detalle]||'El pago fue rechazado. Prueba con otra tarjeta.')}
         })
       }
@@ -690,19 +772,25 @@ function paintPerfil(){
   }
   const nombre=sesion.nombre||sesion.email.split('@')[0];
   const ini=(nombre[0]||'U').toUpperCase();
-  const cuenta=miCuentaSsh, vigente=!!(cuenta&&cuenta.expires_at>Date.now());
+  const lista=(misCuentas||[]).filter(a=>a.expires_at>Date.now());
+  const premium=lista.some(a=>a.plan==='premium');
   const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
+  const tarjetas=lista.map(a=>{
+    const r=restante(a.expires_at), total=Math.max(864e5,a.expires_at-(a.created_at||a.expires_at-2*864e5)), pct=Math.max(2,Math.min(100,Math.round(r.left/total*100))), pronto=a.plan==='premium'&&r.left<=3*864e5;
+    return '<div class="rec" style="margin-bottom:12px"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Gratuita')+'</span></div>'+
+      (SERVERS.length>1&&a.server?'<div class="srvtag">Servidor: '+srvLabel(a.server)+'</div>':'')+
+      '<div class="time"><small>Quedan <b>'+r.txt+'</b> · vence el '+fmt(a.expires_at)+' · '+(a.max_login||1)+((a.max_login||1)>1?' conexiones':' conexión')+'</small><div class="bar"><i class="'+(pronto?'low':'')+'" style="width:'+pct+'%"></i></div>'+
+      (pronto?'<small style="color:#fbbf24;display:block;margin-top:6px">Vence pronto: renueva desde la Tienda.</small>':'')+'</div></div>';
+  }).join('');
   box.innerHTML=
     '<div class="phead"><div class="avatar">'+ini+'</div><div class="info"><b>'+nombre+'</b><small>'+sesion.email+'</small></div></div>'+
     '<div class="plist">'+
-      '<div class="it"><span>Cuenta SSH activa</span><b>'+(cuenta&&cuenta.expires_at>Date.now()?cuenta.username:'—')+'</b></div>'+
+      '<div class="it"><span>Cuentas SSH activas</span><b>'+(lista.length||'—')+'</b></div>'+
       '<div class="it"><span>Dominio activo</span><b>'+(dom&&dom.expiresAt>Date.now()?dom.name:'—')+'</b></div>'+
-      '<div class="it"><span>Plan</span><b>'+(vigente&&cuenta.plan==='premium'?'Premium ★':'Gratuito')+'</b></div>'+
-      (vigente?'<div class="it"><span>Días restantes</span><b>'+Math.ceil((cuenta.expires_at-Date.now())/864e5)+'</b></div>'+
-        '<div class="it"><span>Vence el</span><b>'+fmt(cuenta.expires_at)+'</b></div>'+
-        '<div class="it"><span>Conexiones simultáneas</span><b>'+(cuenta.max_login||1)+'</b></div>':'')+
+      '<div class="it"><span>Plan</span><b>'+(premium?'Premium ★':'Gratuito')+'</b></div>'+
     '</div>'+
-    '<button class="upg" id="pUpg">'+(vigente&&cuenta.plan==='premium'?'Renovar o ampliar mi plan':'Mejorar a Premium ★')+'</button>'+
+    (lista.length?'<h3 style="margin:18px 0 10px;font:700 15px Inter,sans-serif">Mis cuentas · días restantes</h3>'+tarjetas:'<p class="hint" style="margin-top:14px">'+(cuentasCargando?'Cargando tus cuentas…':'Todavía no tienes ninguna cuenta SSH activa. Crea una en la sección Cuenta SSH.')+'</p>')+
+    '<button class="upg" id="pUpg">'+(premium?'Renovar o ampliar mi plan':'Mejorar a Premium ★')+'</button>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pUpg').onclick=()=>tab('tienda');
   $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
@@ -714,44 +802,52 @@ const showMsgSsh=(cls,txt)=>{const m=$('#msgSsh');m.className='msg '+cls;m.inner
 const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+value+'</code><button data-copy="'+value+'" title="Copiar">'+copyIcon+'</button></div>';
 
-function showAccount(a){
-  miCuentaSsh=a||null;
-  if(!a){
-    const msg=sesion?'Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.':'Inicia sesión para crear y ver tu cuenta SSH.';
-    $('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>'+msg+'</div>';return}
-  const total=Math.max(864e5,(a.expires_at-(a.created_at||a.expires_at-2*864e5))),left=Math.max(0,a.expires_at-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
+function accountCard(a,i,multi){
   const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
-  $('#mySsh').innerHTML=
-    '<div class="rec"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Activa')+'</span></div>'+
+  return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Activa')+'</span></div>'+
+    (multi&&a.server?'<div class="srvtag">Servidor: '+srvLabel(a.server)+'</div>':'')+
     '<div style="padding:14px 16px"><div class="cred">'+
       row('Host',a.host)+row('Usuario',a.username)+row('Contraseña',a.password)+
       row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+(a.max_login?row('Conexiones',a.max_login):'')+
     '</div>'+
     '<div class="payload">'+payload+'</div>'+
     '</div>'+
-    '<div class="time"><small>Caduca el '+fmt(a.expires_at)+' · quedan <b>'+d+' d '+h+' h</b></small><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
-    '<div class="actions"><button class="btn" id="cpAll">'+copyIcon+'Copiar todo</button></div></div>';
-  $('#mySsh').querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);b.style.color='var(--ok)'});
-  $('#cpAll').onclick=e=>{
-    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port+'\nCaduca: '+fmt(a.expires_at));
-    e.currentTarget.lastChild.textContent='Copiado';
-  };
+    '<div class="actions"><button class="btn cpAll" data-i="'+i+'">'+copyIcon+'Copiar todo</button><button class="btn toPerfil">Ver días en mi Perfil</button></div></div>';
 }
+function showAccounts(arr){
+  misCuentas=arr||[]; miCuentaSsh=misCuentas[0]||null;
+  if(!misCuentas.length){
+    const msg=sesion?'Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.':'Inicia sesión para crear y ver tu cuenta SSH.';
+    $('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>'+msg+'</div>';return}
+  const multi=SERVERS.length>1;
+  $('#mySsh').innerHTML=misCuentas.map((a,i)=>accountCard(a,i,multi)).join('');
+  $('#mySsh').querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);b.style.color='var(--ok)'});
+  $('#mySsh').querySelectorAll('.toPerfil').forEach(btn=>btn.onclick=()=>tab('perfil'));
+  $('#mySsh').querySelectorAll('.cpAll').forEach(btn=>btn.onclick=e=>{
+    const a=misCuentas[+btn.dataset.i];
+    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port);
+    e.currentTarget.lastChild.textContent='Copiado';
+  });
+}
+const showAccount=a=>showAccounts(a?[a]:[]);
 
 function lockSsh(locked){ sshHas=locked; refreshSshButton(); }
+function recalcLock(){ sshHas=!!cuentaEn(srvSel); refreshSshButton(); }
 function refreshSshButton(){
   const b=$('#goSsh'); b.classList.remove('loading');
   $('#sshGate').hidden=!!sesion;
   if(!sesion){ b.disabled=false; $('#goSshText').textContent='Inicia sesión para crear tu cuenta'; return; }
+  const sv=srvActual();
+  if(sv&&!sv.ok){ b.disabled=true; $('#goSshText').textContent='Servidor no disponible'; return; }
+  if(sv&&sv.max&&sv.active>=sv.max){ b.disabled=true; $('#goSshText').textContent='Servidor lleno'; return; }
   b.disabled=sshHas;
-  $('#goSshText').textContent=sshHas?'Ya tienes una cuenta activa':'Crear cuenta · 2 días';
+  $('#goSshText').textContent=sshHas?(SERVERS.length>1?'Ya tienes una cuenta en este servidor':'Ya tienes una cuenta activa'):'Crear cuenta · 2 días';
 }
 
 const FLAGS={BR:'🇧🇷',US:'🇺🇸',ES:'🇪🇸',AR:'🇦🇷',MX:'🇲🇽',CL:'🇨🇱',CO:'🇨🇴',PE:'🇵🇪',DE:'🇩🇪',FR:'🇫🇷',NL:'🇳🇱',SG:'🇸🇬',JP:'🇯🇵'};
 const SPEED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20a8 8 0 1 1 8-8"/><path d="m12 12 4-3"/></svg>';
 
 function renderServer(s){
-  pintarPremium(s);
   const used=s.active||0,max=s.max||1,pct=Math.min(100,Math.round(used/max*100));
   const carga=Math.max(pct,s.cpu||0,s.ram||0);
   const lv=carga>=85?'hi':carga>=60?'mid':'ok';
@@ -774,38 +870,39 @@ function renderServer(s){
 }
 
 async function loadSsh(){
-  sshLoaded=true;
+  sshLoaded=true; cuentasCargando=true;
   try{
     const s=await api('/api/ssh');
     if(s.error) throw new Error(s.error);
-    ultimoSsh=s; try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{} renderServer(s); if(vista==='ssh') pintarStatsSsh();
+    ultimoSsh=s; try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{}
+    aplicarServidores(s); pintarPremium(s); renderServer(srvActual()||s); if(vista==='ssh') pintarStatsSsh();
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
-    const a=s.account||null;
-    const valid=a&&a.expires_at>Date.now()?a:null;
-    showAccount(valid); lockSsh(!!valid); if(vista==='perfil') paintPerfil();
+    const lista=(s.accounts||(s.account?[s.account]:[])).filter(a=>a.expires_at>Date.now());
+    showAccounts(lista); recalcLock(); if(vista==='perfil') paintPerfil(); avisarVencimiento(lista);
   }catch(e){
-    showAccount(null); lockSsh(false);
+    showAccounts([]); lockSsh(false);
     showMsgSsh('err','No se pudo consultar el servidor. '+e.message);
-  }
+  }finally{ cuentasCargando=false; if(vista==='perfil') paintPerfil(); }
 }
 
 async function refreshServer(){
   if($('#paneSsh').hidden||document.hidden) return;
-  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;renderServer(s);if(vista==='ssh')pintarStatsSsh();}}catch{}
+  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;aplicarServidores(s);pintarPremium(s);renderServer(srvActual()||s);refreshSshButton();if(vista==='ssh')pintarStatsSsh();}}catch{}
 }
 
 $('#goSsh').onclick=async()=>{
   if(!sesion){ openModal('login'); return; }
   const b=$('#goSsh'); b.disabled=true; b.classList.add('loading'); $('#goSshText').textContent='Creando…'; $('#msgSsh').className='msg';
   const j=await api('/api/ssh',{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({username:$('#user').value})}).catch(e=>({error:e.message}));
+    body:JSON.stringify({username:$('#user').value,server:srvSel})}).catch(e=>({error:e.message}));
   if(j.ok){
     showMsgSsh('ok','Cuenta creada. Guarda la contraseña: solo se muestra aquí.');
-    showAccount(j.account); lockSsh(true); refreshServer();
+    avisar('¡Cuenta creada!','Los días restantes de tu cuenta se ven en tu Perfil.');
+    sshLoaded=false; loadSsh();
   }else{
     if(j.error&&/inicia sesi/i.test(j.error)){ lockSsh(false); openModal('login'); }
     showMsgSsh('err',j.error||'Error desconocido');
-    if(j.account){showAccount(j.account);lockSsh(true)} else lockSsh(false);
+    if(j.account){ loadSsh(); } else lockSsh(false);
   }
 };
 
@@ -907,12 +1004,12 @@ async function confirmarPago(){
   if(!window._payId||!sesion) return;
   const id=window._payId; window._payId=null;
   const j=await api('/api/confirmar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payment_id:id})}).catch(()=>({}));
-  if(j.entregada){ showMsgSsh('ok','Pago aprobado. Tu cuenta Premium ya está activa.'); sshLoaded=false; loadSsh(); }
+  if(j.entregada){ showMsgSsh('ok','Pago aprobado. Tu cuenta Premium ya está activa.'); avisarPago(true); sshLoaded=false; loadSsh(); }
 }
 // Llamado desde el módulo de Firebase cuando cambia el estado de sesión
 window.onAuthChange=async(user,getToken)=>{
-  if(user&&!user.emailVerified){ sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); openVerify(user.email); refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
-  if(!user){ pendingVerify=null; closeVerify(); sesion=null; idToken=null; miCuentaSsh=null; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
+  if(user&&!user.emailVerified){ sesion=null; idToken=null; miCuentaSsh=null; misCuentas=[]; sshHas=false; sshLoaded=false; paintAuth(); openVerify(user.email); refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
+  if(!user){ pendingVerify=null; closeVerify(); sesion=null; idToken=null; miCuentaSsh=null; misCuentas=[]; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh') loadSsh(); else refreshSshButton(); if(vista==='perfil') paintPerfil(); return; }
   idToken=await getToken();
   try{
     const r=await fetch(API_BASE+'/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
@@ -920,7 +1017,7 @@ window.onAuthChange=async(user,getToken)=>{
   }catch{ sesion={email:user.email,uid:user.uid}; }
   pendingVerify=null; closeVerify();
   paintAuth(); sshLoaded=false; confirmarPago();
-  if(vista==='ssh') loadSsh(); else refreshSshButton();
+  if(vista==='ssh'||vista==='perfil') loadSsh(); else refreshSshButton();
   if(vista==='perfil') paintPerfil();
 };
 
@@ -928,7 +1025,7 @@ fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
-try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c)renderServer(c)}catch{}
+try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c){aplicarServidores(c);pintarPremium(c);renderServer(srvActual()||c)}}catch{}
 tab((location.hash||'#ssh').slice(1));
 if(pagoQ==='ok'){showMsgSsh('ok','Pago recibido. Estamos creando tu cuenta; aparecerá en "Tu cuenta" en unos segundos.');let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}
 else if(pagoQ){showMsgSsh('err',pagoQ==='pendiente'?'Tu pago está pendiente. Cuando se acredite, la cuenta se creará sola.':'El pago no se completó. No se te ha cobrado.')}
