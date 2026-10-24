@@ -1,6 +1,6 @@
 // POST /api/confirmar {payment_id} -> el cliente vuelve de Mercado Pago: se consulta el pago a la API de MP
 // y, si está aprobado y es suyo, se entrega la cuenta sin depender del webhook. Idempotente (ref = id de pago).
-import { requireUser } from "../lib/fbverify.js";
+import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { entregar } from "../lib/entrega.js";

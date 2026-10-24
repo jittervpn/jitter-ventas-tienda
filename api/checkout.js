@@ -1,5 +1,5 @@
 // POST /api/checkout {items:[ids]} -> crea la preferencia de Mercado Pago y devuelve su URL.
-import { requireUser } from "../lib/fbverify.js";
+import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { MONEDA, pagados } from "../lib/precios.js";

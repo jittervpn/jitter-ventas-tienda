@@ -1,10 +1,10 @@
 // GET  /api/ssh  -> estado de TODOS los servidores (público) + las cuentas SSH y V2Ray del usuario si hay sesión
 // POST /api/ssh  -> crea una cuenta en el servidor elegido: SSH/WebSocket (por defecto) o V2Ray con {type:"v2ray"}
 //                   (EXIGE sesión con correo verificado)
-// La identidad que recibe cada agente es el uid de Firebase: 1 cuenta gratis por usuario y por servidor.
+// La identidad que recibe cada agente es el uid del usuario (lib/auth.js): 1 cuenta gratis por usuario y por servidor.
 import { agentFetch, serverIds, defaultServer } from "../lib/agent.js";
 import { limit, clientIp } from "../lib/ratelimit.js";
-import { currentUser, requireUser, usuarioValido } from "../lib/fbverify.js";
+import { currentUser, requireUser, usuarioValido } from "../lib/auth.js";
 
 import { cors } from "../lib/cors.js";
 const ultimo = (globalThis.__jxServidores ||= {}); // último estado conocido de cada servidor (para mostrarlo aunque esté caído)

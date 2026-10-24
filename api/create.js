@@ -3,7 +3,7 @@ import { limit } from "../lib/ratelimit.js";
 import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 import { cors } from "../lib/cors.js";
-import { requireUser } from "../lib/fbverify.js";
+import { requireUser } from "../lib/auth.js";
 const isValidIPv4 = (ip) =>
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip);
 const isValidSub = (s) => /^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$/.test(s);

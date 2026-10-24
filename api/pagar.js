@@ -1,7 +1,7 @@
 // POST /api/pagar {items, formData, key} -> cobra con el token de tarjeta del Brick y entrega la cuenta.
-// Autocontenido: solo usa archivos que ya existen en el repo (fbverify, ratelimit, cf, precios, agent).
+// Autocontenido: solo usa archivos que ya existen en el repo (auth, ratelimit, cf, precios, agent).
 import { randomUUID } from "node:crypto";
-import { requireUser } from "../lib/fbverify.js";
+import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { pagados } from "../lib/precios.js";
