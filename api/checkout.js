@@ -6,8 +6,10 @@ import { MONEDA, pagados } from "../lib/precios.js";
 import { serverValido } from "../lib/agent.js";
 
 import { cors } from "../lib/cors.js";
+import { cargarPanel } from "../lib/panel.js";
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+  await cargarPanel();
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
   const over = limit(req, { max: 6, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });

@@ -7,11 +7,13 @@ import { limit, clientIp } from "../lib/ratelimit.js";
 import { currentUser, requireUser, usuarioValido } from "../lib/auth.js";
 
 import { cors } from "../lib/cors.js";
+import { cargarPanel } from "../lib/panel.js";
 const ultimo = (globalThis.__jxServidores ||= {}); // último estado conocido de cada servidor (para mostrarlo aunque esté caído)
 const suma = (arr, k) => arr.reduce((a, s) => a + (Number(s[k]) || 0), 0);
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+  await cargarPanel();
   const over = limit(req, { max: req.method === "POST" ? 5 : 30, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
 

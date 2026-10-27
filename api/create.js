@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { limit } from "../lib/ratelimit.js";
-import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
+import { checkEnv, zoneName, maxUsers, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 import { cors } from "../lib/cors.js";
+import { cargarPanel } from "../lib/panel.js";
 import { requireUser } from "../lib/auth.js";
 const isValidIPv4 = (ip) =>
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip);
@@ -11,6 +12,7 @@ const RESERVED = new Set(["www", "mail", "ns1", "ns2", "api", "panel", "admin", 
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+  await cargarPanel();
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
   const over = limit(req, { max: 5, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
@@ -28,7 +30,7 @@ export default async function handler(req, res) {
 
   const device = "u:" + user.uid; // un registro por usuario verificado; no se puede saltar cambiando el identificador del navegador
   const id = identity({ ...req, headers: { ...req.headers, "x-jx-device": device } });
-  const fqdn = `${sub}.${clean(process.env.ZONE_NAME)}`;
+  const fqdn = `${sub}.${zoneName()}`;
 
   try {
     const zone = await zoneId();
@@ -36,7 +38,7 @@ export default async function handler(req, res) {
     const mine = active.find((r) => isMine(r, id));
     if (mine) return res.status(429).json({ error: "Ya tienes un registro activo. Podrás crear otro cuando expire.", record: mine });
 
-    const max = parseInt(process.env.MAX_USERS || "100", 10);
+    const max = maxUsers();
     if (active.length >= max) return res.status(503).json({ error: "Se alcanzó el límite de usuarios. Inténtalo más tarde." });
 
     const taken = await cfRequest(`/zones/${zone}/dns_records?name=${fqdn}`);
