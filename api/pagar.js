@@ -9,10 +9,8 @@ import { serverValido } from "../lib/agent.js";
 import { entregar } from "../lib/entrega.js";
 
 import { cors } from "../lib/cors.js";
-import { cargarPanel } from "../lib/panel.js";
 export default async function handler(req, res) {
   if (cors(req, res)) return;
-  await cargarPanel();
   try {
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
     const over = limit(req, { max: 6, windowMs: 60000 });
@@ -61,6 +59,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ status: pay.status, detalle: pay.status_detail });
   } catch (e) {
     console.error("api/pagar error:", e.message);
-    return res.status(502).json({ error: "No se pudo procesar el pago: " + e.message });
+    return res.status(502).json({ error: "No se pudo procesar el pago. Inténtalo de nuevo o escríbenos por Telegram." });
   }
 }

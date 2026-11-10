@@ -1,18 +1,22 @@
 import crypto from "node:crypto";
 import { limit } from "../lib/ratelimit.js";
-import { checkEnv, zoneName, maxUsers, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
+import { checkEnv, cfRequest, zoneId, clean, listActive, getCookie, identity, isMine, makeComment, incrementTotal, SEVEN_DAYS_MS } from "../lib/cf.js";
 
 import { cors } from "../lib/cors.js";
-import { cargarPanel } from "../lib/panel.js";
 import { requireUser } from "../lib/auth.js";
 const isValidIPv4 = (ip) =>
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip);
+// Solo IPs públicas: nada de 10.x, 127.x, 192.168.x, 172.16-31.x, 169.254.x, 0.x, CGNAT, multicast ni reservadas.
+const isPublicIPv4 = (ip) => {
+  const [a, b] = ip.split(".").map(Number);
+  return !(a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) || (a === 198 && (b === 18 || b === 19)));
+};
 const isValidSub = (s) => /^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$/.test(s);
 const RESERVED = new Set(["www", "mail", "ns1", "ns2", "api", "panel", "admin", "ftp", "smtp", "cpanel"]);
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
-  await cargarPanel();
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
   const over = limit(req, { max: 5, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
@@ -21,16 +25,18 @@ export default async function handler(req, res) {
   const err = checkEnv();
   if (err) return res.status(500).json({ error: err });
 
-  const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+  let body = {};
+  try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; }
+  catch { return res.status(400).json({ error: "Datos inválidos." }); }
   const sub = String(body.subdomain || "").trim().toLowerCase();
   const ip = String(body.ip || "").trim();
   if (!isValidSub(sub)) return res.status(400).json({ error: "Subdominio inválido: solo letras, números y guiones (2-32 caracteres)." });
   if (RESERVED.has(sub)) return res.status(400).json({ error: "Ese subdominio está reservado." });
-  if (!isValidIPv4(ip)) return res.status(400).json({ error: "IP inválida. Usa una IPv4 pública, por ejemplo 203.0.113.10." });
+  if (!isValidIPv4(ip) || !isPublicIPv4(ip)) return res.status(400).json({ error: "IP inválida. Usa una IPv4 pública, por ejemplo 203.0.113.10." });
 
   const device = "u:" + user.uid; // un registro por usuario verificado; no se puede saltar cambiando el identificador del navegador
   const id = identity({ ...req, headers: { ...req.headers, "x-jx-device": device } });
-  const fqdn = `${sub}.${zoneName()}`;
+  const fqdn = `${sub}.${clean(process.env.ZONE_NAME)}`;
 
   try {
     const zone = await zoneId();
@@ -38,7 +44,7 @@ export default async function handler(req, res) {
     const mine = active.find((r) => isMine(r, id));
     if (mine) return res.status(429).json({ error: "Ya tienes un registro activo. Podrás crear otro cuando expire.", record: mine });
 
-    const max = maxUsers();
+    const max = parseInt(process.env.MAX_USERS || "100", 10);
     if (active.length >= max) return res.status(503).json({ error: "Se alcanzó el límite de usuarios. Inténtalo más tarde." });
 
     const taken = await cfRequest(`/zones/${zone}/dns_records?name=${fqdn}`);
