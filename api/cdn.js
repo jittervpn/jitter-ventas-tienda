@@ -9,6 +9,11 @@ import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
 import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE } from "../lib/cdn.js";
 
+// Con la API oficial cada servicio gasta saldo REAL. Por defecto solo pueden crear/renovar los correos de CDN_PERMITIDOS
+// (separados por comas). Cuando quieras abrirlo a todos los clientes: CDN_ABIERTO=1.
+const permitidos = () => String(process.env.CDN_PERMITIDOS || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
+const puedeCrear = (u) => process.env.CDN_ABIERTO === "1" || permitidos().includes(String(u.email || "").toLowerCase());
+
 const fallo = (res, e) => {
   const codigo = e.codigo || "INTERNAL_ERROR";
   console.error("cdn:", codigo, e.message);
@@ -31,10 +36,11 @@ export default async function handler(req, res) {
         return res.json({ estado: String(pick(o, "status", "state") || "").toLowerCase(), error: err ? mensaje(String(pick(typeof err === "object" ? err : { code: err }, "code") || err).toUpperCase()) : undefined });
       }
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
-      return res.json({ services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE() });
+      return res.json({ services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), puedeCrear: puedeCrear(u) });
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
+    if (!puedeCrear(u)) return res.status(403).json({ error: "El CDN está en pruebas y todavía no está disponible para tu cuenta.", codigo: "EN_PRUEBAS" });
     let b = {};
     try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { return res.status(400).json({ error: "Datos inválidos." }); }
 

@@ -507,6 +507,7 @@
   .cdnact{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px}
   .cdnedit{display:flex;gap:10px;padding:0 14px 14px}.cdnedit input{flex:1;min-width:0;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink);font:500 14px "JetBrains Mono",ui-monospace,monospace}
   #cdnMsg2{margin:0 0 14px}
+  #cdnList.noedit .cdnact,#cdnList.noedit .cdnedit{display:none}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047047508633424"
      crossorigin="anonymous"></script>
@@ -1337,6 +1338,8 @@ function pintarCdn(){
   if(cdnErr){ aviso(cdnErr,'Reintentar',cdnRecargar); lista.innerHTML=''; return; }
   if(!cdnData){ gate.innerHTML='<div class="hint">Cargando…</div>'; form.hidden=true; return; }
   gate.innerHTML=''; form.hidden=false;
+  g('cdnList').classList.toggle('noedit',cdnData.puedeCrear===false);
+  if(cdnData.puedeCrear===false){ gate.innerHTML='<div class="hint">Estamos probando este servicio. Pronto estará disponible para todos los clientes.</div>'; form.hidden=true; }
   const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo+'-'; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
   const o=g('cdnOrigin'); if(!o.value){ const sg=(ultimoSsh&&ultimoSsh.servers||[]).find(x=>x.host); if(sg) o.value=sg.host; }
   const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=lleno||cdnBusy;
