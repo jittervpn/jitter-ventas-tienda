@@ -75,11 +75,15 @@ Variables en Vercel → Settings → Environment Variables (luego Redeploy):
 |---|---|
 | `CDN_API_KEY` | tu clave oficial del CDN (**solo aquí; nunca en archivos ni en GitHub**) |
 | `CDN_API_BASE` | opcional. Por defecto `https://api-cdn.h4x.site` (oficial). Para pruebas: `https://api-cdn.h4x.site/sandbox` |
-| `CDN_PERMITIDOS` | correos que pueden crear/renovar, separados por comas. Ej.: `jittervpn@gmail.com` |
-| `CDN_ABIERTO` | `1` para abrirlo a TODOS los clientes (cada servicio gasta saldo real) |
+| `CDN_PERMITIDOS` | correos de administrador que pueden crear/renovar SIN pagar (pruebas). Ej.: `jittervpn@gmail.com` |
+| `CDN_PRECIO` | precio de cada servicio y de cada renovación (30 días). Por defecto `17000` |
+| `MP_ACCESS_TOKEN` / `MP_PUBLIC_KEY` | Mercado Pago: cobro del CDN (tarjeta en la web y página de Mercado Pago) |
+| `SSH_ACTIVO` | `1` solo si quieres volver a permitir crear cuentas SSH/V2Ray (por defecto desactivado) |
 | `CDN_MAX_POR_CLIENTE` | opcional, por defecto 2 |
 
-- Sin `CDN_PERMITIDOS` ni `CDN_ABIERTO`, nadie puede crear: los clientes ven «Estamos probando este servicio».
+- Los clientes pagan el CDN con Mercado Pago y el servicio se crea solo al aprobarse el pago (también por webhook).
+- Si el servicio no se puede crear por un dato inválido (origen, ruta ocupada…), el pago se devuelve automáticamente.
+- Cambiar el origen de un servicio propio es gratis.
 - La clave vive solo en Vercel: el navegador del cliente nunca la ve.
 - Cada cliente solo ve y toca los servicios cuya ruta empieza por su prefijo (`/c<6 letras>-nombre`).
 - ⚠ El formato de peticiones/respuestas se asumió. Si algo no coincide, se ajusta solo en `CAMPOS` y `mapService()` de `lib/cdn.js`.

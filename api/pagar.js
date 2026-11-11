@@ -1,11 +1,11 @@
-// POST /api/pagar {items, formData, key} -> cobra con el token de tarjeta del Brick y entrega la cuenta.
-// Autocontenido: solo usa archivos que ya existen en el repo (auth, ratelimit, cf, precios, agent).
+// POST /api/pagar {cdn:{origen,ruta}|{renovar:id}, formData, key} -> cobra con el token de tarjeta del Brick y entrega el CDN.
 import { randomUUID } from "node:crypto";
 import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
-import { pagados } from "../lib/precios.js";
-import { serverValido } from "../lib/agent.js";
+import { CATALOGO, PLAN_CDN } from "../lib/precios.js";
+import { prepararCdn } from "../lib/cdnventa.js";
+import { mensaje, estadoHttp } from "../lib/cdn.js";
 import { entregar } from "../lib/entrega.js";
 
 import { cors } from "../lib/cors.js";
@@ -24,25 +24,24 @@ export default async function handler(req, res) {
     try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; }
     catch { return res.status(400).json({ error: "Datos inválidos." }); }
 
-    const ids = Array.isArray(b.items) ? b.items.slice(0, 5).map(String) : [];
-    const items = pagados(ids);
-    if (!items.length || items.includes(undefined)) return res.status(400).json({ error: "Carrito inválido." });
     const fd = b.formData || {};
     if (!fd.token || !fd.payment_method_id) return res.status(400).json({ error: "Datos de tarjeta incompletos." });
+    const item = CATALOGO.find((c) => c.id === PLAN_CDN);
+    let ped;
+    try { ped = await prepararCdn(user, b.cdn); }
+    catch (e) { const c = e.codigo || "INTERNAL_ERROR"; return res.status(estadoHttp(c)).json({ error: mensaje(c), codigo: c }); }
+    if (ped.error) return res.status(ped.status).json({ error: ped.error, codigo: ped.codigo });
 
-    const total = items.reduce((a, c) => a + c.precio, 0); // el importe lo fija el servidor
     const key = /^[\w-]{8,64}$/.test(String(b.key || "")) ? b.key : randomUUID();
-    const base = clean(process.env.SITE_URL) || `https://${req.headers.host}`;
-
     const r = await fetch("https://api.mercadopago.com/v1/payments", {
       method: "POST",
       headers: { authorization: "Bearer " + token, "content-type": "application/json", "X-Idempotency-Key": key },
       body: JSON.stringify({
-        transaction_amount: total, token: fd.token, installments: 1,
-        description: items.map((c) => c.nombre).join(", "),
+        transaction_amount: item.precio, token: fd.token, installments: 1, // el importe lo fija el servidor
+        description: ped.descripcion,
         payment_method_id: fd.payment_method_id, issuer_id: fd.issuer_id,
         payer: { email: fd.payer?.email || user.email, identification: fd.payer?.identification },
-        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}:${serverValido(b.server)}`,
+        external_reference: ped.ref,
         notification_url: `https://${req.headers.host}/api/mp-webhook`, binary_mode: true, statement_descriptor: "JITTERX",
       }),
     });
@@ -54,7 +53,7 @@ export default async function handler(req, res) {
     if (pay.status === "approved") {
       let e = { ok: false };
       try { e = await entregar(pay); } catch (err) { console.error("MP entrega falló", pay.id, err.message); }
-      return res.status(200).json({ status: "approved", entregada: !!e.ok });
+      return res.status(200).json({ status: "approved", entregada: !!e.ok, op: e.op || null, devuelto: !!e.devuelto, error: e.ok ? undefined : e.error });
     }
     return res.status(200).json({ status: pay.status, detalle: pay.status_detail });
   } catch (e) {

@@ -54,6 +54,8 @@ export default async function handler(req, res) {
       });
     }
 
+    // La tienda ya no crea cuentas SSH/V2Ray. Para volver a activarlo: variable SSH_ACTIVO=1 en Vercel.
+    if (req.method === "POST" && process.env.SSH_ACTIVO !== "1") return res.status(410).json({ error: "La creación de cuentas SSH y V2Ray ya no está disponible." });
     if (req.method === "POST") {
       const u = await requireUser(req, res);   // responde 401/403 por sí solo
       if (!u) return;

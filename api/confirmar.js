@@ -1,5 +1,5 @@
 // POST /api/confirmar {payment_id} -> el cliente vuelve de Mercado Pago: se consulta el pago a la API de MP
-// y, si está aprobado y es suyo, se entrega la cuenta sin depender del webhook. Idempotente (ref = id de pago).
+// y, si está aprobado y es suyo, se entrega el servicio sin depender del webhook. Idempotente (ref = id de pago).
 import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     if (pay.status !== "approved") return res.status(200).json({ status: pay.status, entregada: false });
 
     const e = await entregar(pay);
-    return res.status(200).json({ status: "approved", entregada: !!e.ok });
+    return res.status(200).json({ status: "approved", entregada: !!e.ok, op: e.op || null, devuelto: !!e.devuelto, error: e.ok ? undefined : e.error });
   } catch (e) {
     console.error("api/confirmar error:", e.message);
     return res.status(502).json({ error: "No se pudo confirmar el pago." });
