@@ -8,7 +8,7 @@ import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
 import { CATALOGO, MONEDA, PLAN_CDN } from "../lib/precios.js";
-import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE } from "../lib/cdn.js";
+import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE, limpiarSlug, rutaDe } from "../lib/cdn.js";
 
 // Los clientes compran el CDN con Mercado Pago (/api/pagar y /api/checkout). Crear o renovar SIN pagar desde aquí
 // solo lo pueden los correos de CDN_PERMITIDOS (separados por comas): pensado para el dueño y para pruebas.
@@ -50,13 +50,13 @@ export default async function handler(req, res) {
     if (gratis && !puedeCrear(u)) return res.status(402).json({ error: "Para crear o renovar un servicio CDN hay que pagarlo.", codigo: "PAGO" });
 
     if (b.accion === "crear") {
-      const slug = String(b.ruta || "").trim().toLowerCase().replace(/^\/+/, "").replace(new RegExp("^" + prefijo(u.uid) + "-"), "");
+      const slug = limpiarSlug(u.uid, b.ruta);
       const origen = origenValido(b.origen);
       if (!SLUG_RE.test(slug)) return res.status(400).json({ error: mensaje("INVALID_PATH"), codigo: "INVALID_PATH" });
       if (!origen) return res.status(400).json({ error: "El origen debe ser un dominio válido o una IPv4 pública.", codigo: "INVALID_DOMAIN" });
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
       if (mios.length >= MAX_POR_CLIENTE()) return res.status(409).json({ error: `Ya tienes el máximo de servicios CDN (${MAX_POR_CLIENTE()}).`, codigo: "LIMITE" });
-      const path = "/" + prefijo(u.uid) + "-" + slug;
+      const path = rutaDe(u.uid, slug);
       const idem = crypto.createHash("sha256").update(u.uid + "|" + origen + "|" + path).digest("hex").slice(0, 40);
       const j = await cdn("POST", "/v1/services", CAMPOS.crear(origen, path), { "idempotency-key": idem });
       const op = operacionId(j);
