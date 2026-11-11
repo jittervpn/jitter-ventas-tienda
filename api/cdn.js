@@ -13,7 +13,8 @@ import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, ope
 // Los clientes compran el CDN con Mercado Pago (/api/pagar y /api/checkout). Crear o renovar SIN pagar desde aquí
 // solo lo pueden los correos de CDN_PERMITIDOS (separados por comas): pensado para el dueño y para pruebas.
 const permitidos = () => String(process.env.CDN_PERMITIDOS || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
-const puedeCrear = (u) => process.env.CDN_ABIERTO === "1" || permitidos().includes(String(u.email || "").toLowerCase());
+// (CDN_ABIERTO ya no se usa: con la venta activa habría regalado servicios y mostrado tu saldo a todos los clientes)
+const puedeCrear = (u) => !!u.email && permitidos().includes(String(u.email).toLowerCase());
 
 const fallo = (res, e, admin) => {
   const codigo = e.codigo || "INTERNAL_ERROR";

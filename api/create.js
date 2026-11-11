@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     const zone = await zoneId();
     const active = await listActive();
     const mine = active.find((r) => isMine(r, id));
-    if (mine) return res.status(429).json({ error: "Ya tienes un registro activo. Podrás crear otro cuando expire.", record: mine });
+    if (mine) return res.status(429).json({ error: "Ya tienes un registro activo. Podrás crear otro cuando expire.", record: { id: mine.id, name: mine.name, ip: mine.ip, expiresAt: mine.expiresAt } });
 
     const max = parseInt(process.env.MAX_USERS || "100", 10);
     if (active.length >= max) return res.status(503).json({ error: "Se alcanzó el límite de usuarios. Inténtalo más tarde." });
@@ -60,6 +60,7 @@ export default async function handler(req, res) {
 
     res.status(201).json({ ok: true, record: { id: dns.id, name: fqdn, ip, createdAt: now, expiresAt }, device });
   } catch (e) {
-    res.status(502).json({ error: "Cloudflare rechazó la operación: " + e.message });
+    console.error("api/create:", e.message);
+    res.status(502).json({ error: "No se pudo crear el registro. Inténtalo de nuevo en unos minutos." });
   }
 }

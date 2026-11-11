@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       zone: clean(process.env.ZONE_NAME),
     });
   } catch (e) {
-    res.status(502).json({ error: "Cloudflare: " + e.message });
+    console.error("api/stats:", e.message);
+    res.status(502).json({ error: "El servicio de subdominios no responde." });
   }
 }

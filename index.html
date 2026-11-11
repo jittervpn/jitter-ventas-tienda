@@ -505,6 +505,14 @@
   .cdnpath span{color:var(--muted);font:600 15px "JetBrains Mono",ui-monospace,monospace;white-space:nowrap}
   .cdnpath input{padding-left:2px}
   .cdnact{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px}
+  .cdnprev{margin:-4px 0 14px;padding:10px 12px;border:1px dashed var(--line2);border-radius:12px;font-size:13px;color:var(--ink2);word-break:break-all}
+  .cdnprev code{font-family:'JetBrains Mono',monospace;color:var(--ink)}
+  .cdnprev .tipo{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:rgba(79,148,255,.14);color:#9cc2ff;font-size:11px;font-weight:700}
+  .trust{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:14px;color:var(--muted);font-size:12.5px}
+  .trust span{display:inline-flex;align-items:center;gap:6px}.trust svg{width:14px;height:14px;color:var(--ok)}
+  .cdntime{padding:4px 14px 12px}.cdntime small{color:var(--muted);font-size:12px}
+  .cdntime .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+  .cdntime .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--accent))}.cdntime .bar i.low{background:linear-gradient(90deg,#f59e0b,#ef4444)}
   .cdnedit{display:flex;gap:10px;padding:0 14px 14px}.cdnedit input{flex:1;min-width:0;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink);font:500 14px "JetBrains Mono",ui-monospace,monospace}
   #cdnMsg2{margin:0 0 14px}
   .cdnprice{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border:1px solid rgba(79,148,255,.35);background:rgba(79,148,255,.08);border-radius:14px}
@@ -519,7 +527,7 @@
 <body>
 
 <nav class="nav"><div class="in">
-  <div style="display:flex;align-items:center;gap:10px"><button class="burger" id="burger" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a></div>
+  <div style="display:flex;align-items:center;gap:10px"><button class="burger" id="burger" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud CDN</small></div></a></div>
   <div class="topnav" role="navigation" aria-label="Secciones">
     <button data-tab="home">Resumen</button><button data-tab="cdn">CDN</button><button data-tab="dns">Dominio</button><button data-tab="perfil">Perfil</button>
   </div>
@@ -629,7 +637,9 @@
         <div id="cdnForm" style="margin-top:14px" hidden>
           <div class="f"><label for="cdnOrigin">Origen (dominio o IP de tu servidor)</label><div class="field"><input id="cdnOrigin" placeholder="mi-servidor.com o 203.0.113.10" autocomplete="off" autocapitalize="none" spellcheck="false"></div></div>
           <div class="f"><label for="cdnSlug">Nombre de tu ruta</label><div class="field cdnpath"><span id="cdnPre">/</span><input id="cdnSlug" placeholder="miruta" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="hint">2 a 20 letras minúsculas o números, sin guiones ni espacios. Tu ruta final lleva delante un prefijo propio para que nadie más la use.</div></div>
+          <div class="cdnprev" id="cdnPrev" hidden></div>
           <button class="primary" id="cdnGo" type="button"><span class="spinner"></span><span id="cdnGoT">Pagar y crear mi CDN</span></button>
+          <div class="trust"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Pago seguro con Mercado Pago</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Se crea al instante</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Devolución automática si falla</span></div>
           <div style="text-align:center;margin-top:12px"><a href="#" id="cdnAlt" style="color:var(--muted);font-size:13px">Prefiero pagar en la página de Mercado Pago</a></div>
           <button class="primary ghost2" id="cdnFree" type="button" hidden><span class="spinner"></span><span>Crear sin cobro (solo administrador)</span></button>
           <div class="msg" id="cdnMsg"></div>
@@ -782,7 +792,7 @@ function repintarEstado(){
   if(estadoApi.dns===true||estadoApi.cdn===true) setStatus('on','Sistema operativo');
   else if(estadoApi.dns===false&&Date.now()-t0Estado>2500) setStatus('off','Sin conexión con la API');
 }
-const showMsg=(cls,txt)=>{const m=$('#msg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+const showMsg=(cls,txt)=>{const m=$('#msg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+esc(txt)+'</span>'};
 
 function updatePreview(){
   const s=$('#sub').value.trim().toLowerCase()||'mi-servidor';
@@ -801,12 +811,12 @@ function showRecord(r){
   if(!r){$('#mine').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>Todavía no has creado ningún registro.<br>Aparecerá aquí en cuanto lo hagas.</div>';return}
   const total=7*864e5,left=Math.max(0,r.expiresAt-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),pct=Math.max(2,Math.round(left/total*100));
   $('#mine').innerHTML=
-    '<div class="rec"><div class="top"><span class="name">'+r.name+'</span><span class="pill">Activo</span></div>'+
-    '<dl><div><dt>Tipo</dt><dd>A</dd></div><div><dt>Apunta a</dt><dd>'+r.ip+'</dd></div>'+
+    '<div class="rec"><div class="top"><span class="name">'+esc(r.name)+'</span><span class="pill">Activo</span></div>'+
+    '<dl><div><dt>Tipo</dt><dd>A</dd></div><div><dt>Apunta a</dt><dd>'+esc(r.ip)+'</dd></div>'+
     '<div><dt>Creado</dt><dd>'+(r.createdAt?fmt(r.createdAt):'—')+'</dd></div><div><dt>Expira</dt><dd>'+fmt(r.expiresAt)+'</dd></div></dl>'+
     '<div class="time"><small>Tiempo restante: <b>'+d+' d '+h+' h</b></small><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
     '<div class="actions"><button class="btn" id="cp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar dominio</button>'+
-    '<a class="btn" href="http://'+r.name+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>Abrir</a></div></div>';
+    '<a class="btn" href="http://'+encodeURI(r.name)+'" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>Abrir</a></div></div>';
   $('#cp').onclick=e=>{navigator.clipboard.writeText(r.name);e.currentTarget.lastChild.textContent='Copiado';};
 }
 
@@ -818,17 +828,22 @@ async function load(){
     $('#suffix').textContent='.'+zone; updatePreview();
     if(vista==='dns') pintarStatsDns();
     estadoApi.dns=true; repintarEstado();
-    let remote=null;
-    try{const m=await api('/api/me'); remote=m.record||null;}catch(e){console.warn('api/me:',e.message)}
-    const rec=remote||JSON.parse(localStorage.getItem('jx_record')||'null');
-    const valid=rec&&rec.expiresAt>Date.now()?rec:null;
-    if(remote) localStorage.setItem('jx_record',JSON.stringify(remote));
-    showRecord(valid); lockButton(!!valid); if(vista==='home') pintarHome();
+    await cargarMiRegistro();
   }catch(e){
     estadoApi.dns=false; repintarEstado(); setTimeout(repintarEstado,2600);
     showRecord(null);
     showMsg('err','El servicio de subdominios no responde. '+(e.message||'Revisa la configuración de Cloudflare en Vercel y vuelve a desplegar.'));
   }
+}
+// El subdominio de la cuenta con sesión. Sin sesión no se muestra ninguno (ni el guardado de otra persona en este navegador).
+async function cargarMiRegistro(){
+  let remote=null, ok=false;
+  if(localStorage.getItem('jx_token')){ try{const m=await api('/api/me'); ok=!m.error; remote=m.record||null;}catch(e){console.warn('api/me:',e.message)} }
+  else localStorage.removeItem('jx_record');
+  const rec=ok?remote:JSON.parse(localStorage.getItem('jx_record')||'null');
+  const valid=rec&&rec.expiresAt>Date.now()?rec:null;
+  try{ valid?localStorage.setItem('jx_record',JSON.stringify(valid)):localStorage.removeItem('jx_record'); }catch{}
+  showRecord(valid); lockButton(!!valid); if(vista==='home') pintarHome();
 }
 
 $('#go').onclick=async()=>{
@@ -837,7 +852,7 @@ $('#go').onclick=async()=>{
     body:JSON.stringify({subdomain:$('#sub').value,ip:$('#ip').value})}).catch(e=>({error:e.message}));
   if(j.ok){
     localStorage.setItem('jx_record',JSON.stringify(j.record));
-    showMsg('ok','Registro creado: <b>'+j.record.name+'</b> → '+j.record.ip+'. Estará activo en menos de un minuto.');
+    showMsg('ok','Registro creado: '+j.record.name+' → '+j.record.ip+'. Estará activo en menos de un minuto.');
     showRecord(j.record); lockButton(true); load();
   }else{
     showMsg('err',j.error||'Error desconocido');
@@ -1033,7 +1048,7 @@ function pintarCdn(){
   if(cdnErr){ aviso(cdnErr,'Reintentar',cdnRecargar); lista.innerHTML=''; return; }
   if(!cdnData){ gate.innerHTML='<div class="hint">Cargando…</div>'; form.hidden=true; return; }
   gate.innerHTML=''; form.hidden=false;
-  const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
+  const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo; cdnVista(); g('cdnCount').textContent=sv.length+' de '+cdnData.max;
   g('cdnGoT').textContent=p?'Pagar '+p+' y crear mi CDN':'Pagar y crear mi CDN';
   g('cdnFree').hidden=!cdnData.admin;
   let sb=g('cdnSaldo'); if(!sb){ sb=document.createElement('div'); sb.id='cdnSaldo'; sb.className='hint'; sb.style.marginTop='10px'; g('cdnFree').after(sb); }
@@ -1045,7 +1060,8 @@ function pintarCdn(){
     const [et,cl]=cdnEstado(x.estado), pay='GET '+x.path+' HTTP/1.1[crlf]Host: '+x.host+'[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]';
     return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+esc(x.path)+'</span><span class="pill'+cl+'">'+et+'</span></div>'+
       '<div class="cred" style="padding:14px 14px 0">'+(x.host?row('Host CDN',x.host)+row('Puerto',80):'')+row('Ruta',x.path)+row('Origen',x.origin||'—')+(x.expira?row('Vence',new Date(x.expira).toLocaleDateString('es')+' · '+restaTxt(x.expira-Date.now())):'')+'</div>'+
-      (x.host?'<div style="padding:0 14px">'+payBlock('Payload CloudFront',pay)+'</div>':'')+
+      (x.expira?(()=>{ const r=restante(x.expira), pct=Math.max(2,Math.min(100,Math.round(r.left/(30*864e5)*100))); return '<div class="cdntime"><small>Quedan <b>'+r.txt+'</b></small><div class="bar"><i class="'+(r.left<3*864e5?'low':'')+'" style="width:'+pct+'%"></i></div></div>'; })():'')+
+      (x.host?'<div style="padding:0 14px">'+payBlock('Payload CloudFront',pay)+'<button class="pcopy" data-copy="'+esc(x.host+':80\n'+pay)+'" style="margin-top:8px">'+copyIcon+'Copiar host, puerto y payload</button></div>':'')+
       '<div class="cdnact"><button class="pcopy" data-cdn="renovar" data-id="'+esc(x.id)+'">Renovar'+(p?' · '+p:'')+'</button>'+(cdnData.admin?'<button class="pcopy" data-cdn="renovarGratis" data-id="'+esc(x.id)+'">Renovar sin cobro</button>':'')+'<button class="pcopy" data-cdn="origen" data-id="'+esc(x.id)+'">Cambiar origen</button></div>'+
       '<div class="cdnedit" hidden><input class="cdnoin" placeholder="nuevo.dominio.com o IP" value="'+esc(x.origin||'')+'" autocapitalize="none" spellcheck="false"><button class="pcopy" data-cdn="guardar" data-id="'+esc(x.id)+'">Guardar</button></div></div>';
   }).join(''):'<div class="empty">Aún no tienes servicios CDN.<br>Contrata el primero con el formulario de arriba.</div>';
@@ -1130,7 +1146,18 @@ document.getElementById('cdnGo').onclick=()=>{ const p=cdnPedidoNuevo(); if(p) c
 document.getElementById('cdnAlt').onclick=e=>{ e.preventDefault(); const p=cdnPedidoNuevo(); if(p) cdnPagarMP(p,'cdnMsg'); };
 document.getElementById('cdnAlt2').onclick=e=>{ e.preventDefault(); if(cdnPedido&&cdnPedido.renovar) cdnPagarMP(cdnPedido,'cdnMsg2'); };
 document.getElementById('cdnFree').onclick=cdnCrearGratis;
-document.getElementById('cdnSlug').addEventListener('input',e=>{ const v=e.target.value.toLowerCase().replace(/[^a-z0-9]/g,''); if(v!==e.target.value) e.target.value=v; });
+document.getElementById('cdnSlug').addEventListener('input',e=>{ const v=e.target.value.toLowerCase().replace(/[^a-z0-9]/g,''); if(v!==e.target.value) e.target.value=v; cdnVista(); });
+document.getElementById('cdnOrigin').addEventListener('input',cdnVista);
+// Vista previa de lo que se va a crear (antes de pagar)
+function cdnVista(){
+  const box=document.getElementById('cdnPrev'); if(!box||!cdnData) return;
+  const o=document.getElementById('cdnOrigin').value.trim().toLowerCase(), r=document.getElementById('cdnSlug').value.trim();
+  if(!o&&!r){ box.hidden=true; return; }
+  const ip=/^\d{1,3}(\.\d{1,3}){3}$/.test(o), dom=/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(o);
+  box.hidden=false;
+  box.innerHTML='Tu ruta: <code>/'+esc(cdnData.prefijo)+esc(r||'…')+'</code>'+(r&&r.length<2?' <span class="tipo" style="background:rgba(239,68,68,.15);color:#fca5a5">mínimo 2</span>':'')+
+    '<br>Origen: <code>'+esc(o||'…')+'</code>'+(o?'<span class="tipo"'+(ip||dom?'':' style="background:rgba(239,68,68,.15);color:#fca5a5"')+'>'+(ip?'IP':dom?'Dominio':'Revisa el formato')+'</span>':'');
+}
 document.getElementById('cdnSlug').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('cdnGo').click(); });
 
 /* ---------- resumen ---------- */
@@ -1173,7 +1200,7 @@ let sesion=null, mailPend='', codeExp=0, reCool=0, reTimer=null;
 const TOKEN_KEY='jx_token';
 const getTok=()=>{try{return localStorage.getItem(TOKEN_KEY)}catch{return null}};
 const setTok=t=>{try{t?localStorage.setItem(TOKEN_KEY,t):localStorage.removeItem(TOKEN_KEY)}catch{}};
-const showMsgM=(cls,txt)=>{const m=$('#mMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
+const showMsgM=(cls,txt)=>{const m=$('#mMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+esc(txt)+'</span>'};
 
 function paintAuth(){
   const box=$('#auth');
@@ -1266,10 +1293,11 @@ function resetEstado(){ sesion=null; cdnData=null; cdnErr=''; cdnPedido=null; ce
 function aplicarSesion(user){
   if(!user){
     resetEstado(); paintAuth(); pintarHome(); pintarCdn(); pintarBadgesMenu(); if(vista==='perfil') paintPerfil();
+    cargarMiRegistro();
     return;
   }
   sesion=user; paintAuth(); pintarHome(); if(vista==='perfil') paintPerfil();
-  confirmarPago(); cdnRecargar();
+  confirmarPago(); cdnRecargar(); cargarMiRegistro();
 }
 function cerrarSesion(){ setTok(null); aplicarSesion(null); }
 

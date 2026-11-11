@@ -3,6 +3,7 @@
 import crypto from "node:crypto";
 import { clean } from "../lib/cf.js";
 import { entregar } from "../lib/entrega.js";
+import { limit } from "../lib/ratelimit.js";
 
 function firmaOk(req, dataId) {
   const secret = clean(process.env.MP_WEBHOOK_SECRET);
@@ -19,6 +20,8 @@ export default async function handler(req, res) {
   const tipo = q.type || body.type || q.topic;
   const id = q["data.id"] || body?.data?.id || (q.topic === "payment" ? q.id : null);
   if (tipo !== "payment" || !id) return res.status(200).json({ ignored: true });
+  if (!/^\d{4,20}$/.test(String(id))) return res.status(200).json({ ignored: "id inválido" });
+  if (limit(req, { max: 120, windowMs: 60000 })) return res.status(429).json({ error: "Demasiadas peticiones" });
   if (!firmaOk(req, id)) return res.status(401).json({ error: "Firma inválida" });
 
   const token = clean(process.env.MP_ACCESS_TOKEN);
