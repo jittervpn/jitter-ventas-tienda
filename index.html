@@ -3,17 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0f1c">
+<meta name="theme-color" content="#26282c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta http-equiv="cache-control" content="no-cache">
 <title>Jitterx Panel Cloud — Cuentas SSH y subdominios para tu VPS</title>
+<link rel="canonical" href="https://jitterxcloud.shop/">
 <meta name="description" content="Cuentas SSH gratis y Premium para HTTP Custom y NetMod, y subdominios temporales para tu VPS. Compra con tarjeta o Mercado Pago.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0f1c; --bg2:#0e1526; --card:#111a2e; --card2:#15203a; --line:#1f2c49; --line2:#2b3a5e;
-    --ink:#eef2fb; --ink2:#aab6d3; --muted:#6b7a9c;
-    --accent:#22d3ee; --accent2:#0ea5e9; --ok:#34d399; --err:#fb7185; --warn:#fbbf24;
+    --bg:#26282c; --bg2:#1d1f22; --card:#151618; --card2:#1b1c1f; --line:#34373c; --line2:#44484e;
+    --ink:#f3f4f6; --ink2:#b5bac3; --muted:#868b95;
+    --accent:#4f94ff; --accent2:#7c6cff; --btn:#0b66e8; --ok:#34d399; --err:#fb7185; --warn:#fbbf24;
     --r:16px; --r2:10px; --shadow:0 20px 50px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -23,7 +29,7 @@
   body{background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
   body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     background:
-      radial-gradient(900px 500px at 85% -10%,rgba(34,211,238,.12),transparent 60%),
+      radial-gradient(900px 500px at 85% -10%,rgba(79,148,255,.12),transparent 60%),
       radial-gradient(700px 500px at -10% 110%,rgba(14,165,233,.08),transparent 60%),
       linear-gradient(var(--bg2) 1px,transparent 1px) 0 0/100% 56px,
       linear-gradient(90deg,var(--bg2) 1px,transparent 1px) 0 0/56px 100%}
@@ -31,10 +37,10 @@
   .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
 
   /* ---------- nav ---------- */
-  .nav{position:sticky;width:100%;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(10,15,28,.75);border-bottom:1px solid var(--line)}
+  .nav{position:sticky;width:100%;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(38,40,44,.75);border-bottom:1px solid var(--line)}
   .nav .in{max-width:1100px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
   .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px;text-decoration:none}
-  .logo i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font-style:normal;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(34,211,238,.35)}
+  .logo i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;font-style:normal;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(79,148,255,.35)}
   .logo small{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:-2px}
   .status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2);white-space:nowrap}
   .status b{width:8px;height:8px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 3px rgba(107,122,156,.2)}
@@ -45,7 +51,7 @@
   /* ---------- layout ---------- */
   main{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:28px 20px 40px}
   .hero{margin-bottom:28px}
-  .eyebrow{display:inline-flex;max-width:100%;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(34,211,238,.3);border-radius:999px;background:rgba(34,211,238,.06);margin-bottom:14px}
+  .eyebrow{display:inline-flex;max-width:100%;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:6px 12px;border:1px solid rgba(79,148,255,.3);border-radius:999px;background:rgba(79,148,255,.06);margin-bottom:14px}
   h1{font-size:clamp(26px,5vw,44px);overflow-wrap:anywhere;line-height:1.1;letter-spacing:-.03em;font-weight:800;max-width:720px}
   h1 span{background:linear-gradient(90deg,var(--accent),#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
   .lead{color:var(--ink2);max-width:620px;margin-top:12px;font-size:16px}
@@ -70,7 +76,7 @@
   .f{margin-top:16px}
   .f label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:7px}
   .field{display:flex;align-items:stretch;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;transition:border-color .15s,box-shadow .15s}
-  .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
+  .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,148,255,.18)}
   .field input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);padding:13px 14px;font:500 15px "JetBrains Mono",monospace}
   .field input::placeholder{color:var(--muted)}
   .field .sfx{display:flex;align-items:center;padding:0 14px;color:var(--ink2);font:500 14px "JetBrains Mono",monospace;background:var(--card2);border-left:1px solid var(--line2);white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px}
@@ -78,8 +84,8 @@
   .preview{margin-top:16px;padding:12px 14px;border-radius:var(--r2);background:var(--bg2);border:1px dashed var(--line2);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .preview code{min-width:0;font-family:"JetBrains Mono",monospace;color:var(--ink);font-size:13px;word-break:break-all}
   .preview .arrow{color:var(--accent)}
-  button.primary{margin-top:20px;width:100%;padding:15px 18px;border:0;border-radius:var(--r2);cursor:pointer;font:700 15px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(34,211,238,.28);transition:transform .12s,box-shadow .12s,opacity .2s;display:flex;align-items:center;justify-content:center;gap:10px}
-  button.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 30px rgba(34,211,238,.36)}
+  button.primary{margin-top:20px;width:100%;padding:15px 18px;border:0;border-radius:var(--r2);cursor:pointer;font:700 15px Inter,sans-serif;color:#04121a;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(79,148,255,.28);transition:transform .12s,box-shadow .12s,opacity .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+  button.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 30px rgba(79,148,255,.36)}
   button.primary:active:not(:disabled){transform:translateY(0)}
   button.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
   button:focus-visible,input:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
@@ -127,7 +133,7 @@
 
   .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
   .prod{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2);padding:18px;display:flex;flex-direction:column;gap:8px}
-  .prod .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(34,211,238,.1);color:var(--accent);border:1px solid rgba(34,211,238,.3)}
+  .prod .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(79,148,255,.1);color:var(--accent);border:1px solid rgba(79,148,255,.3)}
   .prod h3{font-size:17px;font-weight:700}.prod p{color:var(--muted);font-size:13px;flex:1}
   .prod .price{font:800 24px Inter,sans-serif}.prod .price small{font-size:12px;color:var(--muted);font-weight:500}
   .prod button{margin:0;padding:11px;font-size:14px}
@@ -152,7 +158,7 @@
   .switch button{flex:1;padding:9px;border:0;border-radius:6px;background:transparent;color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer}
   .switch button[aria-selected=true]{background:var(--card2);color:var(--ink)}
   .server{border:1px solid var(--line2);border-radius:var(--r2);background:var(--bg2);padding:14px;margin-bottom:18px;position:relative;overflow:hidden}
-  .server.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+  .server.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,148,255,.12)}
   .server .head{display:flex;align-items:flex-start;gap:12px}
   .server .flag{font-size:30px;line-height:1;flex:none}
   .server .who{flex:1;min-width:0}
@@ -226,7 +232,7 @@
   .srvchips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
   .chip{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer}
   .chip small{color:var(--muted);font-weight:500}
-  .chip[aria-pressed=true]{border-color:var(--accent);color:var(--ink);background:rgba(34,211,238,.1)}
+  .chip[aria-pressed=true]{border-color:var(--accent);color:var(--ink);background:rgba(79,148,255,.1)}
   .chip:disabled{opacity:.5;cursor:not-allowed}
   .srvpick{margin-top:12px}
   .srvpick label{display:block;font:600 13px Inter,sans-serif;color:var(--ink2);margin-bottom:6px}
@@ -259,6 +265,248 @@
   footer{border-top:1px solid var(--line);padding:20px;margin-bottom:8px;text-align:center;font-size:12px;color:var(--muted)}
   footer b{color:var(--ink2);font-weight:600}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  /* ===== refinamiento visual ===== */
+  :root{--r:14px;--shadow:0 1px 0 rgba(255,255,255,.03) inset,0 12px 32px rgba(0,0,0,.22)}
+  body::before{background:radial-gradient(1000px 520px at 80% -15%,rgba(79,148,255,.10),transparent 62%)}
+  main{padding:40px 20px 56px}
+  .nav{background:rgba(38,40,44,.88)}
+  .logo i{background:var(--accent);box-shadow:none}
+  .logo small{text-transform:none;letter-spacing:.02em}
+  .hero{margin-bottom:6px}
+  .eyebrow{text-transform:none;letter-spacing:0;font-size:13px;padding:5px 12px}
+  h1{font-size:clamp(30px,5.6vw,52px);line-height:1.08;letter-spacing:-.035em;max-width:760px;text-wrap:balance}
+  h1 span{background:none;-webkit-text-fill-color:currentColor;color:inherit}
+  .lead{font-size:17px;line-height:1.65;max-width:600px}
+  .trust{list-style:none;display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:22px;font-size:14px;color:var(--ink2)}
+  .trust li{display:flex;align-items:center;gap:8px}
+  .trust svg{width:16px;height:16px;color:var(--ok);flex:none}
+  .stats{gap:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:30px 0;overflow:hidden}
+  .stat{background:none;border:0;border-radius:0;padding:18px 24px}
+  .stat+.stat{border-left:1px solid var(--line)}
+  .stat label{text-transform:none;letter-spacing:0;font-size:13px;font-weight:500}
+  .stat b{font-size:30px}
+  .card{padding:28px}
+  .card h2{font-size:19px;letter-spacing:-.015em}
+  button.primary{background:var(--accent);box-shadow:none;min-height:50px;border-radius:12px}
+  button.primary:hover:not(:disabled){background:#5ae3f6;box-shadow:0 8px 24px rgba(79,148,255,.22)}
+  .tabs button[aria-selected=true],.authbtns button.cta{background:var(--accent)}
+  .field input{font-size:16px}
+  .steps{gap:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-top:32px;overflow:hidden}
+  .step{background:none;border:0;border-radius:0;padding:22px 24px}
+  .step+.step{border-left:1px solid var(--line)}
+  .step i{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(79,148,255,.12);font:700 12px Inter,sans-serif}
+  .step h3{font-size:15px;margin:10px 0 4px}
+  .step p{font-size:14px;line-height:1.55}
+  .modal .box{max-width:420px;padding:30px;border-radius:18px}
+  .modal h3{font-size:22px;letter-spacing:-.02em}
+  footer{padding:30px 20px;font-size:13px;line-height:1.7}
+  footer .fl{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 22px;margin-top:6px}
+  footer a{color:var(--ink2);text-decoration:none}
+  footer a:hover{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(max-width:640px){
+    main{padding:28px 16px 40px}
+    .steps{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .stat{padding:14px 12px}
+    .stat label{font-size:12px;line-height:1.3}
+    .stat b{font-size:24px}
+    .stat:last-child{grid-column:auto}
+    .step+.step{border-left:0;border-top:1px solid var(--line)}
+    .card{padding:20px}
+    .lead{font-size:16px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ===== anillo de plazas y menú lateral ===== */
+  .stats{grid-template-columns:auto 1fr;align-items:center;background:linear-gradient(135deg,rgba(79,148,255,.06),transparent 55%),var(--card)}
+  .ring{position:relative;width:176px;height:176px;margin:20px 26px;flex:none}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+  .ring circle{fill:none;stroke-linecap:round}
+  .ring .rt{stroke:var(--line);stroke-width:7}
+  .ring .rf{stroke:url(#rg);stroke-width:7;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.5s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 8px rgba(79,148,255,.6))}
+  .ring .ro{stroke:rgba(79,148,255,.3);stroke-width:1;stroke-dasharray:1 3.6;transform-origin:60px 60px;animation:ringspin 50s linear infinite}
+  @keyframes ringspin{to{transform:rotate(360deg)}}
+  .ring.warn .rf{stroke:var(--warn);filter:drop-shadow(0 0 8px rgba(251,191,36,.55))}
+  .ring.crit .rf{stroke:var(--err);filter:drop-shadow(0 0 8px rgba(251,113,133,.6))}
+  .rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22px}
+  .rc b{font-size:42px;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+  .rc small{font-size:12px;color:var(--muted);line-height:1.25}
+  .rc small+small{color:var(--ink2);margin-top:3px}
+  .sv{display:grid;grid-template-columns:1fr 1fr;align-self:stretch}
+  .sv .stat{display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--line)}
+  .sv .stat b{font-size:34px}
+  @media(max-width:640px){
+    .stats{grid-template-columns:auto 1fr}
+    .ring{width:124px;height:124px;margin:16px 14px}
+    .rc{padding:0 14px}.rc b{font-size:30px}.rc small{font-size:11px}
+    .sv{grid-template-columns:1fr}
+    .sv .stat{padding:12px 16px;border-left:1px solid var(--line)}
+    .sv .stat+.stat{border-top:1px solid var(--line)}
+    .sv .stat b{font-size:26px}
+  }
+  .drawer{width:min(86vw,320px);background:linear-gradient(180deg,#202226,var(--bg2) 40%);gap:2px;padding:0 12px calc(16px + env(safe-area-inset-bottom));box-shadow:none}
+  body.dopen .drawer{box-shadow:24px 0 60px rgba(0,0,0,.45)}
+  .dhead{margin:0 -12px 4px;padding:16px 14px;border-bottom:1px solid var(--line)}
+  .dlogo{display:flex;align-items:center;gap:10px}
+  .dlogo i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--accent);color:#04121a;font:800 14px Inter,sans-serif}
+  .duser{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
+  .duser i{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;font:700 15px Inter,sans-serif;font-style:normal;background:rgba(79,148,255,.14);color:var(--accent)}
+  .duser div{min-width:0}.duser b{display:block;font:600 14px Inter,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .duser small{display:block;color:var(--muted);font-size:12px}
+  .dsec{text-transform:none;letter-spacing:0;font-size:12px;margin:16px 8px 4px}
+  .dlink{transition:background .15s,color .15s}
+  .dlink:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+  .dlink[aria-current=true]{background:rgba(79,148,255,.1);color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+  .dcount{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,rgba(79,148,255,.08),transparent)}
+  a.dlink{text-decoration:none}
+  .hero[hidden]+.stats{margin-top:0}
+  .dfoot{margin-top:auto;padding-top:12px}
+  #dAuth{justify-content:center;background:var(--accent);color:#04121a}
+  #dAuth.out{background:transparent;border:1px solid var(--line2);color:var(--ink2)}
+  .ptitle{margin:18px 0 8px;font:600 13px Inter,sans-serif;color:var(--ink)}
+  .cfbox{margin-top:18px;padding-top:2px;border-top:1px solid var(--line)}
+  .cfbox .ptitle:first-child{margin-top:16px}
+  .pcopy{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 12px;border-radius:8px;border:1px solid var(--line2);background:none;color:var(--ink2);font:600 13px Inter,sans-serif;cursor:pointer;transition:color .15s,border-color .15s}
+  .pcopy svg{width:14px;height:14px}.pcopy:hover{color:var(--accent);border-color:var(--accent)}
+  .gh{max-width:1060px;margin:0 auto;padding:12px 20px 48px}
+  .gh h2{font-size:22px;letter-spacing:-.02em;margin:0 0 6px}.gh>p{color:var(--ink2);margin:0 0 18px;max-width:640px}
+  .gh .g{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .gh .g a{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-decoration:none;transition:border-color .15s}
+  .gh .g a:hover{border-color:var(--accent)}.gh b{display:block;color:var(--ink);margin-bottom:4px;font-size:16px}.gh span{color:var(--ink2);font-size:14px;line-height:1.55}
+  .gh .mas{display:inline-block;margin-top:14px;color:var(--accent);font-weight:600;text-decoration:none}
+  /* ===== menú lateral ordenado ===== */
+  .dmas{margin:2px 0 0}
+  .dmas summary{list-style:none}.dmas summary::-webkit-details-marker{display:none}
+  .dmas summary:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+  .dmas .chev{margin-left:auto;transition:transform .2s}.dmas[open] .chev{transform:rotate(180deg)}
+  .dmas .dlink{padding-left:30px;font-weight:500}
+  .dmas summary.dlink{padding-left:12px;font-weight:600}
+  .dcount{display:flex;align-items:baseline;gap:8px;margin:12px 2px 0;padding:10px 14px}
+  .dcount small{flex:1;display:block}.dcount b{display:inline;font-size:20px;line-height:1}
+  .dlegal{display:flex;justify-content:center;gap:8px;padding:12px 0 2px;font-size:12px;color:var(--muted)}
+  .dlegal a{color:var(--muted);text-decoration:none}.dlegal a:hover{color:var(--accent)}
+  .dfoot{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px}
+  .dtg{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:12px;background:rgba(41,182,246,.14);color:#58c4f6;font:600 14px Inter,sans-serif;text-decoration:none}
+  .dtg svg{width:18px;height:18px}
+  .dfoot #dAuth{justify-content:center}
+  /* ===== acabado profesional ===== */
+  ::selection{background:rgba(79,148,255,.28)}
+  html{scrollbar-color:#24304f transparent;scrollbar-width:thin}
+  .topnav{display:none;gap:2px;margin-left:8px}
+  .topnav button{position:relative;white-space:nowrap;padding:8px 12px;border:0;border-radius:9px;background:transparent;color:var(--ink2);font:600 14px Inter,sans-serif;cursor:pointer;transition:color .15s,background .15s}
+  .topnav button:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+  .topnav button[aria-current=true]{color:var(--accent);background:rgba(79,148,255,.1)}
+  @media(min-width:960px){.topnav{display:flex;flex:1}.nav .in{gap:12px}}
+  @media(max-width:1180px){.authbtns .who{display:none}}
+  .hero{padding:10px 0 4px}
+  .hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
+  .hero-cta .primary{width:auto;min-width:190px;padding:0 28px;margin:0}
+  .ghostbtn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:12px;border:1px solid var(--line2);color:var(--ink);font:600 15px Inter,sans-serif;text-decoration:none;transition:border-color .15s,color .15s}
+  .ghostbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .card{border-radius:16px;border-color:var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 120px),var(--card);box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px rgba(0,0,0,.18);transition:border-color .2s}
+  .card:hover{border-color:var(--line2)}
+  .card h2{display:flex;align-items:center;gap:12px}
+  .card h2 svg{box-sizing:content-box;width:18px;height:18px;padding:7px;border-radius:10px;background:rgba(79,148,255,.12);color:var(--accent);flex:none}
+  .card .sub{font-size:15px;line-height:1.6}
+  .field input,.field select{min-height:48px}
+  .field:focus-within{box-shadow:0 0 0 3px rgba(79,148,255,.14)}
+  .pane:not([hidden]){animation:paneIn .3s ease both}
+  @keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .gh .g a{transition:border-color .15s,transform .15s}.gh .g a:hover{transform:translateY(-2px)}
+  footer{border-top:1px solid var(--line);margin-top:8px}
+  @media(max-width:640px){.hero-cta .primary,.ghostbtn{flex:1 1 100%}}
+  /* ===== pulido general v3 ===== */
+  .prod{border-radius:14px;padding:20px;transition:border-color .2s,transform .2s}
+  .prod:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .prod .price{margin:12px 0 4px}
+  .prod button{margin-top:14px}
+  .phead{margin:20px 0 18px}
+  .rec{border-radius:14px}
+  .faq details,.faqitem{border-radius:12px}
+  .nav .logo i{box-shadow:0 0 0 1px rgba(79,148,255,.35),0 6px 18px rgba(79,148,255,.18)}
+  /* ===== estilo panel de cliente (gris neutro + azul) ===== */
+  button.primary,.cta,.navcta,.authbtns button.cta,.tabs button[aria-selected=true],#dAuth,.hero-cta .primary{background:var(--btn);color:#fff}
+  button.primary:hover:not(:disabled){background:#2a7bff}
+  .spinner{border-color:rgba(255,255,255,.35);border-top-color:#fff}
+  .logo i,.dlogo i{background:var(--btn);color:#fff;box-shadow:none}
+  .nav{background:rgba(38,40,44,.92);border-bottom:1px solid var(--line)}
+  body::before{background:none}
+  .drawer{background:#202226}
+  .dlink{font-size:16px;padding:14px 12px;border-radius:12px}
+  .dlink[aria-current=true]{background:rgba(124,108,255,.16);color:#a7a2ff;box-shadow:none}
+  .dtg{background:rgba(79,148,255,.14);color:#7fb0ff}
+  .eyebrow{border-radius:8px}
+  .greet{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 22px}
+  .greet h1{font-size:clamp(26px,5vw,36px);letter-spacing:-.03em;line-height:1.15;margin:0 0 6px}
+  .greet p{color:var(--muted);font-size:15px}
+  .greet .primary{width:auto;margin:0;padding:0 26px;min-height:46px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:20px}
+  .kpi{padding:18px 20px}.kpi+.kpi{border-left:1px solid var(--line)}
+  .kpi label{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .kpi b{display:block;font:600 34px "JetBrains Mono",ui-monospace,monospace;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+  .kpi small{color:var(--muted);font-size:13px}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+  .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .chead h2{font-size:18px;margin:0}.chead a{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none}
+  .thead,.trow{display:grid;grid-template-columns:1.4fr .7fr 1fr;gap:10px;align-items:center;padding:12px 4px}
+  .thead{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+  .trow{border-bottom:1px solid var(--line);font-size:15px}.trow:last-child{border-bottom:0}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}.dim{color:var(--ink2);font-size:14px}
+  .empty{padding:20px 6px;color:var(--ink2);text-align:center;line-height:1.7}
+  .empty .primary{width:auto;margin:14px auto 0;padding:0 24px;min-height:44px}
+  .srow{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}.srow:last-child{border-bottom:0}
+  .srow .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}.srow.off .dot{background:var(--err)}
+  .srow b{font-size:15px}.srow small{display:block;color:var(--muted);font-size:13px}
+  .srow .res{margin-left:auto;text-align:right;font:500 12px/1.5 "JetBrains Mono",ui-monospace,monospace;color:var(--ink2)}
+  .quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .qt{display:block;text-align:left;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card2);color:var(--ink);text-decoration:none;cursor:pointer;font:inherit;transition:border-color .15s,transform .15s}
+  .qt:hover{border-color:var(--accent);transform:translateY(-2px)}.qt b{display:block;font-size:15px;margin-bottom:2px}.qt span{color:var(--muted);font-size:13px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  @media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}.kpi b{font-size:28px}}
+  /* ===== menú lateral v2 ===== */
+  body.dopen{overflow:hidden}
+  .dbg{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .drawer{transition:transform .28s cubic-bezier(.22,.8,.2,1)}
+  .dsec{margin:16px 10px 4px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .dlogo div{display:flex;flex-direction:column;line-height:1.25}
+  .dstat{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;margin-top:2px}
+  .dstat .sd{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(52,211,153,.18)}
+  .dstat[data-s=off] .sd{background:var(--err);box-shadow:0 0 0 3px rgba(251,113,133,.18)}
+  .duser .pill{margin-left:auto;font-size:11px;flex:none}
+  .duser b{max-width:150px}
+  .dbadge{margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:rgba(79,148,255,.18);color:#8db8ff;font:700 12px/22px Inter,sans-serif;text-align:center}
+  .dlink[aria-current=true] .dbadge{background:rgba(124,108,255,.3);color:#cfcbff}
+  .dlink:active{transform:scale(.99)}
+  .dprem{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;padding:12px 14px;border:1px solid rgba(251,191,36,.3);border-radius:14px;background:linear-gradient(135deg,rgba(251,191,36,.11),rgba(251,191,36,.02));color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s}
+  .dprem:hover{border-color:rgba(251,191,36,.6)}
+  .dprem .gem{font-size:22px}.dprem b{font-size:18px;color:#fbbf24}
+  .dprem small{display:block;color:var(--muted);font-size:12px;line-height:1.3}
+  .dprem .go{margin-left:auto;font:400 26px/1 Inter,sans-serif;color:#fbbf24}
+  .dpl{display:block;font-size:14px;white-space:nowrap}.dprem b{font-size:17px}
+  .duser small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+  /* ===== mejoras para el cliente ===== */
+  .mt{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,12px);background:#f3f4f6;color:#111;padding:10px 18px;border-radius:999px;font:600 14px Inter,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transition:opacity .2s,transform .2s;z-index:90;pointer-events:none}
+  .mt.show{opacity:1;transform:translate(-50%,0)}
+  .aviso{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;background:rgba(79,148,255,.14);border-bottom:1px solid rgba(79,148,255,.3);color:#d3e3ff;font-size:14px;line-height:1.45;text-align:center}
+  .aviso button{background:none;border:0;color:inherit;cursor:pointer;font-size:16px;opacity:.7;flex:none}
+  .alert{display:flex;gap:10px;align-items:flex-start;padding:14px 16px;margin:0 0 18px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.08);border-radius:14px;font-size:14.5px;line-height:1.5}
+  .dim.warn{color:#fbbf24;font-weight:600}
+  .steps3{display:grid;gap:10px}#hSteps{margin-bottom:16px}
+  .st{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card2);color:var(--ink);text-align:left;text-decoration:none;font:inherit;cursor:pointer;transition:border-color .15s}
+  .st:hover{border-color:var(--accent)}
+  .st i{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(79,148,255,.15);color:var(--accent);font:700 13px Inter,sans-serif;font-style:normal}
+  .st b{display:block;font-size:15px}.st small{color:var(--muted);font-size:13px}
+  #bhttpBody .cred{padding:14px 14px 0}#bhttpBody .pcopy{margin:10px 14px 14px}
+  .st.done i{background:rgba(52,211,153,.2);color:var(--ok)}.st.done b{color:var(--ink2);text-decoration:line-through}
+  /* ===== CDN ===== */
+  .cdnpath{display:flex;align-items:center;padding-left:14px}
+  .cdnpath span{color:var(--muted);font:600 15px "JetBrains Mono",ui-monospace,monospace;white-space:nowrap}
+  .cdnpath input{padding-left:2px}
+  .cdnact{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px}
+  .cdnedit{display:flex;gap:10px;padding:0 14px 14px}.cdnedit input{flex:1;min-width:0;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink);font:500 14px "JetBrains Mono",ui-monospace,monospace}
+  #cdnMsg2{margin:0 0 14px}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047047508633424"
      crossorigin="anonymous"></script>
@@ -267,11 +515,16 @@
 
 <nav class="nav"><div class="in">
   <div style="display:flex;align-items:center;gap:10px"><button class="burger" id="burger" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="logo" href="/"><i>JX</i><div>Jitterx Panel<small>Cloud DNS</small></div></a></div>
+  <div class="topnav" role="navigation" aria-label="Secciones">
+    <button data-tab="home">Resumen</button><button data-tab="tienda">Tienda</button><button data-tab="ssh">Cuenta SSH</button><button data-tab="v2">V2Ray</button>
+    <button data-tab="bhttp">BHTTP</button><button data-tab="cdn">CDN</button><button data-tab="dns">Dominio</button><button data-tab="perfil">Perfil</button>
+  </div>
   <div class="authbtns" id="auth">
     <div class="status" id="status"><b></b><span id="statusText">…</span></div>
     <button class="cta" id="btnLogin">Entrar</button>
   </div>
 </div></nav>
+<div class="aviso" id="aviso" role="status" hidden><span id="avisoT"></span><button id="avisoX" type="button" aria-label="Cerrar aviso">✕</button></div>
 
 <main>
   <section class="hero" id="hero">
@@ -281,12 +534,24 @@
     </div>
     <h1 id="heroTitle">Apunta un subdominio a tu VPS <span>en segundos</span></h1>
     <p class="lead" id="heroLead"></p>
+    <div class="hero-cta"><button class="primary" id="heroGo" type="button">Empezar gratis</button><a class="ghostbtn" href="/guias.html">Ver guías</a></div>
+    <ul class="trust">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Compatible con HTTP Custom y NetMod</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Pago con tarjeta o Mercado Pago</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Inicias sesión con un código por correo</li>
+    </ul>
   </section>
 
   <section class="stats" id="stats">
-    <div class="stat"><label id="lbl1">Cuentas creadas</label><b id="total">—</b></div>
-    <div class="stat"><label id="lbl2">Activas ahora</label><b id="active">—</b></div>
-    <div class="stat"><label id="lbl3">Plazas disponibles</label><b id="free">—</b><div class="bar"><i id="bar"></i></div></div>
+    <div class="ring" id="ring" role="img" aria-label="Plazas disponibles">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f94ff"/><stop offset="1" stop-color="#8b7bff"/></linearGradient></defs>
+        <circle class="ro" cx="60" cy="60" r="58"/><circle class="rt" cx="60" cy="60" r="50"/><circle class="rf" id="rf" cx="60" cy="60" r="50" pathLength="100"/></svg>
+      <div class="rc"><b id="free">—</b><small id="cap"></small><small id="lbl3">Plazas disponibles</small></div>
+    </div>
+    <div class="sv">
+      <div class="stat"><label id="lbl1">Cuentas creadas</label><b id="total">—</b></div>
+      <div class="stat"><label id="lbl2">Activas ahora</label><b id="active">—</b></div>
+    </div>
   </section>
 
   <div class="pane" id="paneV2" role="tabpanel" hidden>
@@ -375,7 +640,7 @@
         <details class="guide"><summary>Cómo conectarte (HTTP Custom, NetMod…)</summary><ol>
           <li>Crea tu cuenta y copia <b>host, usuario y contraseña</b>.</li>
           <li>En la app elige modo <b>SSH + WebSocket</b>, puerto <b>80</b> (o 443 con SSL).</li>
-          <li>Pega el <b>payload</b> que aparece en "Tu cuenta" y pulsa conectar.</li>
+          <li>Pega el <b>payload</b> que aparece en "Tu cuenta" (directo o por CloudFront) y pulsa conectar.</li>
           <li>Si dice <i>Permission denied</i>: revisa mayúsculas, o que la cuenta no haya vencido. Solo se permite el número de conexiones simultáneas de tu plan.</li></ol></details>
       </section>
 
@@ -395,9 +660,63 @@
     </div>
   </div>
 
+  <div class="pane" id="paneHome" hidden>
+    <section class="greet"><div><h1 id="hGreet">Hola</h1><p id="hSub"></p></div><button class="primary" id="hCta" type="button">Crear cuenta SSH</button></section>
+    <div class="alert" id="hAlert" hidden></div>
+    <section class="kpis">
+      <div class="kpi"><label>Cuentas SSH</label><b id="kA">—</b><small>activas</small></div>
+      <div class="kpi"><label>Cuentas V2Ray</label><b id="kB">—</b><small>activas</small></div>
+      <div class="kpi"><label>Plazas libres</label><b id="kC">—</b><small id="kCs">en el servidor</small></div>
+      <div class="kpi"><label>Conectados</label><b id="kD">—</b><small>ahora mismo</small></div>
+    </section>
+    <section class="card" id="hSteps" hidden><div class="chead"><h2>Primeros pasos</h2><span class="dim" id="hStepsN">0 de 3</span></div>
+      <div class="steps3">
+        <button class="st" data-st="login" type="button"><i>1</i><span><b>Inicia sesión</b><small>Con tu correo, sin contraseñas</small></span></button>
+        <button class="st" data-st="crear" type="button"><i>2</i><span><b>Crea tu cuenta SSH</b><small>Gratis, dura 2 días</small></span></button>
+        <a class="st" href="/guia-http-custom.html"><i>3</i><span><b>Conéctate desde tu app</b><small>Guía paso a paso de HTTP Custom</small></span></a>
+      </div></section>
+    <div class="grid2">
+      <section class="card"><div class="chead"><h2>Mis cuentas</h2><a href="#" id="hAll">Ver todas</a></div><div id="hAccs"></div></section>
+      <section class="card"><div class="chead"><h2>Servidores</h2></div><div id="hSrv"></div></section>
+    </div>
+    <section class="card"><div class="chead"><h2>Accesos rápidos</h2></div><div class="quick"><button class="qt" data-go="tienda"><b>Tienda</b><span>Planes y Premium</span></button><button class="qt" data-go="ssh"><b>Cuenta SSH</b><span>Crea tu acceso gratis</span></button><button class="qt" data-go="v2"><b>V2Ray</b><span>Acceso VLESS</span></button><button class="qt" data-go="cdn"><b>CDN</b><span>CloudFront hacia tu VPS</span></button><button class="qt" data-go="bhttp"><b>BHTTP</b><span>Conexión por puerto extra</span></button><button class="qt" data-go="dns"><b>Dominio</b><span>Subdominio a tu VPS</span></button><button class="qt" data-go="faq"><b>Preguntas</b><span>Ayuda rápida</span></button><a class="qt" href="/guias.html"><b>Guías</b><span>Aprende paso a paso</span></a><a class="qt" href="https://t.me/jitterxpanelcloud" target="_blank" rel="noopener noreferrer"><b>Telegram</b><span>Soporte y novedades</span></a></div></section>
+  </div>
+
+  <div class="pane" id="paneCdn" hidden>
+    <div class="grid" style="grid-template-columns:minmax(0,760px)">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>CDN CloudFront</h2>
+        <p class="sub">Crea tu propio punto de conexión por CloudFront hacia tu servidor. Elige el origen (dominio o IP) y el nombre de tu ruta.</p>
+        <div id="cdnGate" style="margin-top:14px"></div>
+        <div id="cdnForm" style="margin-top:14px" hidden>
+          <div class="f"><label for="cdnOrigin">Origen (dominio o IP de tu servidor)</label><div class="field"><input id="cdnOrigin" placeholder="reg.jitterxcloud.dev" autocomplete="off" autocapitalize="none" spellcheck="false"></div></div>
+          <div class="f"><label for="cdnSlug">Nombre de tu ruta</label><div class="field cdnpath"><span id="cdnPre">/</span><input id="cdnSlug" placeholder="miruta" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="hint">2 a 20 caracteres: minúsculas, números y guiones. Tu ruta final lleva un prefijo propio para que nadie más la use.</div></div>
+          <button class="primary" id="cdnGo" type="button"><span class="spinner"></span><span>Crear servicio CDN</span></button>
+          <div class="msg" id="cdnMsg"></div>
+        </div>
+      </section>
+      <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim" id="cdnCount"></span></div><div class="msg" id="cdnMsg2"></div><div id="cdnList"></div></section>
+    </div>
+  </div>
+
+  <div class="pane" id="paneBhttp" hidden>
+    <div class="grid" style="grid-template-columns:minmax(0,640px)">
+      <section class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>BHTTP</h2>
+        <p class="sub">Conexión por el puerto BHTTP del servidor. Usa tu misma cuenta SSH (gratis, dura 2 días).</p>
+        <div id="bhttpBody" style="margin-top:14px"></div>
+        <details class="guide"><summary>Cómo conectarte por BHTTP</summary><ol>
+          <li>Crea tu cuenta SSH en la sección <b>Cuenta SSH</b>.</li>
+          <li>En tu app de túnel, escribe el <b>host</b> y el <b>puerto BHTTP</b> que ves arriba, con tu usuario y contraseña.</li>
+          <li>Ajusta el método de conexión de tu app para ese puerto y conecta.</li>
+        </ol></details>
+      </section>
+    </div>
+  </div>
+
   <div class="pane" id="paneTienda" hidden>
     <div class="grid">
-      <section class="card"><h2>Planes y cuentas</h2><div class="pstat" id="tPremium" hidden>💎 <span id="tPremN">0</span> clientes ya tienen Premium</div><p class="sub">Elige tu plan.</p><div class="prods" id="prods"></div></section>
+      <section class="card"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Planes y cuentas</h2><div class="pstat" id="tPremium" hidden>💎 <span id="tPremN">0</span> clientes ya tienen Premium</div><p class="sub">Elige tu plan.</p><div class="prods" id="prods"></div></section>
       <aside class="card cart"><h2>Tu carrito</h2><div id="cartBox"></div>
         <button class="primary" id="pay">Pagar con tarjeta</button>
         <div id="brickBox" style="margin-top:14px"></div>
@@ -440,7 +759,7 @@
       <aside class="card">
         <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Seguridad</h2>
         <ul class="rules">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu contraseña la gestiona <b>Firebase</b>, no la almacenamos.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Entras con un código enviado a tu correo: no hay contraseñas que robar.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Sesión activa en este dispositivo.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Soporte: escríbenos por <a href="https://t.me/jitterxpanelcloud" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Telegram</a>.</span></li>
         </ul>
@@ -455,6 +774,7 @@
   </section>
 </main>
 
+<div class="mt" id="miniToast" role="status" aria-live="polite" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden>
   <div class="ti">✓</div>
   <div class="tx"><b id="toastT"></b><span id="toastD"></span></div>
@@ -462,66 +782,58 @@
   <button class="x" id="toastX" aria-label="Cerrar">✕</button>
 </div>
 <div class="dbg" id="dbg"></div>
-<aside class="drawer" id="drawer" aria-label="Menú">
-  <div class="dhead"><b>Menú</b><button id="dclose" aria-label="Cerrar">✕</button></div>
-  <div class="dsec">Secciones</div>
-  <button class="dlink" data-tab="tienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Tienda</button>
-  <button class="dlink" data-tab="ssh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH</button>
-  <button class="dlink" data-tab="v2" id="dV2" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>V2Ray</button>
+<aside class="drawer" id="drawer" role="dialog" aria-label="Menú">
+  <div class="dhead"><span class="dlogo"><i>JX</i><div><b>Jitterx Panel Cloud</b><small class="dstat" id="dStat" data-s="on"><span class="sd"></span><span id="dStatT">Sistema operativo</span></small></div></span><button id="dclose" aria-label="Cerrar">✕</button></div>
+  <div class="duser"><i id="dAv">?</i><div><b id="dName">Invitado</b><small id="dSub">Sin sesión iniciada</small></div><span class="pill" id="dPlan" hidden>Gratuito</span></div>
+  <div class="dsec">Panel</div>
+  <button class="dlink" data-tab="home" id="dHome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Resumen</button>
+  <div class="dsec">Servicios</div>
+  <button class="dlink" data-tab="ssh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M13 15h5"/></svg>Cuenta SSH<span class="dbadge" id="bSsh" hidden></span></button>
+  <button class="dlink" data-tab="v2" id="dV2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>V2Ray<span class="dbadge" id="bV2" hidden></span></button>
+  <button class="dlink" data-tab="bhttp" id="dBhttp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>BHTTP</button>
+  <button class="dlink" data-tab="cdn" id="dCdn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>CDN</button>
   <button class="dlink" data-tab="dns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Dominio</button>
+  <div class="dsec">Cuenta</div>
+  <button class="dlink" data-tab="tienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Tienda</button>
   <button class="dlink" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</button>
-  <div class="dsec">Ayuda</div>
-  <button class="dlink" data-tab="faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Preguntas frecuentes</button>
-  <div class="dsec">Legal</div>
-  <a class="dlink" href="/privacidad.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Política de privacidad</a>
-  <a class="dlink" href="/terminos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8"/></svg>Términos de uso</a>
-  <div class="dsec">Comunidad</div>
-  <a class="dlink tg" href="https://t.me/jitterxpanelcloud" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.8 15.4 9.6 19c.4 0 .6-.2.8-.4l1.9-1.8 3.9 2.9c.7.4 1.2.2 1.4-.7l2.6-12.2c.3-1.1-.4-1.6-1.1-1.3L3.9 11.3c-1.1.4-1.1 1.1-.2 1.3l3.9 1.2 9-5.7c.4-.3.8-.1.5.2z"/></svg>Síguenos en Telegram</a>
-  <div class="dcount"><small>Clientes Premium</small><b id="dPremN">—</b><em id="dPremA"></em></div>
-  <div class="dfoot"><button class="dlink" id="dAuth">Entrar</button></div>
+  <details class="dmas" id="dMas"><summary class="dlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>Más<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <button class="dlink" data-tab="faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Preguntas frecuentes</button>
+    <a class="dlink" href="/guias.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Guías y tutoriales</a>
+    <a class="dlink" href="/acerca.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Acerca de</a>
+    <a class="dlink" href="/contacto.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Contacto</a>
+  </details>
+  <button class="dprem" id="dPrem" type="button"><span class="gem">💎</span><span><span class="dpl"><b id="dPremN">—</b> clientes Premium</span><small id="dPremA"></small></span><span class="go">›</span></button>
+  <div class="dlegal"><a href="/privacidad.html">Privacidad</a><span>·</span><a href="/terminos.html">Términos</a></div>
+  <div class="dfoot"><a class="dtg" href="https://t.me/jitterxpanelcloud" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.8 15.4 9.6 19c.4 0 .6-.2.8-.4l1.9-1.8 3.9 2.9c.7.4 1.2.2 1.4-.7l2.6-12.2c.3-1.1-.4-1.6-1.1-1.3L3.9 11.3c-1.1.4-1.1 1.1-.2 1.3l3.9 1.2 9-5.7c.4-.3.8-.1.5.2z"/></svg>Telegram</a><button class="dlink" id="dAuth">Entrar</button></div>
 </aside>
-
-<div class="modal" id="vmodal">
-  <div class="box">
-    <button class="x" id="vClose" aria-label="Cerrar">&times;</button>
-    <h3>Verifica tu correo</h3>
-    <p class="s">Para usar tu cuenta necesitas confirmar que este correo es tuyo: <b id="vMail"></b>. Abre el enlace que te enviamos y luego pulsa «Ya verifiqué». Revisa también la carpeta de spam.</p>
-    <div class="msg" id="vMsg"></div>
-    <button class="primary" id="vOk"><span class="spinner"></span><span>Ya verifiqué</span></button>
-    <button class="primary" id="vSend" style="margin-top:10px;background:transparent;border:1px solid var(--line2);color:var(--ink);box-shadow:none"><span>Reenviar correo</span></button>
-    <p class="s" style="margin-top:14px"><a href="#" id="vOut" style="color:var(--accent)">Usar otro correo (cerrar sesión)</a></p>
-  </div>
-</div>
 
 <div class="modal" id="modal">
   <div class="box">
     <button class="x" id="mClose" aria-label="Cerrar">&times;</button>
-    <h3 id="mTitle">Entrar en tu cuenta</h3>
-    <p class="s" id="mSub">Accede para gestionar tus cuentas y compras.</p>
-    <div class="switch" role="tablist">
-      <button id="swLogin" aria-selected="true">Iniciar sesión</button>
-      <button id="swReg" aria-selected="false">Crear cuenta</button>
+    <h3 id="mTitle">Entrar o crear cuenta</h3>
+    <p class="s" id="mSub">Te enviamos un código de 6 dígitos a tu correo. Sin contraseñas.</p>
+    <div id="stMail" style="margin-top:18px">
+      <div class="f">
+        <label for="mEmail">Correo electrónico</label>
+        <div class="field"><input id="mEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" autocapitalize="none" inputmode="email"></div>
+      </div>
+      <button class="primary" id="mGo"><span class="spinner"></span><span>Enviar código</span></button>
     </div>
-    <div class="f" id="fNombre" hidden>
-      <label for="mNombre">Nombre</label>
-      <div class="field"><input id="mNombre" placeholder="Tu nombre" maxlength="60" autocomplete="name"></div>
+    <div id="stCode" style="margin-top:18px" hidden>
+      <div class="f">
+        <label for="mCode">Código de 6 dígitos</label>
+        <div class="field"><input id="mCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······" style="font-size:24px;letter-spacing:.4em;text-align:center;font-weight:700"></div>
+        <div class="hint">Enviado a <b id="mSent"></b>. Vence en 10 minutos. Revisa también la carpeta de spam.</div>
+      </div>
+      <button class="primary" id="mVerify"><span class="spinner"></span><span>Verificar y entrar</span></button>
+      <button class="primary" id="mResend" style="margin-top:10px;background:transparent;border:1px solid var(--line2);color:var(--ink);box-shadow:none"><span>Reenviar código</span></button>
+      <p class="s" style="margin-top:14px"><a href="#" id="mBack" style="color:var(--accent)">Usar otro correo</a></p>
     </div>
-    <div class="f">
-      <label for="mEmail">Correo electrónico</label>
-      <div class="field"><input id="mEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" autocapitalize="none"></div>
-    </div>
-    <div class="f">
-      <label for="mPass">Contraseña</label>
-      <div class="field"><input id="mPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-      <div class="hint" id="mHint" hidden>Mínimo 8 caracteres.</div>
-    </div>
-    <button class="primary" id="mGo"><span class="spinner"></span><span id="mGoText">Entrar</span></button>
-    <div style="text-align:center;margin-top:12px"><a href="#" id="mReset" style="color:var(--muted);font-size:13px;text-decoration:none">¿Olvidaste tu contraseña?</a></div>
     <div class="msg" id="mMsg"></div>
   </div>
 </div>
 
-<footer><b>Jitterx Panel Cloud</b> · v12 · <span id="year"></span><br><a href="/privacidad.html" style="color:inherit">Política de privacidad</a> · <a href="/terminos.html" style="color:inherit">Términos de uso</a></footer>
+<footer><b>Jitterx Panel Cloud</b><br>© <span id="year"></span> · Cuentas SSH y subdominios para tu VPS<div class="fl"><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a><a href="/privacidad.html">Política de privacidad</a><a href="/terminos.html">Términos de uso</a></div></footer>
 
 <script>/*! qrcode-generator 1.4.4 (c) Kazuhiko Arase, MIT License - https://github.com/kazuhikoarase/qrcode-generator */
 var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});</script>
@@ -532,13 +844,14 @@ let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)
 if(!device){device=crypto.randomUUID();}
 localStorage.setItem('jx_device',device);
 // Si la web está alojada fuera de Vercel (cPanel), la API sigue en Vercel
+const AUTH_BASE=/(^|\.)jitterxcloud\.shop$/.test(location.hostname)?'/auth':'https://jitterxcloud.shop/auth'; // login (PHP + MySQL en cPanel)
 const API_BASE=(/vercel\.app$|^localhost$/.test(location.hostname))?'':'https://jitter-ventas-tienda.vercel.app';
 const api=async(path,opts={})=>{
-  let tk=null; try{ tk=window.fbToken?await window.fbToken():null }catch{}
+  const tk=getTok();
   const r=await fetch(API_BASE+path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
   const txt=await r.text();
   let j; try{ j=JSON.parse(txt) }catch{ throw new Error(r.status===404?('No existe '+path+' en el servidor'):('Respuesta inválida del servidor ('+r.status+')')) }
-  if(j&&j.code==='email_no_verificado'&&typeof openVerify==='function') openVerify();
+  if(r.status===401&&tk&&typeof cerrarSesion==='function') cerrarSesion();
   return j;
 };
 
@@ -549,6 +862,13 @@ $('#year').textContent=new Date().getFullYear();
 
 const fmt=t=>new Date(t).toLocaleString('es',{dateStyle:'medium',timeStyle:'short'});
 const setStatus=(cls,txt)=>{$('#status').className='status '+cls;$('#statusText').textContent=txt};
+// Estado global = "algún servicio responde". Subdominios (Cloudflare) y cuentas SSH son servicios independientes:
+// si uno falla pero el otro funciona, el panel está operativo.
+const estadoApi={dns:null,ssh:null}, t0Estado=Date.now();
+function repintarEstado(){
+  if(estadoApi.dns===true||estadoApi.ssh===true) setStatus('on','Sistema operativo');
+  else if(estadoApi.ssh===false||(estadoApi.dns===false&&(estadoApi.ssh!==null||Date.now()-t0Estado>2500))) setStatus('off','Sin conexión con la API');
+}
 const showMsg=(cls,txt)=>{const m=$('#msg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
 
 function updatePreview(){
@@ -584,7 +904,7 @@ async function load(){
     ultimoDns=s; zone=s.zone||'';
     $('#suffix').textContent='.'+zone; updatePreview();
     if(vista==='dns') pintarStatsDns();
-    setStatus('on','Sistema operativo');
+    estadoApi.dns=true; repintarEstado();
     let remote=null;
     try{const m=await api('/api/me'); remote=m.record||null;}catch(e){console.warn('api/me:',e.message)}
     const rec=remote||JSON.parse(localStorage.getItem('jx_record')||'null');
@@ -592,9 +912,9 @@ async function load(){
     if(remote) localStorage.setItem('jx_record',JSON.stringify(remote));
     showRecord(valid); lockButton(!!valid);
   }catch(e){
-    setStatus('off','Sin conexión con la API');
+    estadoApi.dns=false; repintarEstado(); setTimeout(repintarEstado,2600);
     showRecord(null);
-    showMsg('err','La API no responde. '+(e.message||'Revisa la configuración en Vercel y vuelve a desplegar.'));
+    showMsg('err','El servicio de subdominios no responde. '+(e.message||'Revisa la configuración de Cloudflare en Vercel y vuelve a desplegar.'));
   }
 }
 
@@ -612,7 +932,7 @@ $('#go').onclick=async()=>{
   }
 };
 /* ---------- navegación inferior ---------- */
-const PANES={tienda:'paneTienda',ssh:'paneSsh',v2:'paneV2',dns:'paneDns',perfil:'panePerfil',faq:'paneFaq'};
+const PANES={cdn:'paneCdn',home:'paneHome',tienda:'paneTienda',ssh:'paneSsh',v2:'paneV2',bhttp:'paneBhttp',dns:'paneDns',perfil:'panePerfil',faq:'paneFaq'};
 let vista='ssh';
 
 /* ---------- menú lateral + contador Premium ---------- */
@@ -622,33 +942,54 @@ function pintarPremium(s){
   $('#dPremA').textContent=s.premium_active!=null?(s.premium_active+' activos ahora'):'';
   $('#tPremN').textContent=s.premium_sold; $('#tPremium').hidden=!s.premium_sold;
 }
+function pintarBadgesMenu(){
+  const set=(id,n)=>{ const e=document.getElementById(id); if(!e) return; e.textContent=n; e.hidden=!(sesion&&n>0); };
+  set('bSsh',(typeof misCuentas!=='undefined'&&misCuentas||[]).length); set('bV2',(typeof v2Cuentas!=='undefined'&&v2Cuentas||[]).length);
+}
 function abrirMenu(open){
   document.body.classList.toggle('dopen',open);
   if(!open) return;
-  const lg=!!sesion; $('#dAuth').textContent=lg?'Cerrar sesión':'Entrar';
+  const lg=!!sesion; $('#dAuth').textContent=lg?'Cerrar sesión':'Entrar'; $('#dAuth').classList.toggle('out',lg);
+  $('#dName').textContent=lg?String(sesion.email).split('@')[0]:'Invitado'; $('#dSub').textContent=lg?sesion.email:'Sin sesión iniciada'; $('#dSub').title=lg?sesion.email:''; $('#dAv').textContent=lg?sesion.email[0].toUpperCase():'?';
   document.querySelectorAll('.dlink[data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===vista));
+  const mas=document.getElementById('dMas'); if(mas) mas.open=(vista==='faq');
+  const plan=document.getElementById('dPlan'); plan.hidden=!lg; if(lg){ const pr=(misCuentas||[]).some(a=>a.plan==='premium'); plan.textContent=pr?'Premium':'Gratuito'; plan.className='pill'+(pr?' prem':''); }
+  document.getElementById('dStatT').textContent=document.getElementById('statusText').textContent; document.getElementById('dStat').dataset.s=/\bon\b/.test(document.getElementById('status').className)?'on':'off';
+  pintarBadgesMenu();
   api('/api/ssh').then(s=>{pintarPremium(s);aplicarServidores(s)}).catch(()=>{});
 }
+document.getElementById('heroGo').onclick=()=>{ const c=document.querySelector('.pane:not([hidden]) .card'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); };
 $("#burger").onclick=()=>abrirMenu(true);
 $('#dclose').onclick=$('#dbg').onclick=()=>abrirMenu(false);
 document.addEventListener('keydown',e=>{ if(e.key==="Escape") abrirMenu(false); });
 document.querySelectorAll('.dlink[data-tab]').forEach(b=>b.onclick=()=>{ abrirMenu(false); tab(b.dataset.tab); });
+document.querySelectorAll('.topnav [data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.getElementById('dPrem').onclick=()=>{ abrirMenu(false); tab('tienda'); };
+(function(){ // deslizar hacia la izquierda cierra el menú
+  const d=document.getElementById('drawer'); let x0=null,y0=0;
+  d.addEventListener('touchstart',e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
+  d.addEventListener('touchend',e=>{ if(x0==null) return; const t=e.changedTouches[0]; const dx=t.clientX-x0, dy=Math.abs(t.clientY-y0); x0=null; if(dx<-70&&dy<60) abrirMenu(false); },{passive:true});
+})();
 $("#dAuth").onclick=()=>{ abrirMenu(false); const b=document.querySelector('#btnLogout,#btnLogin'); if(b) b.click(); };
 
 function tab(which){
   if(!PANES[which]) which='ssh';
   vista=which;
+  document.querySelectorAll('.topnav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===which));
   for(const [k,id] of Object.entries(PANES)) $('#'+id).hidden = k!==which;
   history.replaceState(null,'','#'+which);
   // El resumen superior solo acompaña a las vistas de creación
-  const sinResumen=['perfil','tienda','faq','v2'].includes(which);
+  const sinResumen=['perfil','tienda','faq','v2','bhttp','home','cdn'].includes(which);
   $('#hero').hidden = sinResumen;
-  $('#stats').hidden = sinResumen;
+  $('#stats').hidden = ['perfil','tienda','faq','bhttp','home','cdn'].includes(which);
   $('#steps').hidden = sinResumen;
   pintarHero(which);
   window.scrollTo({top:0,behavior:'smooth'});
   if(which==='ssh'&&!sshLoaded) loadSsh();
   if(which==='v2'){ pintarV2(); if(!sshLoaded) loadSsh(); }
+  if(which==='bhttp'){ pintarBhttp(); if(sesion&&!sshLoaded) loadSsh(); }
+  if(which==='cdn'){ if(!ultimoSsh) loadSsh(); cdnRecargar(); }
+  if(which==='home'){ pintarHome(); if(!ultimoSsh||(sesion&&!sshLoaded)) loadSsh(); }
   if(which==='perfil'){ paintPerfil(); if(sesion&&!sshLoaded) loadSsh(); }
   if(which==='tienda'){ paintTienda(); api('/api/ssh').then(s=>{pintarPremium(s);aplicarServidores(s)}).catch(()=>{}); }
 }
@@ -663,6 +1004,7 @@ const HERO={
        title:'Apunta un subdominio a tu VPS <span>en segundos</span>',
        lead:'Elige un nombre, escribe la IP de tu servidor y listo. El registro se crea al instante y se elimina solo cuando expira.',
        l1:'Dominios creados',l2:'Activos ahora',l3:'Plazas disponibles'},
+  v2:{tag:'V2Ray',title:'Conexión V2Ray',lead:'',l1:'Cuentas V2Ray activas',l2:'Servidores con V2Ray',l3:'Plazas disponibles'},
 };
 function pintarHero(which){
   const h=HERO[which]; if(!h) return;
@@ -670,17 +1012,24 @@ function pintarHero(which){
   $('#heroTitle').innerHTML=h.title;
   $('#heroLead').textContent=h.lead;
   $('#lbl1').textContent=h.l1; $('#lbl2').textContent=h.l2; $('#lbl3').textContent=h.l3;
-  which==='ssh'?pintarStatsSsh():pintarStatsDns();
+  which==='ssh'?pintarStatsSsh():which==='v2'?pintarStatsV2():pintarStatsDns();
 }
 let ultimoDns=null, ultimoSsh=null;
-function pintarNums(total,activos,max){
-  $('#total').textContent=total??'—';
-  $('#active').textContent=activos??'—';
-  $('#free').textContent=(max!=null?Math.max(0,max-activos)+' / '+max:'—');
-  $('#bar').style.width=(max?Math.min(100,activos/max*100):0)+'%';
+function pintarNums(total,activos,max,usadas){
+  $('#total').textContent=total??'—'; $('#active').textContent=activos??'—';
+  const ok=max!=null&&usadas!=null, libres=ok?Math.max(0,max-usadas):null, p=ok&&max?libres/max*100:0;
+  $('#free').textContent=ok?libres:'—'; $('#cap').textContent=ok?'de '+max:'';
+  const rf=document.getElementById('rf'); if(rf) rf.style.strokeDashoffset=100-p;
+  const r=document.getElementById('ring'); if(r){ r.classList.toggle('warn',ok&&p<=40&&p>15); r.classList.toggle('crit',ok&&p<=15); }
 }
-function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max):pintarNums(); }
-function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max):pintarNums(); }
+function pintarStatsDns(){ const d=ultimoDns; d?pintarNums(d.total,d.active,d.max,d.active):pintarNums(); }
+function pintarStatsSsh(){ const a=ultimoSsh; a?pintarNums(a.active,a.online??0,a.max,a.active):pintarNums(); }
+function pintarStatsV2(){
+  const vs=((ultimoSsh&&ultimoSsh.servers)||[]).filter(x=>x.ok&&x.v2ray&&x.v2ray.enabled);
+  if(!vs.length) return pintarNums();
+  const act=vs.reduce((n,x)=>n+(x.v2ray.active||0),0), max=vs.reduce((n,x)=>n+(x.v2ray.max||0),0);
+  pintarNums(act,vs.length,max,act);
+}
 
 /* ---------- tiempo restante (misma cuenta en toda la web) y avisos tipo app ---------- */
 function restante(exp){
@@ -710,7 +1059,7 @@ function avisarVencimiento(lista){
 
 /* ---------- V2Ray ---------- */
 var v2Cuentas=[], v2Sel=null;
-const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const v2Servers=()=>SERVERS.filter(s=>s.ok&&s.v2ray&&s.v2ray.enabled);
 const v2Actual=()=>v2Servers().find(x=>x.id===v2Sel)||null;
 const v2CuentaEn=id=>v2Cuentas.find(a=>!a.server||a.server===id)||null;
@@ -718,7 +1067,7 @@ function qrSvg(t){ const q=qrcode(0,'L'); q.addData(t); q.make(); return q.creat
 const showMsgV2=(cls,txt)=>{const m=$('#msgV2');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
 function pintarV2(){
   const vs=v2Servers();
-  $('#dV2').hidden=!vs.length;   // el menú solo muestra V2Ray si algún servidor lo tiene activo
+  $('#dV2').hidden=false;   // siempre visible: si ningún servidor tiene V2Ray activo, el panel avisa «no disponible»
   if(!vs.some(x=>x.id===v2Sel)) v2Sel=(vs[0]||{}).id||null;
   const box=$('#v2Chips');
   if(box&&box.querySelectorAll){
@@ -730,10 +1079,11 @@ function pintarV2(){
 }
 function refreshV2Button(){
   const b=$('#goV2'); b.classList.remove('loading');
+  $('#v2Gate').textContent='Necesitas una cuenta para crear tu acceso V2Ray. Es gratis y tarda un minuto.';
   $('#v2Gate').hidden=!!sesion;
   if(!sesion){ b.disabled=false; $('#goV2Text').textContent='Inicia sesión para crear tu cuenta'; return; }
   const sv=v2Actual();
-  if(!sv){ b.disabled=true; $('#goV2Text').textContent='V2Ray no disponible ahora'; return; }
+  if(!sv){ b.disabled=true; $('#goV2Text').textContent='V2Ray no disponible ahora'; $('#v2Gate').hidden=false; $('#v2Gate').textContent='V2Ray no está disponible en este momento. Las cuentas SSH siguen funcionando con normalidad. Inténtalo de nuevo más tarde.'; return; }
   if(sv.v2ray.max&&sv.v2ray.active>=sv.v2ray.max){ b.disabled=true; $('#goV2Text').textContent='Servidor lleno'; return; }
   const ya=!!v2CuentaEn(v2Sel);
   b.disabled=ya;
@@ -746,7 +1096,7 @@ function pintarCuentasV2(){
     return;
   }
   const multi=v2Servers().length>1;
-  box.innerHTML=v2Cuentas.map((a,i)=>'<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+a.username+'</span><span class="pill">V2Ray · Gratis</span></div>'+
+  box.innerHTML=v2Cuentas.map((a,i)=>'<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+esc(a.username)+'</span><span class="pill">V2Ray · Gratis</span></div>'+
     (multi&&a.server?'<div class="srvtag">Servidor: '+srvLabel(a.server)+'</div>':'')+
     '<div style="padding:14px 16px"><div class="cred">'+row('Host',a.host)+row('UUID',a.uuid)+row('Puerto 80',a.ws_port)+row('Puerto 443 (TLS)',a.ssl_port)+row('Ruta',a.path)+'</div>'+
     '<div class="payload linkbox"><b>Puerto 80:</b> '+esc(a.links.ws)+'</div><div class="payload linkbox"><b>Puerto 443:</b> '+esc(a.links.tls)+'</div></div>'+
@@ -885,7 +1235,7 @@ function paintPerfil(){
   const dom=JSON.parse(localStorage.getItem('jx_record')||'null');
   const tarjetas=lista.map(a=>{
     const r=restante(a.expires_at), total=Math.max(864e5,a.expires_at-(a.created_at||a.expires_at-2*864e5)), pct=Math.max(2,Math.min(100,Math.round(r.left/total*100))), pronto=a.plan==='premium'&&r.left<=3*864e5;
-    return '<div class="rec" style="margin-bottom:12px"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.type==='v2ray'?'V2Ray · Gratis':(a.plan==='premium'?'Premium ★':'Gratuita'))+'</span></div>'+
+    return '<div class="rec" style="margin-bottom:12px"><div class="top"><span class="name">'+esc(a.username)+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.type==='v2ray'?'V2Ray · Gratis':(a.plan==='premium'?'Premium ★':'Gratuita'))+'</span></div>'+
       (SERVERS.length>1&&a.server?'<div class="srvtag">Servidor: '+srvLabel(a.server)+'</div>':'')+
       '<div class="time"><small>Quedan <b>'+r.txt+'</b> · vence el '+fmt(a.expires_at)+(a.type==='v2ray'?'':' · '+(a.max_login||1)+((a.max_login||1)>1?' conexiones':' conexión'))+'</small><div class="bar"><i class="'+(pronto?'low':'')+'" style="width:'+pct+'%"></i></div>'+
       (pronto?'<small style="color:#fbbf24;display:block;margin-top:6px">Vence pronto: renueva desde la Tienda.</small>':'')+'</div></div>';
@@ -901,29 +1251,38 @@ function paintPerfil(){
     '<button class="upg" id="pUpg">'+(premium?'Renovar o ampliar mi plan':'Mejorar a Premium ★')+'</button>'+
     '<button class="danger" id="pOut">Cerrar sesión</button>';
   $('#pUpg').onclick=()=>tab('tienda');
-  $('#pOut').onclick=()=>window.fbSignOut&&window.fbSignOut();
+  $('#pOut').onclick=()=>cerrarSesion();
 }
 
 /* ---------- cuentas SSH ---------- */
 let sshLoaded=false, miCuentaSsh=null, sshHas=false;
 const showMsgSsh=(cls,txt)=>{const m=$('#msgSsh');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
 const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+value+'</code><button data-copy="'+value+'" title="Copiar">'+copyIcon+'</button></div>';
+const row=(label,value)=>'<div class="row"><span>'+label+'</span><code>'+esc(value)+'</code><button data-copy="'+esc(value)+'" title="Copiar">'+copyIcon+'</button></div>';
+
+// CloudFront (opcional): dominio de tu distribución y ruta WebSocket. Con host vacío ('') se oculta este bloque.
+const CF={host:'dedt0xa61ura5.cloudfront.net',path:'/mrmaxxd',port:80};
+// BHTTP: puerto extra del servidor (mismo host que la cuenta). Con port:0 se oculta. Si el agente algún día envía a.bhttp_port, tiene prioridad.
+const BHTTP={port:8881};
+const bhttpPort=a=>+(a&&a.bhttp_port)||BHTTP.port||0;
+const cfPayload=()=>'GET '+CF.path+' HTTP/1.1[crlf]Host: '+CF.host+'[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]';
+const payBlock=(titulo,p)=>'<div class="ptitle">'+titulo+'</div><div class="payload">'+p+'</div><button class="pcopy" data-copy="'+esc(p)+'" title="Copiar payload">'+copyIcon+'Copiar payload</button>';
 
 function accountCard(a,i,multi){
   const payload='GET / HTTP/1.1[crlf]Host: '+a.host+'[crlf]Upgrade: websocket[crlf][crlf]';
-  return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+a.username+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Activa')+'</span></div>'+
+  const cf=CF.host?'<div class="cfbox"><div class="ptitle">Conexión por CloudFront</div><div class="cred">'+row('Host',CF.host)+row('Puerto',CF.port)+row('Ruta',CF.path)+'</div>'+payBlock('Payload CloudFront',cfPayload())+'</div>':'';
+  return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+esc(a.username)+'</span><span class="pill'+(a.plan==='premium'?' prem':'')+'">'+(a.plan==='premium'?'Premium ★':'Activa')+'</span></div>'+
     (multi&&a.server?'<div class="srvtag">Servidor: '+srvLabel(a.server)+'</div>':'')+
     '<div style="padding:14px 16px"><div class="cred">'+
       row('Host',a.host)+row('Usuario',a.username)+row('Contraseña',a.password)+
-      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+(a.max_login?row('Conexiones',a.max_login):'')+
+      row('Puerto WS',a.ws_port)+row('Puerto SSL',a.ssl_port)+(bhttpPort(a)?row('Puerto BHTTP',bhttpPort(a)):'')+(a.max_login?row('Conexiones',a.max_login):'')+
     '</div>'+
-    '<div class="payload">'+payload+'</div>'+
+    payBlock('Payload de conexión directa',payload)+cf+
     '</div>'+
     '<div class="actions"><button class="btn cpAll" data-i="'+i+'">'+copyIcon+'Copiar todo</button><button class="btn toPerfil">Ver días en mi Perfil</button></div></div>';
 }
 function showAccounts(arr){
-  misCuentas=arr||[]; miCuentaSsh=misCuentas[0]||null;
+  misCuentas=arr||[]; miCuentaSsh=misCuentas[0]||null; pintarBhttp(); pintarHome();
   if(!misCuentas.length){
     const msg=sesion?'Todavía no has creado ninguna cuenta.<br>Aparecerá aquí con tus datos de acceso.':'Inicia sesión para crear y ver tu cuenta SSH.';
     $('#mySsh').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3"/></svg>'+msg+'</div>';return}
@@ -933,11 +1292,140 @@ function showAccounts(arr){
   $('#mySsh').querySelectorAll('.toPerfil').forEach(btn=>btn.onclick=()=>tab('perfil'));
   $('#mySsh').querySelectorAll('.cpAll').forEach(btn=>btn.onclick=e=>{
     const a=misCuentas[+btn.dataset.i];
-    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port);
+    navigator.clipboard.writeText('Host: '+a.host+'\nUsuario: '+a.username+'\nContraseña: '+a.password+'\nPuerto WS: '+a.ws_port+'\nPuerto SSL: '+a.ssl_port+(bhttpPort(a)?'\nPuerto BHTTP: '+bhttpPort(a):'')+(CF.host?'\n\nCloudFront\nHost: '+CF.host+'\nPuerto: '+CF.port+'\nRuta: '+CF.path+'\nPayload: '+cfPayload():''));
     e.currentTarget.lastChild.textContent='Copiado';
   });
 }
 const showAccount=a=>showAccounts(a?[a]:[]);
+
+// Aviso general para todos los clientes (déjalo vacío para ocultarlo). Ejemplo:
+//   const AVISO={texto:'Nuevo servidor: ahora el host es reg.jitterxcloud.dev. Si tu app tenía el anterior, actualízalo.'};
+const AVISO={texto:''};
+function mostrarAviso(t){ const el=document.getElementById('aviso'); if(!t){ el.hidden=true; return; }
+  try{ if(sessionStorage.getItem('jx_aviso')===t){ el.hidden=true; return; } }catch{}
+  document.getElementById('avisoT').textContent=t; el.hidden=false;
+  document.getElementById('avisoX').onclick=()=>{ el.hidden=true; try{sessionStorage.setItem('jx_aviso',t)}catch{} }; }
+mostrarAviso(AVISO.texto);
+(function(){ // aviso "Copiado ✓" en TODOS los botones de copiar
+  if(!(navigator.clipboard&&navigator.clipboard.writeText)) return;
+  const w=navigator.clipboard.writeText.bind(navigator.clipboard); let t;
+  navigator.clipboard.writeText=txt=>{ const el=document.getElementById('miniToast'); el.textContent='Copiado ✓'; el.hidden=false; requestAnimationFrame(()=>el.classList.add('show'));
+    clearTimeout(t); t=setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>{el.hidden=true},220); },1600); return w(txt); };
+})();
+/* ---------- CDN (CloudFront) ---------- */
+let cdnData=null, cdnErr='', cdnBusy=false;
+const cdnApi=(path,body)=>api(path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{}).catch(e=>({error:e.message}));
+const cdnMsg=(id,cls,txt)=>{ const m=document.getElementById(id); if(!m) return; if(!cls){ m.className='msg'; return; } m.className='msg '+cls; m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+esc(txt)+'</span>'; };
+const cdnHecho=new Set(['succeeded','success','completed','done','active','ready']), cdnFallo=new Set(['failed','error']);
+async function cdnEsperar(op){
+  for(let i=0;i<40;i++){ await new Promise(r=>setTimeout(r,1500)); const r=await cdnApi('/api/cdn?op='+encodeURIComponent(op));
+    if(r.error) return {fallo:r.error}; if(cdnFallo.has(r.estado)) return {fallo:r.error||'La operación no se pudo completar.'}; if(cdnHecho.has(r.estado)) return {ok:true}; }
+  return {pendiente:true};
+}
+async function cdnRecargar(){
+  if(!sesion){ cdnData=null; cdnErr=''; return pintarCdn(); }
+  const j=await cdnApi('/api/cdn'); if(j.error){ cdnData=null; cdnErr=j.error; } else { cdnData=j; cdnErr=''; }
+  pintarCdn();
+}
+const cdnEstado=e=>/^(active|activo|deployed|ready|enabled|online)$/.test(e)?['Activo','']:/(expir|venc|disabled)/.test(e)?['Vencido',' off']:['Procesando',' prem'];
+function pintarCdn(){
+  const g=id=>document.getElementById(id); if(!g('paneCdn')) return;
+  const gate=g('cdnGate'), form=g('cdnForm'), lista=g('cdnList');
+  const aviso=(txt,btn,fn)=>{ gate.innerHTML='<div class="hint">'+esc(txt)+'</div><button class="primary" id="cdnGateBtn" type="button" style="margin-top:14px"><span>'+btn+'</span></button>'; g('cdnGateBtn').onclick=fn; form.hidden=true; };
+  g('cdnCount').textContent=''; 
+  if(!sesion){ aviso('Inicia sesión para crear y administrar tus servicios CDN.','Entrar',()=>openModal('login')); lista.innerHTML=''; return; }
+  if(cdnErr){ aviso(cdnErr,'Reintentar',cdnRecargar); lista.innerHTML=''; return; }
+  if(!cdnData){ gate.innerHTML='<div class="hint">Cargando…</div>'; form.hidden=true; return; }
+  gate.innerHTML=''; form.hidden=false;
+  const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo+'-'; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
+  const o=g('cdnOrigin'); if(!o.value){ const sg=(ultimoSsh&&ultimoSsh.servers||[]).find(x=>x.host); if(sg) o.value=sg.host; }
+  const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=lleno||cdnBusy;
+  if(lleno&&!cdnBusy) cdnMsg('cdnMsg','err','Ya tienes el máximo de servicios ('+cdnData.max+'). Cuando uno venza podrás crear otro.');
+  lista.innerHTML=sv.length?sv.map(x=>{
+    const [et,cl]=cdnEstado(x.estado), pay='GET '+x.path+' HTTP/1.1[crlf]Host: '+x.host+'[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]';
+    return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+esc(x.path)+'</span><span class="pill'+cl+'">'+et+'</span></div>'+
+      '<div class="cred" style="padding:14px 14px 0">'+(x.host?row('Host CDN',x.host)+row('Puerto',80):'')+row('Ruta',x.path)+row('Origen',x.origin||'—')+(x.expira?row('Vence',new Date(x.expira).toLocaleDateString('es')+' · '+restaTxt(x.expira-Date.now())):'')+'</div>'+
+      (x.host?'<div style="padding:0 14px">'+payBlock('Payload CloudFront',pay)+'</div>':'')+
+      '<div class="cdnact"><button class="pcopy" data-cdn="renovar" data-id="'+esc(x.id)+'">Renovar</button><button class="pcopy" data-cdn="origen" data-id="'+esc(x.id)+'">Cambiar origen</button></div>'+
+      '<div class="cdnedit" hidden><input class="cdnoin" placeholder="nuevo.dominio.com o IP" value="'+esc(x.origin||'')+'" autocapitalize="none" spellcheck="false"><button class="pcopy" data-cdn="guardar" data-id="'+esc(x.id)+'">Guardar</button></div></div>';
+  }).join(''):'<div class="empty">Aún no tienes servicios CDN.</div>';
+  lista.querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText(b.dataset.copy));
+  lista.querySelectorAll('button[data-cdn]').forEach(b=>b.onclick=()=>cdnAccion(b));
+}
+async function cdnLanzar(body,msgOk,msgId){
+  if(cdnBusy) return; cdnBusy=true; cdnMsg(msgId,'ok','Procesando… puede tardar unos segundos.');
+  const j=await cdnApi('/api/cdn',body); let fin={};
+  if(j.error) fin={fallo:j.error}; else if(j.op) fin=await cdnEsperar(j.op);
+  cdnBusy=false; await cdnRecargar();
+  if(fin.fallo) cdnMsg(msgId,'err',fin.fallo); else if(fin.pendiente) cdnMsg(msgId,'ok','Sigue en proceso. Actualiza en un minuto para ver el resultado.'); else { cdnMsg(msgId,'ok',msgOk); return true; }
+}
+async function cdnAccion(b){
+  const card=b.closest('.rec'), id=b.dataset.id;
+  if(b.dataset.cdn==='origen'){ card.querySelector('.cdnedit').hidden=false; return; }
+  if(b.dataset.cdn==='renovar') return cdnLanzar({accion:'renovar',id},'Servicio renovado.','cdnMsg2');
+  const origen=card.querySelector('.cdnoin').value.trim();
+  if(!origen) return cdnMsg('cdnMsg2','err','Escribe el nuevo origen.');
+  return cdnLanzar({accion:'origen',id,origen},'Origen actualizado.','cdnMsg2');
+}
+async function cdnCrear(){
+  const origen=document.getElementById('cdnOrigin').value.trim().toLowerCase(), ruta=document.getElementById('cdnSlug').value.trim().toLowerCase();
+  if(!origen) return cdnMsg('cdnMsg','err','Escribe el origen (dominio o IP de tu servidor).');
+  if(!/^[a-z0-9][a-z0-9-]{1,19}$/.test(ruta)) return cdnMsg('cdnMsg','err','La ruta debe tener 2 a 20 caracteres: minúsculas, números y guiones.');
+  const b=document.getElementById('cdnGo'); b.classList.add('loading'); b.disabled=true;
+  const ok=await cdnLanzar({accion:'crear',origen,ruta},'Tu servicio CDN está listo. Copia el payload de abajo.','cdnMsg');
+  b.classList.remove('loading'); if(ok) document.getElementById('cdnSlug').value=''; pintarCdn();
+}
+document.getElementById('cdnGo').onclick=cdnCrear;
+document.getElementById('cdnSlug').addEventListener('keydown',e=>{ if(e.key==='Enter') cdnCrear(); });
+function saludo(){const h=new Date().getHours();return h<6?'Buenas noches':h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
+const restaTxt=ms=>{const m=Math.max(0,Math.floor(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return d?d+'d '+h+'h':h+'h '+(m%60)+'m'};
+function pintarHome(){
+  const g=id=>document.getElementById(id); pintarBadgesMenu(); if(!g('paneHome')) return;
+  const nombre=sesion?(sesion.nombre||String(sesion.email).split('@')[0]):'';
+  const ssh=(typeof misCuentas!=='undefined'&&misCuentas)||[], v2=(typeof v2Cuentas!=='undefined'&&v2Cuentas)||[];
+  g('hGreet').textContent=saludo()+(nombre?', '+nombre:'');
+  const fecha=new Date().toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'});
+  g('hSub').textContent=fecha+(sesion?' · '+(ssh.length+v2.length)+' cuentas activas':' · Inicia sesión para ver tus cuentas');
+  const cta=g('hCta'); cta.textContent=sesion?'Crear cuenta SSH':'Entrar'; cta.onclick=()=>sesion?tab('ssh'):openModal('login');
+  const u=ultimoSsh||{}, libres=u.max!=null?Math.max(0,u.max-(u.active||0)):null;
+  g('kA').textContent=sesion?ssh.length:'—'; g('kB').textContent=sesion?v2.length:'—';
+  g('kC').textContent=libres==null?'—':libres; g('kCs').textContent=u.max!=null?'de '+u.max:'en el servidor';
+  g('kD').textContent=u.online!=null?u.online:'—';
+  const todas=ssh.map(a=>['SSH',a]).concat(v2.map(a=>['V2Ray',a])), filas=todas.slice(0,5);
+  const pronto=todas.filter(([,a])=>(a.expires_at||0)-Date.now()<6*36e5)[0], al=g('hAlert'); al.hidden=!(sesion&&pronto);
+  if(sesion&&pronto) al.innerHTML='<span>⏰</span><span>Tu cuenta <b>'+esc(pronto[1].username||'')+'</b> vence en <b>'+restaTxt(pronto[1].expires_at-Date.now())+'</b>. Cuando venza podrás crear una nueva gratis.</span>';
+  const hecho=[!!sesion,todas.length>0,false], hs=g('hSteps'); hs.hidden=todas.length>0;
+  hs.querySelectorAll('.st').forEach((el,i)=>{ el.classList.toggle('done',hecho[i]); el.querySelector('i').textContent=hecho[i]?'✓':i+1; });
+  g('hStepsN').textContent=hecho.filter(Boolean).length+' de 3';
+  g('hAll').textContent=sesion&&filas.length?'Ver todas ('+(ssh.length+v2.length)+')':'Ver perfil'; g('hAll').onclick=e=>{e.preventDefault();tab('perfil')};
+  g('hAccs').innerHTML=!sesion?'<div class="empty">Inicia sesión para ver tus cuentas.<br><button class="primary" id="hE1" type="button">Entrar</button></div>'
+    :!filas.length?'<div class="empty">Aún no tienes cuentas activas.<br><button class="primary" id="hE1" type="button">Crear mi primera cuenta</button></div>'
+    :'<div class="thead"><span>Cuenta</span><span>Tipo</span><span>Vence en</span></div>'+filas.map(([t,a])=>'<div class="trow"><span class="mono">'+esc(a.username||a.email||a.name||'—')+'</span><span><span class="pill">'+t+'</span></span><span class="dim'+(((a.expires_at||0)-Date.now())<6*36e5?' warn':'')+'">'+restaTxt((a.expires_at||0)-Date.now())+'</span></div>').join('');
+  const e1=g('hE1'); if(e1) e1.onclick=()=>sesion?tab('ssh'):openModal('login');
+  const sv=u.servers||[];
+  g('hSrv').innerHTML=sv.length?sv.map(x=>'<div class="srow'+(x.ok?'':' off')+'"><span class="dot"></span><div><b>'+esc(x.country||x.name||x.id)+'</b><small>'+esc(x.city||x.host||'')+'</small></div><span class="res">'+(x.ok?('CPU '+(x.cpu??'—')+'%<br>RAM '+(x.ram??'—')+'%'):'Sin conexión')+'</span></div>').join(''):'<div class="empty">Cargando servidores…</div>';
+}
+document.querySelectorAll('#paneHome [data-go]').forEach(b=>b.onclick=()=>tab(b.dataset.go));
+document.querySelectorAll('#hSteps [data-st]').forEach(b=>b.onclick=()=>{ if(!sesion) return openModal('login'); tab('ssh'); });
+
+function pintarBhttp(){
+  const box=document.getElementById('bhttpBody'); if(!box) return;
+  const puerto=bhttpPort(null);
+  const aviso=(txt,btn,fn)=>{ box.innerHTML='<div class="hint">'+txt+'</div><button class="primary" id="bhBtn" style="margin-top:14px"><span>'+btn+'</span></button>'; document.getElementById('bhBtn').onclick=fn; };
+  if(!puerto){ box.innerHTML='<div class="hint">BHTTP no está disponible por ahora.</div>'; return; }
+  if(!sesion) return aviso('Inicia sesión para ver tus datos de conexión BHTTP.','Entrar',()=>openModal('login'));
+  if(!misCuentas.length){
+    if(cuentasCargando) { box.innerHTML='<div class="hint">Cargando tu cuenta…</div>'; return; }
+    return aviso('Aún no tienes una cuenta SSH activa. BHTTP usa la misma cuenta: créala y vuelve aquí.','Crear cuenta SSH',()=>tab('ssh'));
+  }
+  box.innerHTML=misCuentas.map(a=>{
+    const todo=('Host: '+a.host+'\nPuerto BHTTP: '+puerto+'\nUsuario: '+a.username+'\nContraseña: '+a.password).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\n/g,'&#10;');
+    return '<div class="rec" style="margin-bottom:14px"><div class="top"><span class="name">'+esc(a.username)+'</span><span class="pill">BHTTP</span></div>'+
+      '<div class="cred">'+row('Host',a.host)+row('Puerto BHTTP',puerto)+row('Usuario',a.username)+row('Contraseña',a.password)+'</div>'+
+      '<button class="pcopy" data-copy="'+todo+'" title="Copiar datos">'+copyIcon+'Copiar datos</button></div>';
+  }).join('');
+  box.querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);b.style.color='var(--ok)'});
+}
 
 function lockSsh(locked){ sshHas=locked; refreshSshButton(); }
 function recalcLock(){ sshHas=!!cuentaEn(srvSel); refreshSshButton(); }
@@ -982,14 +1470,15 @@ async function loadSsh(){
   try{
     const s=await api('/api/ssh');
     if(s.error) throw new Error(s.error);
-    ultimoSsh=s; try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{}
-    aplicarServidores(s); pintarPremium(s); renderServer(srvActual()||s); if(vista==='ssh') pintarStatsSsh();
+    ultimoSsh=s; estadoApi.ssh=true; repintarEstado(); try{localStorage.setItem('jx_srv',JSON.stringify(s))}catch{}
+    aplicarServidores(s); pintarPremium(s); renderServer(srvActual()||s); if(vista==='ssh') pintarStatsSsh(); else if(vista==='v2') pintarStatsV2();
     clearInterval(window._srv); window._srv=setInterval(refreshServer,15000);
     const lista=(s.accounts||(s.account?[s.account]:[])).filter(a=>a.expires_at>Date.now());
     showAccounts(lista); recalcLock();
-    v2Cuentas=(s.v2accounts||[]).filter(a=>a.expires_at>Date.now()); pintarV2();
+    v2Cuentas=(s.v2accounts||[]).filter(a=>a.expires_at>Date.now()); pintarV2(); pintarHome();
     if(vista==='perfil') paintPerfil(); avisarVencimiento(lista);
   }catch(e){
+    estadoApi.ssh=false; repintarEstado();
     showAccounts([]); lockSsh(false); v2Cuentas=[]; pintarV2();
     showMsgSsh('err','No se pudo consultar el servidor. '+e.message);
   }finally{ cuentasCargando=false; if(vista==='perfil') paintPerfil(); }
@@ -997,7 +1486,7 @@ async function loadSsh(){
 
 async function refreshServer(){
   if($('#paneSsh').hidden||document.hidden) return;
-  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;aplicarServidores(s);pintarPremium(s);renderServer(srvActual()||s);refreshSshButton();if(vista==='ssh')pintarStatsSsh();}}catch{}
+  try{const s=await api('/api/ssh'); if(!s.error){ultimoSsh=s;estadoApi.ssh=true;repintarEstado();aplicarServidores(s);pintarPremium(s);renderServer(srvActual()||s);refreshSshButton();if(vista==='ssh')pintarStatsSsh(); else if(vista==='v2')pintarStatsV2();}}catch{}
 }
 
 $('#goSsh').onclick=async()=>{
@@ -1016,20 +1505,12 @@ $('#goSsh').onclick=async()=>{
   }
 };
 
-/* ---------- sesión de usuario (Firebase Auth) ---------- */
-let sesion=null, modo='login', fbAuth=null, idToken=null;
+/* ---------- sesión de usuario (código por correo) ---------- */
+let sesion=null, mailPend='', codeExp=0, reCool=0, reTimer=null;
+const TOKEN_KEY='jx_token';
+const getTok=()=>{try{return localStorage.getItem(TOKEN_KEY)}catch{return null}};
+const setTok=t=>{try{t?localStorage.setItem(TOKEN_KEY,t):localStorage.removeItem(TOKEN_KEY)}catch{}};
 const showMsgM=(cls,txt)=>{const m=$('#mMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
-
-const FB_ERRORES={
-  'auth/invalid-email':'El correo no tiene un formato válido.',
-  'auth/user-not-found':'Correo o contraseña incorrectos.',
-  'auth/wrong-password':'Correo o contraseña incorrectos.',
-  'auth/invalid-credential':'Correo o contraseña incorrectos.',
-  'auth/email-already-in-use':'Ya existe una cuenta con ese correo. Inicia sesión.',
-  'auth/weak-password':'La contraseña debe tener al menos 6 caracteres.',
-  'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
-  'auth/network-request-failed':'Sin conexión. Revisa tu red.',
-};
 
 function paintAuth(){
   const box=$('#auth');
@@ -1037,77 +1518,132 @@ function paintAuth(){
   if(sesion){
     const w=document.createElement('span'); w.className='who'; w.textContent=sesion.email; box.appendChild(w);
     const b=document.createElement('button'); b.id='btnLogout'; b.textContent='Salir'; box.appendChild(b);
-    b.onclick=()=>window.fbSignOut&&window.fbSignOut();
+    b.onclick=()=>cerrarSesion();
   }else{
     const b=document.createElement('button'); b.id='btnLogin'; b.className='cta'; b.textContent='Entrar'; box.appendChild(b);
-    b.onclick=()=>pendingVerify?openVerify():openModal('login');
+    b.onclick=()=>openModal('login');
   }
 }
 
-function setModo(m){
-  modo=m;
-  $('#swLogin').setAttribute('aria-selected',m==='login');
-  $('#swReg').setAttribute('aria-selected',m==='reg');
-  $('#fNombre').hidden=m==='login';
-  $('#mHint').hidden=m==='login';
-  $('#mTitle').textContent=m==='login'?'Entrar en tu cuenta':'Crear una cuenta';
-  $('#mSub').textContent=m==='login'?'Accede para gestionar tus cuentas y compras.':'Regístrate para comprar y renovar tus cuentas SSH.';
-  $('#mGoText').textContent=m==='login'?'Entrar':'Crear cuenta';
-  $('#mPass').autocomplete=m==='login'?'current-password':'new-password';
-  $('#mMsg').className='msg';
+function paso(n){
+  $('#stMail').hidden=n!==1; $('#stCode').hidden=n!==2; $('#mMsg').className='msg';
+  $('#mTitle').textContent=n===1?'Entrar o crear cuenta':'Revisa tu correo';
+  $('#mSub').textContent=n===1?'Te enviamos un código de 6 dígitos a tu correo. Sin contraseñas.':'Escribe el código que te enviamos.';
 }
-const openModal=m=>{setModo(m||'login');$('#modal').classList.add('open');setTimeout(()=>$('#mEmail').focus(),50)};
+const openModal=()=>{
+  paso(mailPend&&Date.now()<codeExp?2:1);
+  $('#modal').classList.add('open');
+  setTimeout(()=>$(mailPend&&Date.now()<codeExp?'#mCode':'#mEmail').focus(),50);
+};
 const closeModal=()=>$('#modal').classList.remove('open');
 $('#mClose').onclick=closeModal;
 $('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-$('#swLogin').onclick=()=>setModo('login');
-$('#swReg').onclick=()=>setModo('reg');
-$('#mPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mGo').click()});
-$('#mReset').onclick=async e=>{
-  e.preventDefault();
-  const mail=$('#mEmail').value.trim();
-  if(!mail) return showMsgM('err','Escribe tu correo y vuelve a pulsar.');
-  try{ await window.fbResetPassword(mail); showMsgM('ok','Te enviamos un correo para restablecer la contraseña.'); }
-  catch(err){ showMsgM('err',FB_ERRORES[err.code]||'No se pudo enviar el correo.'); }
-};
+
+const cargando=(b,on)=>{b.disabled=on; b.classList.toggle('loading',on)};
+async function authPost(ruta,datos){
+  const r=await fetch(AUTH_BASE+'/'+ruta,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(datos)}).catch(()=>null);
+  if(!r) throw new Error('Sin conexión. Revisa tu red.');
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok) throw new Error(j.error||'No se pudo completar la operación.');
+  return j;
+}
+
+function tickRe(){
+  clearInterval(reTimer);
+  const b=$('#mResend'), t=b.querySelector?b.querySelector('span'):null;
+  const pinta=()=>{ const s=Math.ceil((reCool-Date.now())/1000); if(s>0){b.disabled=true; if(t)t.textContent='Reenviar código ('+s+' s)';} else {b.disabled=false; if(t)t.textContent='Reenviar código'; clearInterval(reTimer);} };
+  pinta(); reTimer=setInterval(pinta,500);
+}
+async function pedirCodigo(mail){
+  await authPost('request-code.php',{email:mail});
+  mailPend=mail; codeExp=Date.now()+600000; reCool=Date.now()+60000;
+  $('#mSent').textContent=mail; $('#mCode').value=''; paso(2); tickRe();
+  setTimeout(()=>$('#mCode').focus(),50);
+}
 
 $('#mGo').onclick=async()=>{
-  const b=$('#mGo'); b.disabled=true; b.classList.add('loading'); $('#mMsg').className='msg';
+  const mail=$('#mEmail').value.trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(mail)) return showMsgM('err','Escribe un correo válido.');
+  const b=$('#mGo'); cargando(b,true); $('#mMsg').className='msg';
+  try{ await pedirCodigo(mail); }catch(err){ showMsgM('err',err.message); }
+  cargando(b,false);
+};
+$('#mEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mGo').click()});
+
+$('#mResend').onclick=async()=>{
+  const b=$('#mResend'); b.disabled=true;
+  try{ await pedirCodigo(mailPend); showMsgM('ok','Te enviamos un código nuevo.'); }
+  catch(err){ showMsgM('err',err.message); tickRe(); }
+};
+$('#mBack').onclick=e=>{e.preventDefault(); mailPend=''; codeExp=0; paso(1); setTimeout(()=>$('#mEmail').focus(),50)};
+
+let verificando=false;
+async function verificar(){
+  const code=$('#mCode').value.replace(/\D/g,'');
+  if(code.length!==6) return showMsgM('err','Escribe los 6 dígitos del código.');
+  if(verificando) return; verificando=true;
+  const b=$('#mVerify'); cargando(b,true); $('#mMsg').className='msg';
   try{
-    const mail=$('#mEmail').value.trim(), pass=$('#mPass').value;
-    if(modo==='reg'){
-      await window.fbRegister(mail,pass,$('#mNombre').value.trim());
-    }else{
-      await window.fbLogin(mail,pass);
-    }
-    closeModal(); $('#mPass').value='';
-  }catch(err){
-    showMsgM('err',FB_ERRORES[err.code]||err.message||'No se pudo completar la operación.');
+    const j=await authPost('verify-code.php',{email:mailPend,code});
+    let v=null; try{ v=await validarToken(j.token) }catch{}           // sin red: se confía en el código ya verificado
+    if(v&&!v.user){ showMsgM('err',textoMotivo(v.reason)); console.warn('Sesión rechazada por el servidor:', v.reason||'servidor sin actualizar'); verificando=false; cargando(b,false); return; }
+    setTok(j.token);
+    if(window.__adsOn){ location.reload(); return; }   // había un script de anuncios en esta página: se recarga ya con sesión (sin anuncios)
+    mailPend=''; codeExp=0; $('#mEmail').value=''; $('#mCode').value='';
+    closeModal(); await aplicarSesion(j.user);
+  }catch(err){ showMsgM('err',err.message); $('#mCode').select(); }
+  verificando=false; cargando(b,false);
+}
+$('#mVerify').onclick=verificar;
+$('#mCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,6); if(e.target.value.length===6) verificar(); });
+$('#mCode').addEventListener('keydown',e=>{if(e.key==='Enter')verificar()});
+
+function resetEstado(){ sesion=null; miCuentaSsh=null; misCuentas=[]; v2Cuentas=[]; sshHas=false; sshLoaded=false; }
+function aplicarSesion(user){
+  if(!user){
+    resetEstado(); paintAuth();
+    if(vista==='ssh'||vista==='v2'||vista==='home') loadSsh(); else refreshSshButton();
+    pintarV2(); pintarBhttp(); pintarHome(); pintarCdn(); if(vista==='perfil') paintPerfil();
+    return;
   }
-  b.disabled=false; b.classList.remove('loading');
-};
+  sesion=user; paintAuth(); sshLoaded=false; confirmarPago();
+  if(vista==='ssh'||vista==='perfil'||vista==='v2'||vista==='bhttp'||vista==='home') loadSsh(); else refreshSshButton();
+  if(vista==='perfil') paintPerfil();
+  if(vista==='cdn') cdnRecargar();
+}
+function cerrarSesion(){ setTok(null); aplicarSesion(null); }
 
+// Pregunta a Vercel si el token es válido. Devuelve {user, reason}; lanza si no hay red.
+async function validarToken(tk){
+  const r=await fetch(API_BASE+'/api/auth/session',{headers:{authorization:'Bearer '+tk}});
+  const j=await r.json();               // si no es JSON (404, etc.) lanza y se trata como "sin red"
+  return {user:j.user||null, reason:j.reason};
+}
+function textoMotivo(reason){
+  if(reason==='sin_secret') return 'Error de configuración: falta SESSION_SECRET en Vercel (y hacer Redeploy).';
+  if(reason==='firma') return 'Error de configuración: la SESSION_SECRET de Vercel es distinta a la de cPanel.';
+  if(reason===undefined) return 'Error de configuración: Vercel todavía tiene el código anterior. Hay que actualizar los archivos api/ y lib/ en GitHub.';
+  return 'Tu sesión venció. Entra de nuevo.';
+}
 
-
-/* ---------- verificación de correo ---------- */
-let pendingVerify=null, vCool=0;
-const showMsgV=(cls,txt)=>{const m=$('#vMsg');m.className='msg '+cls;m.innerHTML=(cls==='ok'?ICON_OK:ICON_ERR)+'<span>'+txt+'</span>'};
-function openVerify(mail){ if(mail) pendingVerify=mail; $('#vMail').textContent=pendingVerify||'tu correo'; $('#vMsg').className='msg'; $('#vmodal').classList.add('open'); }
-const closeVerify=()=>$('#vmodal').classList.remove('open');
-$('#vClose').onclick=closeVerify;
-$('#vOut').onclick=e=>{e.preventDefault();closeVerify();window.fbSignOut&&window.fbSignOut();};
-$('#vSend').onclick=async()=>{
-  if(Date.now()<vCool) return showMsgV('err','Espera unos segundos antes de reenviar.');
-  try{ await window.fbSendVerify(); vCool=Date.now()+60000; showMsgV('ok','Correo enviado. Revisa también la carpeta de spam.'); }
-  catch(err){ showMsgV('err',FB_ERRORES[err.code]||'No se pudo enviar el correo.'); }
-};
-$('#vOk').onclick=async()=>{
-  const b=$('#vOk'); b.disabled=true; b.classList.add('loading');
-  try{ const ok=await window.fbCheckVerified(); if(ok){ closeVerify(); } else showMsgV('err','Todavía no aparece verificado. Abre el enlace del correo y vuelve a intentarlo.'); }
-  catch{ showMsgV('err','No se pudo comprobar. Inténtalo de nuevo.'); }
-  b.disabled=false; b.classList.remove('loading');
-};
+// Al abrir la web: valida el token guardado y restaura la sesión
+async function iniciarSesion(){
+  const tk=getTok(); if(!tk) return aplicarSesion(null);
+  try{
+    const v=await validarToken(tk);
+    if(v.user) return aplicarSesion(v.user);
+    console.warn('Sesión rechazada por el servidor:', v.reason||'servidor sin actualizar');
+    cerrarSesion(); openModal('login'); showMsgM('err',textoMotivo(v.reason));
+  }catch{
+    // sin red: se usa el correo del propio token mientras no haya vencido
+    try{
+      const p=JSON.parse(atob(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if(p.exp>Date.now()/1000) return aplicarSesion({uid:p.sub,email:p.email,verificado:true});
+    }catch{}
+    cerrarSesion();
+  }
+}
 
 /* ---------- confirmar pago al volver de Mercado Pago (no depende del webhook) ---------- */
 async function confirmarPago(){
@@ -1116,76 +1652,19 @@ async function confirmarPago(){
   const j=await api('/api/confirmar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payment_id:id})}).catch(()=>({}));
   if(j.entregada){ showMsgSsh('ok','Pago aprobado. Tu cuenta Premium ya está activa.'); avisarPago(true); sshLoaded=false; loadSsh(); }
 }
-// Llamado desde el módulo de Firebase cuando cambia el estado de sesión
-window.onAuthChange=async(user,getToken)=>{
-  if(user&&!user.emailVerified){ sesion=null; idToken=null; miCuentaSsh=null; misCuentas=[]; v2Cuentas=[]; sshHas=false; sshLoaded=false; paintAuth(); openVerify(user.email); refreshSshButton(); pintarV2(); if(vista==='perfil') paintPerfil(); return; }
-  if(!user){ pendingVerify=null; closeVerify(); sesion=null; idToken=null; miCuentaSsh=null; misCuentas=[]; v2Cuentas=[]; sshHas=false; sshLoaded=false; paintAuth(); if(vista==='ssh'||vista==='v2') loadSsh(); else refreshSshButton(); pintarV2(); if(vista==='perfil') paintPerfil(); return; }
-  idToken=await getToken();
-  try{
-    const r=await fetch(API_BASE+'/api/auth/session',{headers:{authorization:'Bearer '+idToken}}).then(r=>r.json());
-    sesion=r.user||{email:user.email,uid:user.uid};
-  }catch{ sesion={email:user.email,uid:user.uid}; }
-  pendingVerify=null; closeVerify();
-  paintAuth(); sshLoaded=false; confirmarPago();
-  if(vista==='ssh'||vista==='perfil'||vista==='v2') loadSsh(); else refreshSshButton();
-  if(vista==='perfil') paintPerfil();
-};
 
 fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda;PUBKEY=c.publicKey||'';CATALOGO=c.items;carrito=carrito.filter(id=>CATALOGO.some(x=>x.id===id));saveCart();if(vista==='tienda')paintTienda()}).catch(()=>{window._planesError=1;const e=document.getElementById('prods');if(e)e.innerHTML='<div class="empty">No se pudieron cargar los planes. Recarga la página.</div>'});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ){history.replaceState(null,'',location.pathname+'#ssh');if(pagoQ==='ok'){carrito=[];saveCart()}}
 try{const c=JSON.parse(localStorage.getItem('jx_srv')||'null');if(c){aplicarServidores(c);pintarPremium(c);renderServer(srvActual()||c)}}catch{}
-tab((location.hash||'#ssh').slice(1));
+tab((location.hash||'#home').slice(1));
 if(pagoQ==='ok'){showMsgSsh('ok','Pago recibido. Estamos creando tu cuenta; aparecerá en "Tu cuenta" en unos segundos.');let n=0;const iv=setInterval(()=>{loadSsh();if(++n>=10)clearInterval(iv)},5000)}
 else if(pagoQ){showMsgSsh('err',pagoQ==='pendiente'?'Tu pago está pendiente. Cuando se acredite, la cuenta se creará sola.':'El pago no se completó. No se te ha cobrado.')}
 load();
+iniciarSesion();
 </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-           createUserWithEmailAndPassword, updateProfile, signOut,
-           sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence }
-    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBjVeMU56IryRsjXSnKz9t2bFxu8bMsO50",
-    authDomain: "shocktv-df24f.firebaseapp.com",
-    projectId: "shocktv-df24f",
-    storageBucket: "shocktv-df24f.firebasestorage.app",
-    messagingSenderId: "705716023961",
-    appId: "1:705716023961:web:11f72e57d37ceb111bbe08",
-    measurementId: "G-V3S1Z5W4YE"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  await setPersistence(auth, browserLocalPersistence);
-
-  window.fbLogin = (mail, pass) => signInWithEmailAndPassword(auth, mail, pass);
-  window.fbRegister = async (mail, pass, nombre) => {
-    const cred = await createUserWithEmailAndPassword(auth, mail, pass);
-    if (nombre) await updateProfile(cred.user, { displayName: nombre });
-    await sendEmailVerification(cred.user).catch(() => {});
-    return cred;
-  };
-  window.fbSendVerify = () => sendEmailVerification(auth.currentUser);
-  window.fbCheckVerified = async () => {
-    const u = auth.currentUser; if (!u) return false;
-    await u.reload(); if (!u.emailVerified) return false;
-    await u.getIdToken(true);
-    if (window.onAuthChange) window.onAuthChange(u, () => u.getIdToken());
-    return true;
-  };
-  window.fbResetPassword = (mail) => sendPasswordResetEmail(auth, mail);
-  window.fbToken = () => auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null);
-
-  onAuthStateChanged(auth, (user) => {
-    if (window.onAuthChange) window.onAuthChange(user, () => user.getIdToken());
-  });
-
-  // El botón "Salir" del panel usa esto
-  window.fbSignOut = () => signOut(auth);
-</script>
+<script src="/ads.js"></script>
 </body>
 </html>
