@@ -39,7 +39,9 @@ export default async function handler(req, res) {
       }
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
       const precio = (CATALOGO.find((c) => c.id === PLAN_CDN) || {}).precio || 0;
-      return res.json({ services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30 });
+      let saldo; // solo para el administrador: saldo de la cuenta del CDN
+      if (puedeCrear(u)) { try { saldo = await cdn("GET", "/v1/balance"); } catch (e) { saldo = { error: e.message }; } }
+      return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30 });
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
