@@ -1,9 +1,10 @@
-// POST /api/checkout {items:[ids]} -> crea la preferencia de Mercado Pago y devuelve su URL.
+// POST /api/checkout {cdn:{origen,ruta} | cdn:{renovar:id}} -> valida el pedido, crea la preferencia de Mercado Pago y devuelve su URL.
 import { requireUser } from "../lib/auth.js";
 import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
-import { MONEDA, pagados } from "../lib/precios.js";
-import { serverValido } from "../lib/agent.js";
+import { MONEDA, CATALOGO, PLAN_CDN } from "../lib/precios.js";
+import { prepararCdn } from "../lib/cdnventa.js";
+import { mensaje, estadoHttp } from "../lib/cdn.js";
 
 import { cors } from "../lib/cors.js";
 export default async function handler(req, res) {
@@ -15,10 +16,14 @@ export default async function handler(req, res) {
   const token = clean(process.env.MP_ACCESS_TOKEN);
   if (!token) return res.status(500).json({ error: "Falta MP_ACCESS_TOKEN en Vercel." });
 
-  const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
-  const ids = Array.isArray(b.items) ? b.items.slice(0, 5).map(String) : [];
-  const items = pagados(ids);
-  if (!items.length || items.includes(undefined)) return res.status(400).json({ error: "Carrito inválido." });
+  let b = {};
+  try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; }
+  catch { return res.status(400).json({ error: "Datos inválidos." }); }
+  const item = CATALOGO.find((c) => c.id === PLAN_CDN);
+  let ped;
+  try { ped = await prepararCdn(user, b.cdn); }
+  catch (e) { const c = e.codigo || "INTERNAL_ERROR"; return res.status(estadoHttp(c)).json({ error: mensaje(c), codigo: c }); }
+  if (ped.error) return res.status(ped.status).json({ error: ped.error, codigo: ped.codigo });
 
   // Tipos de pago a ocultar. Valores de MP: ticket, atm, bank_transfer, account_money, credit_card, debit_card, prepaid_card
   const excluidos = (clean(process.env.MP_EXCLUIR) || "ticket,atm").split(",").map((x) => x.trim()).filter(Boolean).map((id) => ({ id }));
@@ -28,9 +33,9 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { authorization: "Bearer " + token, "content-type": "application/json" },
       body: JSON.stringify({
-        items: items.map((c) => ({ id: c.id, title: c.nombre, quantity: 1, currency_id: MONEDA, unit_price: c.precio })),
+        items: [{ id: item.id, title: ped.descripcion, quantity: 1, currency_id: MONEDA, unit_price: item.precio }],
         payer: user.email ? { email: user.email } : undefined,
-        external_reference: `${user.uid}:${items.map((c) => c.id).join(",")}:${serverValido(b.server)}`,
+        external_reference: ped.ref,
         notification_url: `https://${req.headers.host}/api/mp-webhook`,
         back_urls: { success: `${base}/?pago=ok`, failure: `${base}/?pago=error`, pending: `${base}/?pago=pendiente` },
         auto_return: "approved",

@@ -7,10 +7,11 @@ import crypto from "node:crypto";
 import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
+import { CATALOGO, MONEDA, PLAN_CDN } from "../lib/precios.js";
 import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE } from "../lib/cdn.js";
 
-// Con la API oficial cada servicio gasta saldo REAL. Por defecto solo pueden crear/renovar los correos de CDN_PERMITIDOS
-// (separados por comas). Cuando quieras abrirlo a todos los clientes: CDN_ABIERTO=1.
+// Los clientes compran el CDN con Mercado Pago (/api/pagar y /api/checkout). Crear o renovar SIN pagar desde aquí
+// solo lo pueden los correos de CDN_PERMITIDOS (separados por comas): pensado para el dueño y para pruebas.
 const permitidos = () => String(process.env.CDN_PERMITIDOS || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
 const puedeCrear = (u) => process.env.CDN_ABIERTO === "1" || permitidos().includes(String(u.email || "").toLowerCase());
 
@@ -36,13 +37,16 @@ export default async function handler(req, res) {
         return res.json({ estado: String(pick(o, "status", "state") || "").toLowerCase(), error: err ? mensaje(String(pick(typeof err === "object" ? err : { code: err }, "code") || err).toUpperCase()) : undefined });
       }
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
-      return res.json({ services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), puedeCrear: puedeCrear(u) });
+      const precio = (CATALOGO.find((c) => c.id === PLAN_CDN) || {}).precio || 0;
+      return res.json({ services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30 });
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
-    if (!puedeCrear(u)) return res.status(403).json({ error: "El CDN está en pruebas y todavía no está disponible para tu cuenta.", codigo: "EN_PRUEBAS" });
     let b = {};
     try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { return res.status(400).json({ error: "Datos inválidos." }); }
+
+    const gratis = b.accion === "crear" || b.accion === "renovar";
+    if (gratis && !puedeCrear(u)) return res.status(402).json({ error: "Para crear o renovar un servicio CDN hay que pagarlo.", codigo: "PAGO" });
 
     if (b.accion === "crear") {
       const slug = String(b.ruta || "").trim().toLowerCase().replace(/^\/+/, "").replace(new RegExp("^" + prefijo(u.uid) + "-"), "");
