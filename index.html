@@ -628,7 +628,7 @@
         <div id="cdnGate" style="margin-top:14px"></div>
         <div id="cdnForm" style="margin-top:14px" hidden>
           <div class="f"><label for="cdnOrigin">Origen (dominio o IP de tu servidor)</label><div class="field"><input id="cdnOrigin" placeholder="mi-servidor.com o 203.0.113.10" autocomplete="off" autocapitalize="none" spellcheck="false"></div></div>
-          <div class="f"><label for="cdnSlug">Nombre de tu ruta</label><div class="field cdnpath"><span id="cdnPre">/</span><input id="cdnSlug" placeholder="miruta" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="hint">2 a 20 caracteres: minúsculas, números y guiones. Tu ruta final lleva un prefijo propio para que nadie más la use.</div></div>
+          <div class="f"><label for="cdnSlug">Nombre de tu ruta</label><div class="field cdnpath"><span id="cdnPre">/</span><input id="cdnSlug" placeholder="miruta" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="hint">2 a 20 letras minúsculas o números, sin guiones ni espacios. Tu ruta final lleva delante un prefijo propio para que nadie más la use.</div></div>
           <button class="primary" id="cdnGo" type="button"><span class="spinner"></span><span id="cdnGoT">Pagar y crear mi CDN</span></button>
           <div style="text-align:center;margin-top:12px"><a href="#" id="cdnAlt" style="color:var(--muted);font-size:13px">Prefiero pagar en la página de Mercado Pago</a></div>
           <button class="primary ghost2" id="cdnFree" type="button" hidden><span class="spinner"></span><span>Crear sin cobro (solo administrador)</span></button>
@@ -1033,7 +1033,7 @@ function pintarCdn(){
   if(cdnErr){ aviso(cdnErr,'Reintentar',cdnRecargar); lista.innerHTML=''; return; }
   if(!cdnData){ gate.innerHTML='<div class="hint">Cargando…</div>'; form.hidden=true; return; }
   gate.innerHTML=''; form.hidden=false;
-  const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo+'-'; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
+  const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
   g('cdnGoT').textContent=p?'Pagar '+p+' y crear mi CDN':'Pagar y crear mi CDN';
   g('cdnFree').hidden=!cdnData.admin;
   const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=g('cdnFree').disabled=lleno||cdnBusy;
@@ -1069,7 +1069,7 @@ async function cdnAccion(b){
 function cdnPedidoNuevo(){
   const origen=document.getElementById('cdnOrigin').value.trim().toLowerCase(), ruta=document.getElementById('cdnSlug').value.trim().toLowerCase();
   if(!origen){ cdnMsg('cdnMsg','err','Escribe el origen (dominio o IP de tu servidor).'); return null; }
-  if(!/^[a-z0-9][a-z0-9-]{1,19}$/.test(ruta)){ cdnMsg('cdnMsg','err','La ruta debe tener 2 a 20 caracteres: minúsculas, números y guiones.'); return null; }
+  if(!/^[a-z0-9]{2,20}$/.test(ruta)){ cdnMsg('cdnMsg','err','La ruta debe tener 2 a 20 letras minúsculas o números, sin guiones ni espacios.'); return null; }
   return {origen,ruta};
 }
 async function cdnCrearGratis(){
@@ -1127,6 +1127,7 @@ document.getElementById('cdnGo').onclick=()=>{ const p=cdnPedidoNuevo(); if(p) c
 document.getElementById('cdnAlt').onclick=e=>{ e.preventDefault(); const p=cdnPedidoNuevo(); if(p) cdnPagarMP(p,'cdnMsg'); };
 document.getElementById('cdnAlt2').onclick=e=>{ e.preventDefault(); if(cdnPedido&&cdnPedido.renovar) cdnPagarMP(cdnPedido,'cdnMsg2'); };
 document.getElementById('cdnFree').onclick=cdnCrearGratis;
+document.getElementById('cdnSlug').addEventListener('input',e=>{ const v=e.target.value.toLowerCase().replace(/[^a-z0-9]/g,''); if(v!==e.target.value) e.target.value=v; });
 document.getElementById('cdnSlug').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('cdnGo').click(); });
 
 /* ---------- resumen ---------- */
