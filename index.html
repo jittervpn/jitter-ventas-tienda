@@ -1036,6 +1036,9 @@ function pintarCdn(){
   const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo; g('cdnCount').textContent=sv.length+' de '+cdnData.max;
   g('cdnGoT').textContent=p?'Pagar '+p+' y crear mi CDN':'Pagar y crear mi CDN';
   g('cdnFree').hidden=!cdnData.admin;
+  let sb=g('cdnSaldo'); if(!sb){ sb=document.createElement('div'); sb.id='cdnSaldo'; sb.className='hint'; sb.style.marginTop='10px'; g('cdnFree').after(sb); }
+  sb.hidden=!cdnData.admin||!cdnData.saldo;
+  if(cdnData.admin&&cdnData.saldo){ const s=cdnData.saldo, b=s.balance??s.credits??s.available??(s.data&&(s.data.balance??s.data.credits)); sb.textContent='Saldo de tu cuenta del CDN (solo lo ves tú): '+(s.error?'no se pudo consultar ('+s.error+')':b!=null?(typeof b==='object'?JSON.stringify(b):b):JSON.stringify(s).slice(0,200)); }
   const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=g('cdnFree').disabled=lleno||cdnBusy;
   if(lleno&&!cdnBusy&&g('cdnMsg').className==='msg') cdnMsg('cdnMsg','err','Ya tienes el máximo de servicios ('+cdnData.max+'). Renueva uno de los que tienes.');
   lista.innerHTML=sv.length?sv.map(x=>{
