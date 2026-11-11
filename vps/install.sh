@@ -42,7 +42,7 @@ con expiración automática y límite de conexiones simultáneas.
 
 Instalar con install.sh. Config en /etc/jitterx-agent.conf
 """
-import json, os, re, subprocess, secrets, string, hmac, time, threading, uuid, tempfile
+import json, os, re, subprocess, secrets, string, hmac, time, threading, uuid, tempfile, ssl
 from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -530,7 +530,26 @@ def v2_worker():
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = 15  # corta conexiones lentas o colgadas (evita agotar hilos)
     server_version = "jitterx"
+    tls_ctx = None  # si se define, esta conexión se cifra con TLS (el saludo TLS se hace en el hilo de la conexión)
+
+    def setup(self):
+        self._tls_ok = True
+        if self.tls_ctx is not None:
+            try:
+                self.request.settimeout(15)
+                self.request = self.tls_ctx.wrap_socket(self.request, server_side=True)
+            except (ssl.SSLError, OSError):   # cliente que habla HTTP plano por el puerto TLS, escáneres, cortes...
+                self._tls_ok = False
+                return
+        super().setup()
+
+    def handle(self):
+        if self._tls_ok: super().handle()
+
+    def finish(self):
+        if self._tls_ok: super().finish()
 
     def log_message(self, fmt, *args):
         pass  # silencio; systemd ya registra lo importante
@@ -599,7 +618,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def v2_create_req(self):
         try:
-            n = int(self.headers.get("content-length", 0))
+            n = max(0, min(int(self.headers.get("content-length", 0)), 65536))
             data = json.loads(self.rfile.read(n) or b"{}")
         except Exception:
             return self.reply(400, {"error": "JSON inválido"})
@@ -620,7 +639,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.path.startswith("/create"):
             return self.reply(404, {"error": "Ruta no encontrada"})
         try:
-            n = int(self.headers.get("content-length", 0))
+            n = max(0, min(int(self.headers.get("content-length", 0)), 65536))
             data = json.loads(self.rfile.read(n) or b"{}")
         except Exception:
             return self.reply(400, {"error": "JSON inválido"})
@@ -635,11 +654,29 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(code, out)
 
 
+def serve(bind, port, ctx=None):
+    h = type("HandlerTLS" if ctx else "HandlerHTTP", (Handler,), {"tls_ctx": ctx})
+    ThreadingHTTPServer((bind, port), h).serve_forever()
+
+
 if __name__ == "__main__":
     purge_expired(load_db())
     v2_probe()
     threading.Thread(target=v2_worker, daemon=True).start()
-    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    # HTTPS opcional: TLS_CERT, TLS_KEY y TLS_PORT en /etc/jitterx-agent.conf (lo configura https-agente.sh).
+    # Un certificado ilegible o mal puesto NUNCA tumba el agente: se registra el error y sigue solo por HTTP.
+    cert, key, tls_port = cfg.get("TLS_CERT"), cfg.get("TLS_KEY"), cfg.get("TLS_PORT")
+    if cert and key and tls_port:
+        try:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+            ctx.load_cert_chain(cert, key)
+            threading.Thread(target=serve, args=("0.0.0.0", int(tls_port), ctx), daemon=True).start()
+            print("HTTPS activo en el puerto", tls_port, flush=True)
+        except Exception as e:
+            print("HTTPS NO activado:", e, flush=True)
+    # BIND_ADDR=127.0.0.1 cierra el HTTP plano al exterior (cuando ya uses solo HTTPS)
+    serve(cfg.get("BIND_ADDR", "0.0.0.0"), PORT)
 JITTERX_AGENT_EOF
 chmod 755 /usr/local/bin/jitterx-agent
 
