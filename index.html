@@ -1053,7 +1053,7 @@ function pintarCdn(){
 async function cdnLanzar(body,msgOk,msgId){
   if(cdnBusy) return; cdnBusy=true; cdnMsg(msgId,'ok','Procesando… puede tardar unos segundos.');
   const j=await cdnApi('/api/cdn',body); let fin={};
-  if(j.error) fin={fallo:j.error}; else if(j.op) fin=await cdnEsperar(j.op);
+  if(j.error) fin={fallo:j.error+(j.detalle?' — Detalle (solo admin): '+j.detalle:'')}; else if(j.op) fin=await cdnEsperar(j.op);
   cdnBusy=false; cdnMsg(msgId); await cdnRecargar();
   if(fin.fallo) cdnMsg(msgId,'err',fin.fallo); else if(fin.pendiente) cdnMsg(msgId,'ok','Sigue en proceso. Actualiza en un minuto para ver el resultado.'); else { cdnMsg(msgId,'ok',msgOk); return true; }
 }
