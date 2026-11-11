@@ -15,10 +15,11 @@ import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, ope
 const permitidos = () => String(process.env.CDN_PERMITIDOS || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
 const puedeCrear = (u) => process.env.CDN_ABIERTO === "1" || permitidos().includes(String(u.email || "").toLowerCase());
 
-const fallo = (res, e) => {
+const fallo = (res, e, admin) => {
   const codigo = e.codigo || "INTERNAL_ERROR";
   console.error("cdn:", codigo, e.message);
-  return res.status(estadoHttp(codigo)).json({ error: mensaje(codigo), codigo });
+  // Al administrador se le muestra la respuesta real de la API para poder diagnosticar.
+  return res.status(estadoHttp(codigo)).json({ error: mensaje(codigo), codigo, detalle: admin ? codigo + " · " + e.message : undefined });
 };
 
 export default async function handler(req, res) {
@@ -77,5 +78,5 @@ export default async function handler(req, res) {
       return res.status(202).json({ ok: true, op: operacionId(j) || null });
     }
     return res.status(400).json({ error: "Acción no válida." });
-  } catch (e) { return fallo(res, e); }
+  } catch (e) { return fallo(res, e, puedeCrear(u)); }
 }
