@@ -39,6 +39,12 @@ export default async function handler(req, res) {
         return res.json({ estado: String(pick(o, "status", "state") || "").toLowerCase(), error: err ? mensaje(String(pick(typeof err === "object" ? err : { code: err }, "code") || err).toUpperCase()) : undefined });
       }
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
+      if (req.query && req.query.debug === "1") {
+        if (!puedeCrear(u)) return res.status(403).json({ error: "Solo para administradores." });
+        const leer = async (p) => { try { return await cdn("GET", p); } catch (e) { return { error: e.message }; } };
+        const [servicios, movimientos, saldo] = await Promise.all([leer("/v1/services"), leer("/v1/transactions"), leer("/v1/balance")]);
+        return res.json({ servicios, movimientos, saldo });
+      }
       const precio = (CATALOGO.find((c) => c.id === PLAN_CDN) || {}).precio || 0;
       let saldo; // solo para el administrador: saldo de la cuenta del CDN
       if (puedeCrear(u)) { try { saldo = await cdn("GET", "/v1/balance"); } catch (e) { saldo = { error: e.message }; } }
