@@ -156,6 +156,15 @@ aside.card.side > div + div { padding-top: var(--space-lg); border-top: 1px soli
 .shead p, .greet p { margin-top: var(--space-xs); color: var(--ink-2); }
 .greet p::first-letter { text-transform: uppercase; }
 
+.greetr { display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap; }
+.counter { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--r); background: rgba(12, 15, 23, 0.55); border: 1px solid var(--line-2); }
+.counter b { display: block; font-size: var(--text-2xl); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.counter small { display: block; font-size: var(--text-xs); color: var(--ink-2); }
+.counter .live { display: flex; align-items: center; gap: 6px; margin-top: 2px; color: var(--ok); font-weight: 600; }
+.counter .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+.shead > .counter { order: 2; }
+@media (max-width: 40rem) { .greetr { width: 100%; flex-direction: column; align-items: stretch; } .greetr .primary { width: 100%; } .shead > .counter { order: 0; width: 100%; } }
+
 /* ---------- botones ---------- */
 .primary { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); width: 100%; min-height: var(--ctl); padding: 0 var(--space-lg); border: 0; border-radius: 12px; background: var(--grad); color: #fff; font-size: var(--text-md); font-weight: 700; text-decoration: none; white-space: nowrap; box-shadow: 0 10px 24px -10px rgba(108, 123, 255, 0.85); transition: filter var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
 .primary:hover { filter: brightness(1.1); }
@@ -519,7 +528,7 @@ footer a:hover { color: var(--ink); }
   </div>
 
   <div class="pane" id="paneHome" hidden>
-    <section class="greet"><div><h1 id="hGreet">Hola</h1><p id="hSub"></p></div><button class="primary" id="hCta" type="button">Contratar CDN</button></section>
+    <section class="greet"><div><h1 id="hGreet">Hola</h1><p id="hSub"></p></div><div class="greetr"><div class="counter c4" id="hCounter" hidden><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><b class="cntN">0</b><small>personas ya contrataron su CDN</small></div></div><button class="primary" id="hCta" type="button">Contratar CDN</button></div></section>
     <div class="alert" id="hAlert" role="status" hidden></div>
     <section class="kpis" aria-label="Tu cuenta en cifras">
       <div class="kpi c1"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span><div><label>Servicios CDN</label><b id="kA">…</b><small>activos</small></div></div>
@@ -545,7 +554,7 @@ footer a:hover { color: var(--ink); }
   </div>
 
   <div class="pane" id="paneCdn" hidden>
-    <section class="shead"><div><h1>CDN CloudFront</h1><p>Tu propio punto de conexión por CloudFront hacia tu servidor. Elige el origen y el nombre de tu ruta, paga y se crea al momento.</p></div></section>
+    <section class="shead"><div class="counter c4" id="cdnCounter" hidden><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><b class="cntN">0</b><small>personas ya contrataron su CDN</small></div></div><div><h1>CDN CloudFront</h1><p>Tu propio punto de conexión por CloudFront hacia tu servidor. Elige el origen y el nombre de tu ruta, paga y se crea al momento.</p></div></section>
     <div class="grid cdn">
       <section class="card box-pad">
         <h2><span class="ic c1" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span>Contratar un servicio</h2>
@@ -1077,6 +1086,21 @@ function cdnVista(){
 }
 document.getElementById('cdnSlug').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('cdnGo').click(); });
 
+/* ---------- contador de clientes del CDN ---------- */
+function pintarContador(d){
+  if(!d||!d.clientes) return;   // sin datos o sin clientes todavía: no se muestra
+  const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  ['hCounter','cdnCounter'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.hidden=false;
+    el.querySelector('small').innerHTML=(d.clientes===1?'persona ya contrató su CDN':'personas ya contrataron su CDN')+(d.activos?'<span class="live">'+d.activos+' con servicio activo</span>':'');
+    const b=el.querySelector('.cntN'), fin=d.clientes;
+    if(quieto||fin<4){ b.textContent=fin; return; }
+    const t0=performance.now(), dur=900;
+    (function paso(t){ const k=Math.min(1,(t-t0)/dur); b.textContent=Math.round(fin*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(paso); })(t0);
+  });
+}
+
 /* ---------- resumen ---------- */
 function saludo(){const h=new Date().getHours();return h<6?'Buenas noches':h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
 const restaTxt=ms=>{const m=Math.max(0,Math.floor(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return d?d+'d '+h+'h':h+'h '+(m%60)+'m'};
@@ -1257,7 +1281,7 @@ async function confirmarPago(){
   if(j.status==='approved') cdnTrasPago(j,'cdnMsg');
 }
 
-fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda||MONEDA;PUBKEY=c.publicKey||'';const it=(c.items||[]).find(x=>x.id==='cdn30');PRECIO_CDN=it?it.precio:0;pintarPrecios();pintarCdn();pintarHome()}).catch(()=>{});
+fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda||MONEDA;PUBKEY=c.publicKey||'';pintarContador(c.cdn);const it=(c.items||[]).find(x=>x.id==='cdn30');PRECIO_CDN=it?it.precio:0;pintarPrecios();pintarCdn();pintarHome()}).catch(()=>{});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ) history.replaceState(null,'',location.pathname+'#cdn');
