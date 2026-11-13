@@ -979,6 +979,10 @@ function pintarCdn(){
   g('cdnFree').hidden=!cdnData.admin;
   let sb=g('cdnSaldo'); if(!sb){ sb=document.createElement('div'); sb.id='cdnSaldo'; sb.className='hint'; sb.style.marginTop='10px'; g('cdnFree').after(sb); }
   sb.hidden=!cdnData.admin||!cdnData.saldo;
+  let db=g('cdnDebug'); if(!db){ db=document.createElement('details'); db.id='cdnDebug'; db.className='guide'; db.innerHTML='<summary>Datos de la API del CDN (solo administrador)</summary><div style="padding:0 var(--space-md) var(--space-md)"><p class="hint">Servicios, movimientos de créditos y saldo tal como los devuelve la API. Copia y envía este texto si algo sale mal.</p><button class="pcopy" type="button" id="cdnDebugCp">Copiar</button><pre class="payload" id="cdnDebugTx" style="max-height:340px;overflow:auto;white-space:pre-wrap">Ábrelo para cargar…</pre></div>'; sb.after(db);
+    db.addEventListener('toggle',async()=>{ if(!db.open) return; const t=g('cdnDebugTx'); t.textContent='Cargando…'; const j=await cdnApi('/api/cdn?debug=1'); t.textContent=JSON.stringify(j,null,2); });
+    g('cdnDebugCp').onclick=()=>navigator.clipboard.writeText(g('cdnDebugTx').textContent); }
+  db.hidden=!cdnData.admin;
   if(cdnData.admin&&cdnData.saldo){ const s=cdnData.saldo, b=s.balance??s.credits??s.available??(s.data&&(s.data.balance??s.data.credits)); sb.textContent='Saldo de tu cuenta del CDN (solo lo ves tú): '+(s.error?'no se pudo consultar ('+s.error+')':b!=null?(typeof b==='object'?JSON.stringify(b):b):JSON.stringify(s).slice(0,200)); }
   const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=g('cdnFree').disabled=lleno||cdnBusy;
   if(lleno&&!cdnBusy&&g('cdnMsg').className==='msg') cdnMsg('cdnMsg','err','Ya tienes el máximo de servicios ('+cdnData.max+'). Renueva uno de los que tienes.');
