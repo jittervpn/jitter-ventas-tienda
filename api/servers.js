@@ -1,10 +1,17 @@
+import { limit } from "../lib/ratelimit.js";
+import { cors } from "../lib/cors.js";
+
 // GET /api/servers -> ahora lista desde TU panel jitterxcloud.shop
 const PANEL = "https://jitterxcloud.shop/auth/api_servidores.php";
 
 export default async function handler(req, res) {
+  if (cors(req, res)) return;
+  const over = limit(req, { max: 20, windowMs: 60000 });
+  if (over) return res.status(429).json({ error: over });
   try {
     const r = await fetch(PANEL, { cache: "no-store" });
     const data = await r.json();
+    if (!Array.isArray(data)) throw new Error("respuesta inesperada");
 
     // Convertimos tu tabla `servidores` al formato que usa tu frontend
     const formatted = data.map(s => ({
