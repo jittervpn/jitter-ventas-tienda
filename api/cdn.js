@@ -78,7 +78,7 @@ export default async function handler(req, res) {
       const s = mapService(await cdn("GET", "/v1/services/" + encodeURIComponent(id)));
       if (!esMio(u.uid, s)) return res.status(404).json({ error: "No encontramos ese servicio." });
       let j;
-      if (b.accion === "renovar") j = await cdn("POST", "/v1/services/" + encodeURIComponent(id) + "/renew", {});
+      if (b.accion === "renovar") j = await cdn("POST", "/v1/services/" + encodeURIComponent(id) + "/renew", {}, { "idempotency-key": "adm-" + id + "-" + Math.floor(Date.now() / 120000) });
       else {
         const origen = origenValido(b.origen);
         if (!origen) return res.status(400).json({ error: "El origen debe ser un dominio válido o una IPv4 pública.", codigo: "INVALID_DOMAIN" });

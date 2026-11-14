@@ -1,6 +1,7 @@
 import { MONEDA, CATALOGO } from "../lib/precios.js";
 import { cdn, listaServicios } from "../lib/cdn.js";
 import { cors } from "../lib/cors.js";
+import { limit } from "../lib/ratelimit.js";
 
 // Contador público de clientes del CDN: personas distintas (cada cliente tiene su prefijo /cXXXXXX en la ruta).
 // Se guarda 2 minutos en memoria para no consultar la API del CDN en cada visita.
@@ -23,6 +24,8 @@ async function contadorCdn() {
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+  const over = limit(req, { max: 40, windowMs: 60000 });
+  if (over) return res.status(429).json({ error: over });
   res.setHeader("Cache-Control", "no-store");
   res.status(200).json({
     moneda: MONEDA,

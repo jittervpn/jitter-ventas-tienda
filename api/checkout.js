@@ -13,6 +13,7 @@ export default async function handler(req, res) {
   const over = limit(req, { max: 6, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
   const user = await requireUser(req, res); if (!user) return;
+  if (limit(req, { max: 15, windowMs: 3600000, key: "chk:" + user.uid })) return res.status(429).json({ error: "Demasiados intentos de pago. Espera una hora." });
   const token = clean(process.env.MP_ACCESS_TOKEN);
   if (!token) return res.status(500).json({ error: "Falta MP_ACCESS_TOKEN en Vercel." });
 

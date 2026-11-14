@@ -17,6 +17,9 @@ export default async function handler(req, res) {
     if (over) return res.status(429).json({ error: over });
     const user = await requireUser(req, res);
     if (!user) return;
+    // Anti «carding»: una cuenta no puede probar tarjetas sin parar (protege tu cuenta de Mercado Pago de contracargos).
+    const overU = limit(req, { max: 8, windowMs: 3600000, key: "pay:" + user.uid });
+    if (overU) return res.status(429).json({ error: "Hiciste demasiados intentos de pago. Espera una hora o escríbenos por Telegram." });
     const token = clean(process.env.MP_ACCESS_TOKEN);
     if (!token) return res.status(500).json({ error: "Falta MP_ACCESS_TOKEN en Vercel." });
 
