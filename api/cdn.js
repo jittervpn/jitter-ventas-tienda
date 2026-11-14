@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         try { await registro({ accion: "activar", id: p.id, email: u.email, servicio: String(s.id), origen, vence }); }
         catch (e) { if (e.status === 409) continue; throw e; }
         try {
-          const j = await cdn("PATCH", "/v1/services/" + encodeURIComponent(s.id) + "/origin", CAMPOS.origen(origen));
+          const j = await cdn("PATCH", "/v1/services/" + encodeURIComponent(s.id) + "/origin", CAMPOS.origen(origen), { "idempotency-key": `prueba-${p.id}-${vence}` });
           return res.status(202).json({ ok: true, op: operacionId(j) || null, vence: vence * 1000 });
         } catch (e) { await registro({ accion: "liberar", id: p.id }).catch(() => {}); throw e; }
       }
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
       const { pruebas: l = [] } = await registro({ accion: "lista" });
       const p = l.map(mapPrueba).find((x) => x.id === Number(b.id));
       if (!p) return res.status(404).json({ error: "No existe esa prueba." });
-      if (p.estado === "activa") { await cdn("PATCH", "/v1/services/" + encodeURIComponent(p.servicio) + "/origin", CAMPOS.origen(REPOSO())); await registro({ accion: "terminar", id: p.id }); }
+      if (p.estado === "activa") { await cdn("PATCH", "/v1/services/" + encodeURIComponent(p.servicio) + "/origin", CAMPOS.origen(REPOSO()), { "idempotency-key": `reposo-${p.id}-${p.vence}` }); await registro({ accion: "terminar", id: p.id }); }
       else await registro({ accion: "cancelar", id: p.id });
       return res.json({ ok: true });
     }
