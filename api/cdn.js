@@ -8,6 +8,7 @@ import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
 import { CATALOGO, MONEDA, PLAN_CDN } from "../lib/precios.js";
+import { registro, mapPrueba, poolEstado, vencerPruebas, miPrueba, esDePruebas, REPOSO, DURACION_MS, NOMBRE_RESERVADO } from "../lib/pruebas.js";
 import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE, limpiarSlug, rutaDe } from "../lib/cdn.js";
 
 // Los clientes compran el CDN con Mercado Pago (/api/pagar y /api/checkout). Crear o renovar SIN pagar desde aquí
@@ -38,7 +39,9 @@ export default async function handler(req, res) {
         const err = pick(o, "error", "error_code");
         return res.json({ estado: String(pick(o, "status", "state") || "").toLowerCase(), error: err ? mensaje(String(pick(typeof err === "object" ? err : { code: err }, "code") || err).toUpperCase()) : undefined });
       }
-      const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
+      await vencerPruebas();
+      const todos = listaServicios(await cdn("GET", "/v1/services"));
+      const mios = todos.filter((s) => esMio(u.uid, s)).map((s) => (esDePruebas(s) ? { ...s, dePruebas: true } : s));
       if (req.query && req.query.debug === "1") {
         if (!puedeCrear(u)) return res.status(403).json({ error: "Solo para administradores." });
         const leer = async (p) => { try { return await cdn("GET", p); } catch (e) { return { error: e.message }; } };
@@ -48,12 +51,54 @@ export default async function handler(req, res) {
       const precio = (CATALOGO.find((c) => c.id === PLAN_CDN) || {}).precio || 0;
       let saldo; // solo para el administrador: saldo de la cuenta del CDN
       if (puedeCrear(u)) { try { saldo = await cdn("GET", "/v1/balance"); } catch (e) { saldo = { error: e.message }; } }
-      return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30 });
+      let prueba = null, pruebas;
+      try { prueba = await miPrueba(u.email, todos); } catch (e) { console.error("pruebas:", e.message); }
+      if (puedeCrear(u)) {
+        try { const [pool, { pruebas: l = [] }] = await Promise.all([poolEstado(todos), registro({ accion: "lista" })]); pruebas = { pool, lista: l.slice(0, 60).map(mapPrueba), reposo: REPOSO() }; }
+        catch (e) { pruebas = { error: "No se pudo leer el registro de pruebas (¿subiste auth/pruebas.php a cPanel?). " + e.message }; }
+      }
+      return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30, prueba, pruebas });
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
     let b = {};
     try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { return res.status(400).json({ error: "Datos inválidos." }); }
+
+    // ---------- pruebas de 1 hora ----------
+    if (b.accion === "prueba_activar") {
+      const origen = origenValido(b.origen);
+      if (!origen) return res.status(400).json({ error: "El origen debe ser un dominio válido o una IPv4 pública.", codigo: "INVALID_DOMAIN" });
+      const p = await miPrueba(u.email);
+      if (!p) return res.status(404).json({ error: "No tienes una prueba disponible. Pídela por Telegram." });
+      if (p.estado === "activa") return res.status(409).json({ error: "Tu prueba ya está activa." });
+      const libres = (await poolEstado()).filter((s) => !s.ocupadoPor);
+      if (!libres.length) return res.status(409).json({ error: "Las pruebas están ocupadas ahora mismo. Inténtalo de nuevo en unos minutos.", codigo: "OCUPADO" });
+      for (const s of libres) {
+        const vence = Math.floor((Date.now() + DURACION_MS) / 1000);
+        try { await registro({ accion: "activar", id: p.id, email: u.email, servicio: String(s.id), origen, vence }); }
+        catch (e) { if (e.status === 409) continue; throw e; }
+        try {
+          const j = await cdn("PATCH", "/v1/services/" + encodeURIComponent(s.id) + "/origin", CAMPOS.origen(origen));
+          return res.status(202).json({ ok: true, op: operacionId(j) || null, vence: vence * 1000 });
+        } catch (e) { await registro({ accion: "liberar", id: p.id }).catch(() => {}); throw e; }
+      }
+      return res.status(409).json({ error: "Las pruebas están ocupadas ahora mismo. Inténtalo de nuevo en unos minutos.", codigo: "OCUPADO" });
+    }
+    if (b.accion === "prueba_dar" || b.accion === "prueba_cancelar") {
+      if (!puedeCrear(u)) return res.status(403).json({ error: "Solo para administradores." });
+      if (b.accion === "prueba_dar") {
+        const email = String(b.email || "").trim().toLowerCase();
+        if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email)) return res.status(400).json({ error: "Escribe un correo válido." });
+        const j = await registro({ accion: "crear", email });
+        return res.json({ ok: true, existia: !!j.existia, prueba: mapPrueba(j.prueba) });
+      }
+      const { pruebas: l = [] } = await registro({ accion: "lista" });
+      const p = l.map(mapPrueba).find((x) => x.id === Number(b.id));
+      if (!p) return res.status(404).json({ error: "No existe esa prueba." });
+      if (p.estado === "activa") { await cdn("PATCH", "/v1/services/" + encodeURIComponent(p.servicio) + "/origin", CAMPOS.origen(REPOSO())); await registro({ accion: "terminar", id: p.id }); }
+      else await registro({ accion: "cancelar", id: p.id });
+      return res.json({ ok: true });
+    }
 
     const gratis = b.accion === "crear" || b.accion === "renovar";
     if (gratis && !puedeCrear(u)) return res.status(402).json({ error: "Para crear o renovar un servicio CDN hay que pagarlo.", codigo: "PAGO" });
@@ -64,7 +109,7 @@ export default async function handler(req, res) {
       if (!SLUG_RE.test(slug)) return res.status(400).json({ error: mensaje("INVALID_PATH"), codigo: "INVALID_PATH" });
       if (!origen) return res.status(400).json({ error: "El origen debe ser un dominio válido o una IPv4 pública.", codigo: "INVALID_DOMAIN" });
       const mios = listaServicios(await cdn("GET", "/v1/services")).filter((s) => esMio(u.uid, s));
-      if (mios.length >= MAX_POR_CLIENTE()) return res.status(409).json({ error: `Ya tienes el máximo de servicios CDN (${MAX_POR_CLIENTE()}).`, codigo: "LIMITE" });
+      // (el administrador no tiene tope: puede tener servicios propios y de pruebas)
       const path = rutaDe(u.uid, slug);
       const idem = crypto.createHash("sha256").update(u.uid + "|" + origen + "|" + path).digest("hex").slice(0, 40);
       const j = await cdn("POST", "/v1/services", CAMPOS.crear(origen, path), { "idempotency-key": idem });

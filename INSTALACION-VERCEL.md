@@ -88,3 +88,13 @@ Variables en Vercel → Settings → Environment Variables (luego Redeploy):
 - Cada cliente solo ve y toca los servicios cuya ruta empieza por su prefijo (`/c<6 letras>-nombre`).
 - ⚠ El formato de peticiones/respuestas se asumió. Si algo no coincide, se ajusta solo en `CAMPOS` y `mapService()` de `lib/cdn.js`.
   Los errores del CDN quedan en Vercel → Logs con el prefijo `cdn:`.
+
+## Pruebas de 1 hora del CDN
+
+1. Sube `auth/pruebas.php` a la carpeta `auth` de cPanel (junto a `lib.php` y `config.php`). La tabla `cdn_pruebas` se crea sola.
+2. Como administrador, en la sección CDN crea UNA vez un servicio con **Crear sin cobro**: ruta que empiece por `prueba` (p. ej. `prueba1`) y origen `example.com`. Cada servicio de pruebas atiende a un cliente a la vez; si quieres dos pruebas simultáneas, crea `prueba2`.
+3. En el bloque «Pruebas de 1 hora» escribe el correo del cliente y pulsa **Dar prueba**. El cliente la activa en su sección CDN con el origen de su servidor.
+4. Las pruebas vencidas se cierran solas en cada visita a la web. Para que se cierren aunque no entre nadie, crea un aviso gratuito en https://cron-job.org que abra cada 5 minutos: `https://jitter-ventas-tienda.vercel.app/api/planes`.
+
+Variables opcionales: `PRUEBAS_URL` (por defecto `https://jitterxcloud.shop/auth/pruebas.php`) y `CDN_PRUEBA_REPOSO` (origen al terminar una prueba, por defecto `example.com`).
+Los clientes no pueden comprar rutas que empiecen por `prueba`.

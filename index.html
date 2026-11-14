@@ -555,6 +555,7 @@ footer a:hover { color: var(--ink); }
 
   <div class="pane" id="paneCdn" hidden>
     <section class="shead"><div class="counter c4" id="cdnCounter" hidden><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><b class="cntN">0</b><small>personas ya contrataron su CDN</small></div></div><div><h1>CDN CloudFront</h1><p>Tu propio punto de conexión por CloudFront hacia tu servidor. Elige el origen y el nombre de tu ruta, paga y se crea al momento.</p></div></section>
+    <div id="cdnPrueba"></div>
     <div class="grid cdn">
       <section class="card box-pad">
         <h2><span class="ic c1" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span>Contratar un servicio</h2>
@@ -584,6 +585,7 @@ footer a:hover { color: var(--ink); }
       </section>
       <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim num" id="cdnCount"></span></div><div class="msg" id="cdnMsg2" role="status"></div><div id="cdnBrick2"></div><p id="cdnAlt2Box" class="alt" hidden><a href="#" id="cdnAlt2" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p><div id="cdnList"></div></section>
     </div>
+    <section class="card" id="cdnAdm" hidden style="margin-top:var(--space-lg)"></section>
   </div>
 
   <div class="pane" id="paneFaq" hidden>
@@ -984,15 +986,17 @@ function pintarCdn(){
     g('cdnDebugCp').onclick=()=>navigator.clipboard.writeText(g('cdnDebugTx').textContent); }
   db.hidden=!cdnData.admin;
   if(cdnData.admin&&cdnData.saldo){ const s=cdnData.saldo, b=s.balance??s.credits??s.available??(s.data&&(s.data.balance??s.data.credits)); sb.textContent='Saldo de tu cuenta del CDN (solo lo ves tú): '+(s.error?'no se pudo consultar ('+s.error+')':b!=null?(typeof b==='object'?JSON.stringify(b):b):JSON.stringify(s).slice(0,200)); }
-  const lleno=sv.length>=cdnData.max; g('cdnGo').disabled=g('cdnFree').disabled=lleno||cdnBusy;
+  const lleno=!cdnData.admin&&sv.length>=cdnData.max; g('cdnGo').disabled=g('cdnFree').disabled=lleno||cdnBusy;
+  pintarPrueba(); pintarAdmPruebas();
   if(lleno&&!cdnBusy&&g('cdnMsg').className==='msg') cdnMsg('cdnMsg','err','Ya tienes el máximo de servicios ('+cdnData.max+'). Renueva uno de los que tienes.');
   lista.innerHTML=sv.length?sv.map(x=>{
     const [et,cl]=cdnEstado(x.estado), pay='GET '+x.path+' HTTP/1.1[crlf]Host: '+x.host+'[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]';
-    return '<div class="rec ticks"><div class="top"><span class="name">'+esc(x.path)+'</span><span class="pill'+cl+'">'+et+'</span></div>'+
+    return '<div class="rec ticks"><div class="top"><span class="name">'+esc(x.path)+'</span>'+(x.dePruebas?'<span class="pill prem">Servicio de pruebas</span>':'<span class="pill'+cl+'">'+et+'</span>')+'</div>'+
       (x.expira?(()=>{ const r=restante(x.expira), pct=Math.max(2,Math.min(100,Math.round(r.left/(30*864e5)*100))); return '<div class="cdntime" style="margin:0 0 var(--space-md)"><div class="days"><b>'+(r.d>0?r.d:r.txt)+'</b><span>'+(r.d>0?(r.d===1?'día restante':'días restantes'):'restantes')+', vence el '+new Date(x.expira).toLocaleDateString('es')+'</span></div><div class="bar"><i class="'+(r.left<3*864e5?'low':'')+'" style="width:'+pct+'%"></i></div></div>'; })():'')+
       '<div class="cred">'+(x.host?row('Host CDN',x.host)+row('Puerto',80):'')+row('Ruta',x.path)+row('Origen',x.origin||'—')+'</div>'+
       (x.host?payBlock('Payload CloudFront',pay)+'<button class="pcopy" type="button" data-copy="'+esc(x.host+':80\n'+pay)+'" style="margin-left:var(--space-xs);margin-top:var(--space-sm)">'+copyIcon+'Copiar todo</button>':'')+
-      '<div class="cdnact"><button class="pcopy" type="button" data-cdn="renovar" data-id="'+esc(x.id)+'">Renovar'+(p?' por '+p:'')+'</button>'+(cdnData.admin?'<button class="pcopy" type="button" data-cdn="renovarGratis" data-id="'+esc(x.id)+'">Renovar sin cobro</button>':'')+'<button class="pcopy" type="button" data-cdn="origen" data-id="'+esc(x.id)+'">Cambiar origen</button></div>'+
+      (x.dePruebas?'<p class="hint">Se presta a los clientes de prueba durante 1 hora. Su origen lo maneja el sistema: no lo cambies a mano.</p><div class="cdnact">'+(cdnData.admin?'<button class="pcopy" type="button" data-cdn="renovarGratis" data-id="'+esc(x.id)+'">Renovar sin cobro</button>':'')+'</div>'
+      :'<div class="cdnact"><button class="pcopy" type="button" data-cdn="renovar" data-id="'+esc(x.id)+'">Renovar'+(p?' por '+p:'')+'</button>'+(cdnData.admin?'<button class="pcopy" type="button" data-cdn="renovarGratis" data-id="'+esc(x.id)+'">Renovar sin cobro</button>':'')+'<button class="pcopy" type="button" data-cdn="origen" data-id="'+esc(x.id)+'">Cambiar origen</button></div>')+
       '<div class="cdnedit" hidden><input class="cdnoin" placeholder="nuevo.dominio.com o IP" value="'+esc(x.origin||'')+'" autocapitalize="none" spellcheck="false"><button class="pcopy" type="button" data-cdn="guardar" data-id="'+esc(x.id)+'">Guardar</button></div></div>';
   }).join(''):'<div class="empty">Aún no tienes servicios CDN.<br>Contrata el primero con el formulario de arriba.</div>';
   lista.querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText(b.dataset.copy));
@@ -1006,6 +1010,77 @@ async function cdnLanzar(body,msgOk,msgId){
   cdnBusy=false; cdnMsg(msgId); await cdnRecargar();
   if(fin.fallo) cdnMsg(msgId,'err',fin.fallo); else if(fin.pendiente) cdnMsg(msgId,'ok','Sigue en proceso. Actualiza en un minuto para ver el resultado.'); else { cdnMsg(msgId,'ok',msgOk); return true; }
 }
+/* ---------- prueba gratis de 1 hora ---------- */
+let pruebaTimer=null;
+const mmss=ms=>{ const s=Math.max(0,Math.floor(ms/1000)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+function pintarPrueba(){
+  const box=document.getElementById('cdnPrueba'); if(!box) return;
+  clearInterval(pruebaTimer);
+  const pr=sesion&&cdnData&&cdnData.prueba;
+  if(!pr){ box.innerHTML=''; return; }
+  const GIFT='<span class="ic c5" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>';
+  if(pr.estado==='pendiente'){
+    box.innerHTML='<section class="card prueba" style="margin-bottom:var(--space-lg)"><h2>'+GIFT+'Tienes una prueba gratis de 1 hora</h2>'+
+      '<p class="sub">Escribe el dominio o la IP de tu servidor y pulsa Activar. Durante 1 hora tendrás un CDN CloudFront apuntando a tu servidor para probarlo en tu app. La hora empieza a contar al activarla.</p>'+
+      '<div class="f"><label for="prOrigin">Origen (dominio o IP de tu servidor)</label><div class="field"><input id="prOrigin" name="origen-prueba" placeholder="mi-servidor.com o 203.0.113.10" autocomplete="off" autocapitalize="none" spellcheck="false"></div></div>'+
+      '<button class="primary" id="prGo" type="button" style="margin-top:var(--space-md)"><span class="spinner"></span><span>Activar mi prueba de 1 hora</span></button><div class="msg" id="prMsg" role="status"></div></section>';
+    const go=document.getElementById('prGo');
+    go.onclick=async()=>{
+      const origen=document.getElementById('prOrigin').value.trim().toLowerCase();
+      if(!origen) return cdnMsg('prMsg','err','Escribe el origen de tu servidor.');
+      go.classList.add('loading'); go.disabled=true; cdnMsg('prMsg','ok','Activando… puede tardar unos segundos.');
+      const j=await cdnApi('/api/cdn',{accion:'prueba_activar',origen}); let fin={};
+      if(j.error) fin={fallo:j.error+(j.detalle?' Detalle para el administrador: '+j.detalle:'')}; else if(j.op) fin=await cdnEsperar(j.op);
+      go.classList.remove('loading'); go.disabled=false;
+      if(fin.fallo) return cdnMsg('prMsg','err',fin.fallo);
+      await cdnRecargar();
+    };
+    return;
+  }
+  const pay='GET '+pr.path+' HTTP/1.1[crlf]Host: '+pr.host+'[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]';
+  box.innerHTML='<section class="card prueba" style="margin-bottom:var(--space-lg)"><div class="chead" style="margin-bottom:var(--space-sm)"><h2>'+GIFT+'Tu prueba está activa</h2><span class="pill">Prueba</span></div>'+
+    '<div class="days"><b id="prLeft">'+mmss(pr.vence-Date.now())+'</b><span>minutos restantes. Apunta a <code>'+esc(pr.origen||'')+'</code></span></div>'+
+    '<div class="bar"><i id="prBar" style="width:100%"></i></div>'+
+    '<div class="cred" style="margin-top:var(--space-md)">'+(pr.host?row('Host CDN',pr.host)+row('Puerto',80):'')+row('Ruta',pr.path||'')+'</div>'+
+    (pr.host?payBlock('Payload CloudFront',pay)+'<button class="pcopy" type="button" data-copy="'+esc(pr.host+':80\n'+pay)+'" style="margin-left:var(--space-xs);margin-top:var(--space-sm)">'+copyIcon+'Copiar todo</button>':'<p class="hint">El host aparecerá en unos segundos.</p>')+
+    '<p class="hint" style="margin-top:var(--space-md)">¿Te gustó? Contrata tu propio CDN abajo y sigue usándolo 30 días.</p></section>';
+  box.querySelectorAll('button[data-copy]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText(b.dataset.copy));
+  const tick=()=>{ const left=pr.vence-Date.now(), e=document.getElementById('prLeft'), bar=document.getElementById('prBar');
+    if(!e){ clearInterval(pruebaTimer); return; }
+    e.textContent=mmss(left); if(bar){ bar.style.width=Math.max(0,Math.min(100,left/36e3))+'%'; bar.classList.toggle('low',left<5*60000); }
+    if(left<=0){ clearInterval(pruebaTimer); setTimeout(cdnRecargar,1500); } };
+  tick(); pruebaTimer=setInterval(tick,1000);
+}
+
+/* ---------- administración de pruebas (solo admin) ---------- */
+function pintarAdmPruebas(){
+  const box=document.getElementById('cdnAdm'); if(!box) return;
+  const d=cdnData&&cdnData.admin&&cdnData.pruebas;
+  box.hidden=!d; if(!d) return;
+  const hora=ms=>ms?new Date(ms).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+  const est={pendiente:['Pendiente',' prem'],activa:['Activa',''],terminada:['Terminada',' off'],cancelada:['Cancelada',' off']};
+  let h='<h2><span class="ic c5" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7"/></svg></span>Pruebas de 1 hora (solo administrador)</h2>';
+  if(d.error){ box.innerHTML=h+'<div class="msg err" style="display:flex"><span>'+esc(d.error)+'</span></div>'; return; }
+  h+='<p class="sub">Das una prueba a un correo; el cliente la activa en su sección CDN con su servidor y el servicio de pruebas le apunta durante 1 hora. Al terminar vuelve a <code>'+esc(d.reposo)+'</code>.</p>';
+  h+='<div class="subh">Servicios de pruebas</div>';
+  h+=d.pool.length?d.pool.map(s=>'<div class="trow"><span class="mono">'+esc(s.path)+'</span><span>'+(s.ocupadoPor?'<span class="pill">En uso</span>':'<span class="pill prem">Libre</span>')+'</span><span class="dim">'+(s.ocupadoPor?esc(s.ocupadoPor.email)+' hasta '+hora(s.ocupadoPor.vence):'')+'</span></div>').join('')
+    :'<div class="empty" style="text-align:left">Todavía no tienes un servicio de pruebas. Créalo una vez con <b>Crear sin cobro</b>: nombre de ruta que empiece por <code>prueba</code> (por ejemplo <code>prueba1</code>) y origen <code>'+esc(d.reposo)+'</code>. Cada servicio de pruebas atiende a un cliente a la vez.</div>';
+  h+='<div class="subh">Dar una prueba</div><div class="cdnedit" style="margin-top:0"><input id="admEmail" type="email" placeholder="correo@del-cliente.com" autocomplete="off" autocapitalize="none" spellcheck="false"><button class="pcopy" type="button" id="admDar">Dar prueba</button></div><div class="msg" id="admMsg" role="status"></div>';
+  h+='<div class="subh">Últimas pruebas</div>';
+  h+=d.lista.length?'<div class="thead"><span>Correo</span><span>Estado</span><span>Fecha</span></div>'+d.lista.map(p=>{ const [t,c]=est[p.estado]||[p.estado,''];
+    return '<div class="trow"><span class="mono">'+esc(p.email)+'</span><span><span class="pill'+c+'">'+t+'</span></span><span class="dim">'+(p.estado==='activa'?'hasta '+hora(p.vence):hora(p.activada||p.creada))+((p.estado==='pendiente'||p.estado==='activa')?' <button class="pcopy" type="button" data-pcan="'+p.id+'" style="min-height:30px;padding:0 10px;margin-left:6px">'+(p.estado==='activa'?'Cortar':'Quitar')+'</button>':'')+'</span></div>'; }).join('')
+    :'<div class="empty">Aún no diste ninguna prueba.</div>';
+  box.innerHTML=h;
+  const dar=document.getElementById('admDar');
+  dar.onclick=async()=>{ const email=document.getElementById('admEmail').value.trim();
+    if(!email) return cdnMsg('admMsg','err','Escribe el correo del cliente.');
+    dar.disabled=true; const j=await cdnApi('/api/cdn',{accion:'prueba_dar',email}); dar.disabled=false;
+    if(j.error) return cdnMsg('admMsg','err',j.error);
+    await cdnRecargar(); cdnMsg('admMsg','ok',(j.existia?'Ese correo ya tenía una prueba pendiente o activa.':'Prueba lista.')+' El cliente la verá en su sección CDN al entrar con '+email+'.'); };
+  box.querySelectorAll('button[data-pcan]').forEach(b=>b.onclick=async()=>{ b.disabled=true;
+    const j=await cdnApi('/api/cdn',{accion:'prueba_cancelar',id:Number(b.dataset.pcan)}); if(j.error){ b.disabled=false; return cdnMsg('admMsg','err',j.error); } await cdnRecargar(); });
+}
+
 async function cdnAccion(b){
   const card=b.closest('.rec'), id=b.dataset.id;
   if(b.dataset.cdn==='origen'){ card.querySelector('.cdnedit').hidden=false; return; }
@@ -1122,8 +1197,9 @@ function pintarHome(){
   g('kB').textContent=prox?restaTxt(prox.expira-Date.now()):'—'; g('kBs').textContent=prox?prox.path:'de tus servicios';
   g('kC').textContent=domOk?'Activo':'—'; g('kCs').textContent=domOk?dom.name:'registro A';
   g('kD').textContent=p||'—';
-  const al=g('hAlert'), pronto=prox&&prox.expira-Date.now()<3*864e5; al.hidden=!(sesion&&pronto);
-  if(sesion&&pronto) al.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Tu CDN <b>'+esc(prox.path)+'</b> vence en <b>'+restaTxt(prox.expira-Date.now())+'</b>. Renuévalo desde la sección CDN.</span>';
+  const al=g('hAlert'), pronto=prox&&prox.expira-Date.now()<3*864e5, pr=cdnData&&cdnData.prueba; al.hidden=!(sesion&&(pronto||pr));
+  if(sesion&&pr) al.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span>'+(pr.estado==='activa'?'Tu prueba del CDN está activa: quedan <b>'+restaTxt(pr.vence-Date.now())+'</b>.':'Tienes una <b>prueba gratis de 1 hora</b> del CDN.')+' <a href="#cdn" onclick="tab(\'cdn\');return false">Ir a CDN</a></span>';
+  else if(sesion&&pronto) al.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Tu CDN <b>'+esc(prox.path)+'</b> vence en <b>'+restaTxt(prox.expira-Date.now())+'</b>. Renuévalo desde la sección CDN.</span>';
   const hecho=[!!sesion,sv.length>0,false], hs=g('hSteps'); hs.hidden=sv.length>0;
   hs.querySelectorAll('.st').forEach((el,i)=>{ el.classList.toggle('done',hecho[i]); el.querySelector('i').textContent=hecho[i]?'✓':i+1; });
   g('hStepsN').textContent=hecho.filter(Boolean).length+' de 3';

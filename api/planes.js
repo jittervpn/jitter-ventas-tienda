@@ -1,5 +1,6 @@
 import { MONEDA, CATALOGO } from "../lib/precios.js";
 import { cdn, listaServicios } from "../lib/cdn.js";
+import { vencerPruebas, esDePruebas } from "../lib/pruebas.js";
 import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
 
@@ -9,7 +10,7 @@ let cache = { t: 0, v: null };
 async function contadorCdn() {
   if (cache.v && Date.now() - cache.t < 120000) return cache.v;
   try {
-    const sv = listaServicios(await cdn("GET", "/v1/services"));
+    const sv = listaServicios(await cdn("GET", "/v1/services")).filter((s) => !esDePruebas(s));
     const pref = (s) => (String(s.path || "").match(/^\/(c[0-9a-f]{6})/) || [])[1];
     const activo = (s) => /^(active|activo|deployed|ready|enabled|online)$/.test(s.estado);
     const todos = new Set(sv.map(pref).filter(Boolean));
@@ -26,6 +27,7 @@ export default async function handler(req, res) {
   if (cors(req, res)) return;
   const over = limit(req, { max: 40, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
+  await vencerPruebas(); // cada visita (o un cron externo) cierra las pruebas de 1 hora que ya vencieron
   res.setHeader("Cache-Control", "no-store");
   res.status(200).json({
     moneda: MONEDA,
