@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1015">
+<title>Cómo configurar HTTP Custom con tu CDN CloudFront | Jitterx Panel Cloud</title>
+<meta name="description" content="Guía práctica para conectar HTTP Custom en Android usando el host, el puerto y el payload de tu servicio CDN, con solución de problemas.">
+<link rel="canonical" href="https://jitterxcloud.shop/guia-http-custom.html">
+<link rel="stylesheet" href="/guias.css">
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="/" aria-label="Jitterx Panel Cloud, inicio"><span class="mk" aria-hidden="true"><i></i><i></i><i></i></span>Jitterx<span>panel cloud</span></a>
+<nav aria-label="Principal"><a href="/">Panel</a><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a></nav><a class="navcta" href="/#cdn">Contratar CDN</a></div></header>
+<main>
+<article data-art>
+<h1>Cómo configurar HTTP Custom con tu CDN CloudFront</h1>
+<p class="meta">Actualizado el 11 de noviembre de 2026, por el equipo de Jitterx Panel Cloud</p>
+<p>HTTP Custom es una aplicación para Android que permite crear túneles cifrados desde el móvil. Esta guía te lleva desde cero hasta una conexión funcionando a través de tu CDN CloudFront, y explica cómo comprobar que todo va bien y qué hacer si algo falla.</p>
+<h2>Qué necesitas antes de empezar</h2>
+<ul>
+<li>Un móvil Android con la app <b>HTTP Custom</b> instalada desde Google Play.</li>
+<li>Un <b>servicio CDN activo</b>. Si todavía no lo tienes, sigue la guía de <a href="/guia-cdn-cloudfront.html">cómo contratar tu CDN CloudFront</a>.</li>
+<li>El <b>usuario y la contraseña SSH de tu propio servidor</b> (el que pusiste como origen del CDN).</li>
+</ul>
+<h2>Paso 1: copia los datos de tu CDN</h2>
+<p>Entra a la web, abre la sección <b>CDN</b> y busca tu servicio en <b>Mis servicios CDN</b>. Ahí tienes el <b>host CDN</b>, el <b>puerto 80</b> y el <b>payload CloudFront</b>, cada uno con su botón de copiar.</p>
+<h2>Paso 2: configura la app</h2>
+<ol>
+<li>Abre HTTP Custom y crea una configuración nueva.</li>
+<li>En los datos SSH, escribe como servidor el <b>host CDN</b> (termina en <code>cloudfront.net</code>) y el <b>puerto 80</b>, seguidos del usuario y la contraseña de tu servidor: <code>host:80@usuario:contraseña</code>.</li>
+<li>Activa la opción de <b>payload personalizado</b> y pega el payload CloudFront de tu servicio.</li>
+<li>Guarda la configuración.</li>
+</ol>
+<h2>Paso 3: conecta y verifica</h2>
+<p>Pulsa el botón de inicio. El registro de la app mostrará la respuesta <code>HTTP/1.1 101</code> del WebSocket y después la autenticación SSH. Para comprobarlo, abre en el navegador un sitio que muestre tu IP pública: debería coincidir con la de tu servidor, no con la de tu operador.</p>
+<h2>Solución de problemas</h2>
+<h3>Error 403 o 404 en el registro</h3>
+<p>El payload no coincide con tu servicio: revisa que la ruta y el host sean exactamente los de tu tarjeta. Vuelve a copiar el payload con el botón.</p>
+<h3>Error 502 o 504</h3>
+<p>CloudFront no logra conectar con tu servidor. Comprueba que el origen sea correcto, que el servidor esté encendido y que acepte WebSocket en el puerto 80. Si cambiaste de servidor, actualiza el origen con <b>Cambiar origen</b>.</p>
+<h3>«Authentication failed»</h3>
+<p>El usuario o la contraseña SSH de tu servidor no son correctos. Revísalos respetando mayúsculas y minúsculas.</p>
+<h3>Conectaba y dejó de funcionar</h3>
+<p>Mira en la web si tu servicio sigue <b>Activo</b>. Si venció, renuévalo: conservas el mismo host, ruta y payload.</p>
+<h3>Se desconecta cada pocos minutos</h3>
+<p>Suele deberse al ahorro de energía de Android. Permite que la app funcione sin restricciones de batería.</p>
+<div class="box"><p><b>Consejo.</b> NetMod y otras apps que aceptan SSH sobre WebSocket con payload se configuran igual: host CDN, puerto 80 y el mismo payload.</p></div>
+<h2>Sigue aprendiendo</h2><div class="grid"><a href="/guia-cdn-cloudfront.html"><b>Cómo contratar y usar tu CDN CloudFront</b><span>Qué es el CDN CloudFront de Jitterx Panel Cloud, qué necesitas, cómo contratarlo, renovarlo y cambiar el origen paso a paso.</span></a><a href="/guia-subdominio.html"><b>Cómo apuntar un subdominio a tu VPS</b><span>Qué es un registro A, cómo crear gratis un subdominio que apunte a la IP de tu servidor y cómo usarlo como origen de tu CDN.</span></a><a href="/guia-tunel-ssh-websocket.html"><b>Qué es un túnel SSH sobre WebSocket y para qué sirve</b><span>Explicación clara de qué es un túnel SSH, cómo funciona el encapsulado en WebSocket, por qué encaja con una CDN y sus límites de seguridad.</span></a><a href="/guia-seguridad-wifi-publica.html"><b>Cómo proteger tu conexión en redes WiFi públicas</b><span>Riesgos reales de las redes WiFi abiertas y medidas prácticas para proteger tus datos: HTTPS, túneles cifrados, actualizaciones y más.</span></a></div>
+</article>
+</main>
+<footer><div class="in"><span><b>Jitterx Panel Cloud</b>, © 2026. CDN CloudFront y subdominios para tu VPS.</span><nav aria-label="Enlaces del sitio"><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a><a href="/privacidad.html">Política de privacidad</a><a href="/terminos.html">Términos de uso</a></nav></div></footer>
+<script src="/guias.js"></script><script src="/ads.js"></script>
+</body>
+</html>

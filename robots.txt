@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /auth/
+
+Sitemap: https://jitterxcloud.shop/sitemap.xml

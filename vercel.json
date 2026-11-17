@@ -1,12 +1,9 @@
 {
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "no-referrer" }
-      ]
-    }
+  "routes": [
+    { "src": "/(lib|vps|root|scripts|cpanel|node_modules)(/.*)?", "status": 404, "dest": "/404.html" },
+    { "src": "/(.*\\.md|package\\.json|package-lock\\.json|firestore\\.rules|vercel\\.json|\\.gitignore|\\.git/.*)", "status": 404, "dest": "/404.html" },
+    { "src": "/auth/(request-code|verify-code)\\.php", "status": 308, "headers": { "Location": "/" } },
+    { "src": "/api/(.*)", "headers": { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer" }, "continue": true },
+    { "src": "/(.*)", "headers": { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", "X-Frame-Options": "SAMEORIGIN" }, "continue": true }
   ]
 }

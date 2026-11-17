@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1015">
+<title>Cómo contratar y usar tu CDN CloudFront | Jitterx Panel Cloud</title>
+<meta name="description" content="Qué es el CDN CloudFront de Jitterx Panel Cloud, qué necesitas, cómo contratarlo, renovarlo y cambiar el origen paso a paso.">
+<link rel="canonical" href="https://jitterxcloud.shop/guia-cdn-cloudfront.html">
+<link rel="stylesheet" href="/guias.css">
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="/" aria-label="Jitterx Panel Cloud, inicio"><span class="mk" aria-hidden="true"><i></i><i></i><i></i></span>Jitterx<span>panel cloud</span></a>
+<nav aria-label="Principal"><a href="/">Panel</a><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a></nav><a class="navcta" href="/#cdn">Contratar CDN</a></div></header>
+<main>
+<article data-art>
+<h1>Cómo contratar y usar tu CDN CloudFront</h1>
+<p class="meta">Actualizado el 11 de noviembre de 2026, por el equipo de Jitterx Panel Cloud</p>
+<p>El CDN CloudFront de Jitterx Panel Cloud te da un punto de conexión propio dentro de la red de CloudFront que reenvía el tráfico hacia tu servidor. En lugar de conectarte directamente a la IP de tu VPS, tu app se conecta a un dominio de CloudFront, y CloudFront entrega la conexión a tu servidor. Esta guía explica qué necesitas, cómo contratarlo y cómo mantenerlo activo.</p>
+<h2>Cómo funciona</h2>
+<p>Cada servicio CDN tiene tres datos: un <b>host CDN</b> (un dominio que termina en <code>cloudfront.net</code>), una <b>ruta</b> propia (por ejemplo <code>/c1a2b3cmiruta</code>) y un <b>origen</b>, que es el dominio o la IP de tu servidor. Cuando tu app abre una conexión WebSocket al host CDN con tu ruta, CloudFront la reenvía al origen por el puerto 80. La ruta lleva un prefijo único de tu cuenta, así nadie más puede usar la tuya.</p>
+<h2>Qué necesitas antes de contratarlo</h2>
+<ul>
+<li><b>Un servidor propio (VPS)</b> con un servicio que acepte conexiones <b>WebSocket en el puerto 80</b>, por ejemplo un túnel SSH sobre WebSocket.</li>
+<li><b>El origen:</b> la IPv4 pública del servidor o un dominio que ya apunte a ella. Si no tienes dominio, puedes crear uno gratis siguiendo la guía de <a href="/guia-subdominio.html">cómo apuntar un subdominio a tu VPS</a>.</li>
+<li>Una cuenta en la web: entras con tu correo y un código de 6 dígitos, sin contraseñas.</li>
+</ul>
+<h2>Paso a paso para contratarlo</h2>
+<ol>
+<li>Entra a la web, inicia sesión y abre la sección <b>CDN</b> del menú.</li>
+<li>En <b>Origen</b>, escribe el dominio o la IP pública de tu servidor.</li>
+<li>En <b>Nombre de tu ruta</b>, elige entre 2 y 20 letras minúsculas o números, sin guiones ni espacios. Delante se añade solo el prefijo de tu cuenta.</li>
+<li>Pulsa <b>Pagar y crear mi CDN</b>. Puedes pagar con tarjeta dentro de la web o en la página de Mercado Pago. Cada servicio cuesta <b>$17.000</b> y dura <b>30 días</b>.</li>
+<li>Cuando el pago se aprueba, el servicio se crea solo. En unos segundos aparece en <b>Mis servicios CDN</b> con el estado <b>Activo</b>, el host CDN y el payload listo para copiar.</li>
+</ol>
+<p>Antes de cobrarte, la web revisa que el origen y la ruta sean válidos. Si después del pago el servicio no se pudiera crear por un dato inválido, el dinero se devuelve automáticamente.</p>
+<h2>Copiar los datos a tu app</h2>
+<p>En la tarjeta de tu servicio tienes el <b>host CDN</b>, el <b>puerto 80</b>, la <b>ruta</b> y el <b>payload CloudFront</b>, cada uno con su botón de copiar. El payload tiene esta forma:</p>
+<pre><code>GET /tu-ruta HTTP/1.1[crlf]Host: tu-host.cloudfront.net[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]</code></pre>
+<p>Cómo cargarlo en la app está explicado en la guía de <a href="/guia-http-custom.html">configuración de HTTP Custom con tu CDN</a>.</p>
+<h2>Renovar y cambiar el origen</h2>
+<ul>
+<li><b>Renovar:</b> en la tarjeta de tu servicio pulsa <b>Renovar</b> y paga de nuevo. Se suman 30 días y conservas el mismo host, ruta y payload, así que no tienes que tocar la app.</li>
+<li><b>Cambiar origen:</b> si cambias de servidor, pulsa <b>Cambiar origen</b>, escribe el nuevo dominio o IP y guarda. No tiene costo.</li>
+<li>La web te avisa cuando a un servicio le quedan menos de 3 días.</li>
+</ul>
+<h2>Problemas frecuentes</h2>
+<h3>«El dominio de origen no resuelve»</h3>
+<p>El dominio que escribiste todavía no apunta a ninguna IP. Revisa su registro A o usa directamente la IP pública del servidor.</p>
+<h3>El servicio está activo pero la app no conecta</h3>
+<p>Comprueba que tu servidor acepte WebSocket en el puerto 80 y que el firewall del proveedor tenga ese puerto abierto. Revisa también que el payload esté completo, incluida la línea final.</p>
+<h3>«Esa ruta ya está en uso»</h3>
+<p>Ya tienes un servicio con ese nombre. Elige otro nombre de ruta.</p>
+<div class="box"><p><b>Uso responsable.</b> El CDN es para conectarte a tus propios servicios. Está prohibido usarlo para spam, ataques o cualquier actividad ilegal; los servicios que lo incumplan se suspenden sin aviso.</p></div>
+<h2>Sigue aprendiendo</h2><div class="grid"><a href="/guia-http-custom.html"><b>Cómo configurar HTTP Custom con tu CDN CloudFront</b><span>Guía práctica para conectar HTTP Custom en Android usando el host, el puerto y el payload de tu servicio CDN, con solución de problemas.</span></a><a href="/guia-subdominio.html"><b>Cómo apuntar un subdominio a tu VPS</b><span>Qué es un registro A, cómo crear gratis un subdominio que apunte a la IP de tu servidor y cómo usarlo como origen de tu CDN.</span></a><a href="/guia-tunel-ssh-websocket.html"><b>Qué es un túnel SSH sobre WebSocket y para qué sirve</b><span>Explicación clara de qué es un túnel SSH, cómo funciona el encapsulado en WebSocket, por qué encaja con una CDN y sus límites de seguridad.</span></a><a href="/guia-seguridad-wifi-publica.html"><b>Cómo proteger tu conexión en redes WiFi públicas</b><span>Riesgos reales de las redes WiFi abiertas y medidas prácticas para proteger tus datos: HTTPS, túneles cifrados, actualizaciones y más.</span></a></div>
+</article>
+</main>
+<footer><div class="in"><span><b>Jitterx Panel Cloud</b>, © 2026. CDN CloudFront y subdominios para tu VPS.</span><nav aria-label="Enlaces del sitio"><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a><a href="/privacidad.html">Política de privacidad</a><a href="/terminos.html">Términos de uso</a></nav></div></footer>
+<script src="/guias.js"></script><script src="/ads.js"></script>
+</body>
+</html>
