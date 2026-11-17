@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       try { prueba = await miPrueba(u.email, todos); } catch (e) { console.error("pruebas:", e.message); }
       if (puedeCrear(u)) {
         try { const [pool, { pruebas: l = [] }] = await Promise.all([poolEstado(todos), registro({ accion: "lista" })]); pruebas = { pool, lista: l.slice(0, 60).map(mapPrueba), reposo: REPOSO() }; }
-        catch (e) { pruebas = { error: "No se pudo leer el registro de pruebas (¿subiste auth/pruebas.php a cPanel?). " + e.message }; }
+        catch (e) { pruebas = { error: "No se pudo leer el registro de pruebas (¿conectaste el Blob store al proyecto?). " + e.message }; }
       }
       return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30, prueba, pruebas });
     }

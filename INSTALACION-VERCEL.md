@@ -98,3 +98,13 @@ Variables en Vercel → Settings → Environment Variables (luego Redeploy):
 
 Variables opcionales: `PRUEBAS_URL` (por defecto `https://jitterxcloud.shop/auth/pruebas.php`) y `CDN_PRUEBA_REPOSO` (origen al terminar una prueba, por defecto `example.com`).
 Los clientes no pueden comprar rutas que empiecen por `prueba`.
+
+## Todo en Vercel (sin cPanel)
+
+Desde noviembre de 2026 la web, el login y las pruebas de 1 hora viven en este mismo proyecto:
+
+- `index.html`, guías, `sitemap.xml`, `robots.txt`, iconos → se sirven como archivos estáticos.
+- Login por código: `api/auth/codigo.js` (mismo uid por correo y mismo token que el antiguo PHP).
+- Códigos de acceso y registro de pruebas: Vercel Blob privado `jitterx-datos` (`BLOB_READ_WRITE_TOKEN`).
+- Correo: Gmail SMTP. Variables: `SMTP_USER` (tu Gmail) y `SMTP_PASS` (contraseña de aplicación de Google).
+- Dominio: `jitterxcloud.shop` y `www.jitterxcloud.shop` añadidos al proyecto.

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1015">
+<title>Qué es un túnel SSH sobre WebSocket y para qué sirve | Jitterx Panel Cloud</title>
+<meta name="description" content="Explicación clara de qué es un túnel SSH, cómo funciona el encapsulado en WebSocket, por qué encaja con una CDN y sus límites de seguridad.">
+<link rel="canonical" href="https://jitterxcloud.shop/guia-tunel-ssh-websocket.html">
+<link rel="stylesheet" href="/guias.css">
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="/" aria-label="Jitterx Panel Cloud, inicio"><span class="mk" aria-hidden="true"><i></i><i></i><i></i></span>Jitterx<span>panel cloud</span></a>
+<nav aria-label="Principal"><a href="/">Panel</a><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a></nav><a class="navcta" href="/#cdn">Contratar CDN</a></div></header>
+<main>
+<article data-art>
+<h1>Qué es un túnel SSH sobre WebSocket y para qué sirve</h1>
+<p class="meta">Actualizado el 11 de noviembre de 2026, por el equipo de Jitterx Panel Cloud</p>
+
+<p>Un túnel SSH sobre WebSocket es una forma de enviar tu tráfico de internet a través de un servidor remoto, cifrado de extremo a extremo hasta ese servidor, usando una conexión que parece tráfico web normal. Es una técnica muy usada por desarrolladores, administradores de sistemas y usuarios que quieren una capa extra de privacidad. En esta guía explicamos cada pieza con calma.</p>
+<h2>Primero: qué es SSH</h2>
+<p>SSH (<i>Secure Shell</i>) es un protocolo creado para administrar servidores de forma segura. Todo lo que viaja por una conexión SSH va cifrado, y el servidor te identifica con un usuario y una contraseña o con una clave. Además de abrir una terminal remota, SSH permite crear <b>túneles</b> (<i>port forwarding</i>): el servidor actúa como intermediario y reenvía el tráfico de tus aplicaciones hacia su destino final.</p>
+<p>Un caso típico es el reenvío dinámico (<code>ssh -D</code>), que convierte al servidor en un proxy SOCKS. Las aplicaciones que usan ese proxy envían sus datos por el túnel cifrado y salen a internet con la dirección IP del servidor, no con la de tu red local.</p>
+<h2>Qué aporta WebSocket</h2>
+<p>WebSocket es un estándar web que empieza como una petición HTTP normal con una cabecera <code>Upgrade: websocket</code> y, si el servidor acepta, mantiene el canal abierto para intercambiar datos en ambos sentidos. Se usa en chats, juegos en línea y paneles en tiempo real.</p>
+<p>Encapsular SSH dentro de WebSocket significa que la conexión empieza con un saludo HTTP y después transporta el flujo SSH. La ventaja práctica es que viaja por los puertos <b>80</b> y <b>443</b>, que casi cualquier red deja abiertos, y que se lleva bien con proxies web y redes de entrega de contenido (CDN). En redes de oficinas, universidades o locales con restricciones, es frecuente que el SSH directo (puerto 22) esté bloqueado, pero el tráfico web no.</p>
+<h2>Cómo funciona de punta a punta</h2>
+<ol>
+<li>Una app cliente (por ejemplo, HTTP Custom o NetMod en Android) abre una conexión HTTP hacia el servidor.</li>
+<li>Envía la petición de actualización a WebSocket; el servidor responde con el código 101 (<i>Switching Protocols</i>).</li>
+<li>Sobre ese canal se negocia la sesión SSH y se autentica tu usuario.</li>
+<li>La app expone un proxy o una VPN local en el teléfono; el tráfico de tus aplicaciones entra por ahí, va cifrado hasta el servidor y desde allí sale a su destino.</li>
+</ol>
+<h2>Usos legítimos habituales</h2>
+<ul>
+<li><b>Privacidad en redes que no controlas:</b> cafeterías, aeropuertos o WiFi de hoteles.</li>
+<li><b>Acceso a recursos propios:</b> llegar a servicios internos de tu VPS o de tu casa sin exponerlos a internet.</li>
+<li><b>Pruebas de desarrollo:</b> comprobar cómo se comporta una web o API desde otra ubicación geográfica.</li>
+<li><b>Entornos con filtrado excesivo:</b> redes que bloquean puertos de forma indiscriminada.</li>
+</ul>
+<h2>Límites y precauciones</h2>
+<ul>
+<li><b>Confías en el operador del servidor.</b> El túnel te protege entre tu móvil y el servidor, pero el operador puede ver a qué destinos te conectas. Elige proveedores de confianza.</li>
+<li><b>No sustituye a HTTPS.</b> Las webs seguras siguen cifrando su contenido dentro del túnel, y eso es lo que protege tus contraseñas.</li>
+<li><b>No te protege del phishing ni del malware.</b> Un túnel cifra el trayecto; no decide si el sitio al que entras es legítimo.</li>
+<li><b>Puede añadir latencia.</b> Cada salto extra suma milisegundos; la velocidad depende de la distancia al servidor y de su carga.</li>
+</ul>
+<div class="box"><p><b>Uso responsable.</b> Usa estas técnicas respetando las leyes de tu país y las condiciones de las redes y servicios que utilices. Un túnel es una herramienta de privacidad y administración, no una licencia para actividades abusivas.</p></div>
+<h2>Por qué encaja con una CDN</h2>
+<p>Como la conexión empieza como una petición web normal, una CDN como CloudFront puede recibirla en su red y reenviarla a tu servidor. Tu app se conecta al dominio de la CDN y el túnel llega a tu VPS. Así funciona el <a href="/guia-cdn-cloudfront.html">CDN CloudFront de Jitterx Panel Cloud</a>; para configurarlo en el móvil, sigue la guía de <a href="/guia-http-custom.html">HTTP Custom con tu CDN</a>.</p>
+<h2>Sigue aprendiendo</h2><div class="grid"><a href="/guia-cdn-cloudfront.html"><b>Cómo contratar y usar tu CDN CloudFront</b><span>Qué es el CDN CloudFront de Jitterx Panel Cloud, qué necesitas, cómo contratarlo, renovarlo y cambiar el origen paso a paso.</span></a><a href="/guia-http-custom.html"><b>Cómo configurar HTTP Custom con tu CDN CloudFront</b><span>Guía práctica para conectar HTTP Custom en Android usando el host, el puerto y el payload de tu servicio CDN, con solución de problemas.</span></a><a href="/guia-subdominio.html"><b>Cómo apuntar un subdominio a tu VPS</b><span>Qué es un registro A, cómo crear gratis un subdominio que apunte a la IP de tu servidor y cómo usarlo como origen de tu CDN.</span></a><a href="/guia-seguridad-wifi-publica.html"><b>Cómo proteger tu conexión en redes WiFi públicas</b><span>Riesgos reales de las redes WiFi abiertas y medidas prácticas para proteger tus datos: HTTPS, túneles cifrados, actualizaciones y más.</span></a></div>
+</article>
+</main>
+<footer><div class="in"><span><b>Jitterx Panel Cloud</b>, © 2026. CDN CloudFront y subdominios para tu VPS.</span><nav aria-label="Enlaces del sitio"><a href="/guias.html">Guías</a><a href="/acerca.html">Acerca de</a><a href="/contacto.html">Contacto</a><a href="/privacidad.html">Política de privacidad</a><a href="/terminos.html">Términos de uso</a></nav></div></footer>
+<script src="/guias.js"></script><script src="/ads.js"></script>
+</body>
+</html>

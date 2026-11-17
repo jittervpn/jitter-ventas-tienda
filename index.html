@@ -695,9 +695,8 @@ const $=s=>document.querySelector(s)||{style:{},classList:{add(){},remove(){}},s
 let device=localStorage.getItem('jx_device')||(document.cookie.match(/(?:^|;\s*)jx_device=([^;]+)/)||[])[1]||'';
 if(!device){device=crypto.randomUUID();}
 localStorage.setItem('jx_device',device);
-// Si la web está alojada fuera de Vercel (cPanel), la API sigue en Vercel
-const AUTH_BASE=/(^|\.)jitterxcloud\.shop$/.test(location.hostname)?'/auth':'https://jitterxcloud.shop/auth'; // login (PHP + MySQL en cPanel)
-const API_BASE=(/vercel\.app$|^localhost$/.test(location.hostname))?'':'https://jitter-ventas-tienda.vercel.app';
+// La web y la API viven juntas en Vercel (jitterxcloud.shop). Desde otro sitio, se usa el dominio principal.
+const API_BASE=(/(^|\.)jitterxcloud\.shop$|vercel\.app$|^localhost$/.test(location.hostname))?'':'https://jitterxcloud.shop';
 const api=async(path,opts={})=>{
   const tk=getTok();
   const r=await fetch(API_BASE+path,{...opts,headers:{...(opts.headers||{}),'x-jx-device':device,...(tk?{authorization:'Bearer '+tk}:{})}});
@@ -1253,7 +1252,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 const cargando=(b,on)=>{b.disabled=on; b.classList.toggle('loading',on)};
 async function authPost(ruta,datos){
-  const r=await fetch(AUTH_BASE+'/'+ruta,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(datos)}).catch(()=>null);
+  const r=await fetch(API_BASE+'/api/auth/codigo',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({accion:ruta,...datos})}).catch(()=>null);
   if(!r) throw new Error('Sin conexión. Revisa tu red.');
   const j=await r.json().catch(()=>({}));
   if(!r.ok||!j.ok) throw new Error(j.error||'No se pudo completar la operación.');
@@ -1267,7 +1266,7 @@ function tickRe(){
   pinta(); reTimer=setInterval(pinta,500);
 }
 async function pedirCodigo(mail){
-  await authPost('request-code.php',{email:mail});
+  await authPost('pedir',{email:mail});
   mailPend=mail; codeExp=Date.now()+600000; reCool=Date.now()+60000;
   $('#mSent').textContent=mail; $('#mCode').value=''; paso(2); tickRe();
   setTimeout(()=>$('#mCode').focus(),50);
@@ -1296,7 +1295,7 @@ async function verificar(){
   if(verificando) return; verificando=true;
   const b=$('#mVerify'); cargando(b,true); $('#mMsg').className='msg';
   try{
-    const j=await authPost('verify-code.php',{email:mailPend,code});
+    const j=await authPost('verificar',{email:mailPend,code});
     let v=null; try{ v=await validarToken(j.token) }catch{}           // sin red: se confía en el código ya verificado
     if(v&&!v.user){ showMsgM('err',textoMotivo(v.reason)); console.warn('Sesión rechazada por el servidor:', v.reason||'servidor sin actualizar'); verificando=false; cargando(b,false); return; }
     setTok(j.token);
