@@ -108,3 +108,9 @@ Desde noviembre de 2026 la web, el login y las pruebas de 1 hora viven en este m
 - Códigos de acceso y registro de pruebas: Vercel Blob privado `jitterx-datos` (`BLOB_READ_WRITE_TOKEN`).
 - Correo: Gmail SMTP. Variables: `SMTP_USER` (tu Gmail) y `SMTP_PASS` (contraseña de aplicación de Google).
 - Dominio: `jitterxcloud.shop` y `www.jitterxcloud.shop` añadidos al proyecto.
+
+## PayPal
+
+- Variables: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_ENV` (`sandbox` o `live`), `PAYPAL_PRECIO_USD` (15 por defecto).
+- PayPal cobra en USD. El botón aparece debajo del formulario de tarjeta al comprar o renovar.
+- Para cobrar de verdad: crea credenciales **Live** en developer.paypal.com, cámbialas en Vercel y pon `PAYPAL_ENV=live`.

@@ -308,6 +308,9 @@ aside.card.side > div + div { padding-top: var(--space-lg); border-top: 1px soli
 .cdnprice b { font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .cdnprice span { font-size: var(--text-sm); color: var(--ink-2); }
 #cdnBrick, #cdnBrick2 { margin-top: var(--space-md); }
+.ppbox { margin-top: var(--space-md); padding: var(--space-md); border: 1px solid var(--line); border-radius: var(--r-md, 14px); background: var(--card-2); }
+.ppbox .pptit { margin: 0 0 var(--space-sm); font-size: var(--text-sm); color: var(--muted); text-align: center; }
+.ppbox .pptit b { color: var(--ink); }
 .guide { margin-top: var(--space-lg); border-radius: var(--r); background: var(--bg-2); border: 1px solid var(--line); }
 .guide summary, .faq summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); min-height: 52px; padding: 0 var(--space-md); cursor: pointer; list-style: none; font-weight: 700; font-size: var(--text-sm); }
 .guide summary::-webkit-details-marker, .faq summary::-webkit-details-marker { display: none; }
@@ -567,14 +570,14 @@ footer a:hover { color: var(--ink); }
           <div class="cdnprev" id="cdnPrev" hidden></div>
           <button class="primary" id="cdnGo" type="button"><span class="spinner"></span><span id="cdnGoT">Pagar y crear mi CDN</span></button>
           <ul class="trust">
-            <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Pago seguro con Mercado Pago</li>
+            <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Pago seguro con Mercado Pago o PayPal</li>
             <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Se crea al instante</li>
             <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Devolución automática si falla</li>
           </ul>
           <p class="alt"><a href="#" id="cdnAlt" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p>
           <button class="primary ghost2" id="cdnFree" type="button" hidden><span class="spinner"></span><span>Crear sin cobro (solo administrador)</span></button>
           <div class="msg" id="cdnMsg" role="status"></div>
-          <div id="cdnBrick"></div>
+          <div id="cdnBrick"></div><div id="cdnBrickPp"></div>
         </div>
         <details class="guide"><summary>Cómo usar tu CDN</summary><ol>
           <li>Escribe el <b>origen</b>: el dominio o la IP pública de tu servidor (debe aceptar WebSocket en el puerto 80).</li>
@@ -583,7 +586,7 @@ footer a:hover { color: var(--ink); }
           <li>Antes de que venza, pulsa <b>Renovar</b> para sumar otros 30 días. Cambiar el origen no tiene costo.</li>
         </ol></details>
       </section>
-      <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim num" id="cdnCount"></span></div><div class="msg" id="cdnMsg2" role="status"></div><div id="cdnBrick2"></div><p id="cdnAlt2Box" class="alt" hidden><a href="#" id="cdnAlt2" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p><div id="cdnList"></div></section>
+      <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim num" id="cdnCount"></span></div><div class="msg" id="cdnMsg2" role="status"></div><div id="cdnBrick2"></div><div id="cdnBrick2Pp"></div><p id="cdnAlt2Box" class="alt" hidden><a href="#" id="cdnAlt2" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p><div id="cdnList"></div></section>
     </div>
     <section class="card" id="cdnAdm" hidden style="margin-top:var(--space-lg)"></section>
   </div>
@@ -876,7 +879,7 @@ function avisarVencimiento(lista){
 }
 
 /* ---------- precios y pago con Mercado Pago ---------- */
-let MONEDA='ARS', PRECIO_CDN=0, PUBKEY='', mpSdk=null, mpInst=null, brickCtl=null;
+let MONEDA='ARS', PRECIO_CDN=0, PUBKEY='', PAYPAL=null, ppSdk=null, mpSdk=null, mpInst=null, brickCtl=null;
 const money=n=>{if(!n)return '';try{return new Intl.NumberFormat('es-AR',{style:'currency',currency:MONEDA,maximumFractionDigits:0}).format(n)}catch{return n+' '+MONEDA}};
 const precioTxt=()=>money((cdnData&&cdnData.precio)||PRECIO_CDN);
 function pintarPrecios(){
@@ -886,7 +889,7 @@ function pintarPrecios(){
 }
 const LOC={ARS:'es-AR',BRL:'pt-BR',CLP:'es-CL',COP:'es-CO',MXN:'es-MX',PEN:'es-PE',UYU:'es-UY'};
 const cargarSdk=()=>mpSdk||(mpSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://sdk.mercadopago.com/js/v2';s.onload=ok;s.onerror=()=>{mpSdk=null;ko(new Error('No se pudo cargar el módulo de pago'))};document.head.appendChild(s)}));
-function cerrarBrick(){ if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null} ['cdnBrick','cdnBrick2'].forEach(id=>{const b=document.getElementById(id);if(b)b.innerHTML=''}); const a=document.getElementById('cdnAlt2Box'); if(a) a.hidden=true; }
+function cerrarBrick(){ if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null} ['cdnBrick','cdnBrick2','cdnBrickPp','cdnBrick2Pp'].forEach(id=>{const b=document.getElementById(id);if(b)b.innerHTML=''}); const a=document.getElementById('cdnAlt2Box'); if(a) a.hidden=true; }
 const RECHAZO={cc_rejected_insufficient_amount:'Fondos insuficientes en la tarjeta.',cc_rejected_bad_filled_card_number:'Revisa el número de la tarjeta.',cc_rejected_bad_filled_date:'Revisa la fecha de vencimiento.',cc_rejected_bad_filled_security_code:'Revisa el código de seguridad.',cc_rejected_high_risk:'Pago rechazado por seguridad. Prueba con otra tarjeta.',cc_rejected_card_disabled:'La tarjeta está inhabilitada para compras online.'};
 
 /* ---------- perfil ---------- */
@@ -1110,7 +1113,8 @@ async function cdnPagar(pedido,boxId,msgId){
   try{
     await cargarSdk(); cerrarBrick(); if(boxId==='cdnBrick2') document.getElementById('cdnAlt2Box').hidden=false;
     mpInst=mpInst||new MercadoPago(PUBKEY,{locale:LOC[MONEDA]||'es-AR'});
-    cdnMsg(msgId,'ok',(pedido.renovar?'Renovación':'Servicio nuevo')+': '+precioTxt()+'. Completa los datos de tu tarjeta.');
+    cdnMsg(msgId,'ok',(pedido.renovar?'Renovación':'Servicio nuevo')+': '+precioTxt()+'. Completa los datos de tu tarjeta'+(PAYPAL?' o paga con PayPal.':'.'));
+    montarPaypal(pedido,boxId+'Pp',msgId);
     brickCtl=await mpInst.bricks().create('cardPayment',boxId,{
       initialization:{amount:monto,payer:{email:sesion.email}},
       customization:{paymentMethods:{minInstallments:1,maxInstallments:1},visual:{style:{theme:'dark'}}},
@@ -1125,6 +1129,34 @@ async function cdnPagar(pedido,boxId,msgId){
       }
     });
   }catch(e){ cdnMsg(msgId,'err',e.message||'No se pudo abrir el formulario de pago.'); }
+}
+// PayPal (cobra en USD). El servidor crea la orden con el importe fijo y entrega el CDN al capturarla.
+const cargarPP=()=>ppSdk||(ppSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL.clientId)+'&currency=USD&intent=capture&locale=es_AR&components=buttons';s.onload=ok;s.onerror=()=>{ppSdk=null;ko(new Error('No se pudo cargar PayPal'))};document.head.appendChild(s)}));
+async function montarPaypal(pedido,hostId,msgId){
+  const host=document.getElementById(hostId); if(!PAYPAL||!host) return;
+  host.innerHTML='<div class="ppbox"><p class="pptit">¿No tienes tarjeta argentina? Paga con <b>PayPal</b> · <b>USD '+Number(PAYPAL.precio).toFixed(2)+'</b></p><div class="ppbtn"></div></div>';
+  try{
+    await cargarPP();
+    const cont=host.querySelector('.ppbtn'); if(!cont) return;
+    await window.paypal.Buttons({
+      style:{layout:'vertical',color:'gold',shape:'rect',label:'paypal',height:45},
+      createOrder:async()=>{
+        cdnMsg(msgId);
+        const j=await api('/api/paypal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({accion:'crear',cdn:pedido})}).catch(e=>({error:e.message}));
+        if(!j.id){ cdnMsg(msgId,'err',j.error||'No se pudo iniciar el pago con PayPal.'); throw new Error(j.error||'sin orden'); }
+        return j.id;
+      },
+      onApprove:async(d,actions)=>{
+        cdnMsg(msgId,'ok','Confirmando tu pago con PayPal…');
+        const j=await api('/api/paypal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({accion:'capturar',id:d.orderID})}).catch(e=>({error:e.message}));
+        if(j.reintentar){ cdnMsg(msgId,'err',j.error); return actions.restart(); }
+        if(j.status==='approved'){ cerrarBrick(); if(!pedido.renovar) document.getElementById('cdnSlug').value=''; return cdnTrasPago(j,msgId); }
+        cdnMsg(msgId,'err',j.error||'PayPal todavía no confirmó el pago. Si se te cobró, escríbenos por Telegram con tu correo.');
+      },
+      onCancel:()=>cdnMsg(msgId,'err','Cancelaste el pago con PayPal. No se te cobró nada.'),
+      onError:e=>{ console.error('PayPal',e); if(!document.querySelector('#'+msgId+'.err')) cdnMsg(msgId,'err','PayPal no respondió. Prueba de nuevo o paga con tarjeta.'); }
+    }).render(cont);
+  }catch(e){ host.innerHTML=''; console.error('PayPal',e); }
 }
 // Pago en la página de Mercado Pago (el pedido viaja dentro del pago; al volver se confirma solo).
 async function cdnPagarMP(pedido,msgId){
@@ -1360,7 +1392,7 @@ async function confirmarPago(){
   if(j.status==='approved') cdnTrasPago(j,'cdnMsg');
 }
 
-fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda||MONEDA;PUBKEY=c.publicKey||'';pintarContador(c.cdn);const it=(c.items||[]).find(x=>x.id==='cdn30');PRECIO_CDN=it?it.precio:0;pintarPrecios();pintarCdn();pintarHome()}).catch(()=>{});
+fetch(API_BASE+'/api/planes').then(r=>r.json()).then(c=>{MONEDA=c.moneda||MONEDA;PUBKEY=c.publicKey||'';PAYPAL=c.paypal||null;pintarContador(c.cdn);const it=(c.items||[]).find(x=>x.id==='cdn30');PRECIO_CDN=it?it.precio:0;pintarPrecios();pintarCdn();pintarHome()}).catch(()=>{});
 const pagoQ=(location.search.match(/[?&]pago=(\w+)/)||[])[1];
 window._payId=(location.search.match(/[?&](?:payment_id|collection_id)=(\d+)/)||[])[1]||null;
 if(pagoQ) history.replaceState(null,'',location.pathname+'#cdn');
