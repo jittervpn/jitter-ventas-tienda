@@ -8,5 +8,8 @@
   "dependencies": {
     "@vercel/blob": "2.8.2",
     "nodemailer": "10.3.1"
+  },
+  "overrides": {
+    "zod": "4.6.7"
   }
 }
