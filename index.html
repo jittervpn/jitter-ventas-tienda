@@ -308,6 +308,21 @@ aside.card.side > div + div { padding-top: var(--space-lg); border-top: 1px soli
 .cdnprice b { font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .cdnprice span { font-size: var(--text-sm); color: var(--ink-2); }
 #cdnBrick, #cdnBrick2 { margin-top: var(--space-md); }
+.paysel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xs); margin: var(--space-xs) 0 var(--space-md); }
+.paysel.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.paylbl { margin: var(--space-md) 0 0; font-size: var(--text-sm); font-weight: 700; color: var(--ink); }
+.payopt { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 76px; padding: var(--space-sm) 6px; border: 1.5px solid var(--line-2); border-radius: 12px; background: var(--card-2); color: var(--ink); text-align: center; cursor: pointer; transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out); }
+.payopt:hover { border-color: var(--accent); }
+.payopt[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+.payopt b { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: var(--text-sm); line-height: 1.15; }
+.payopt b .pp { font-size: 1.05rem; line-height: 22px; }
+.payopt b svg { width: 22px; height: 22px; flex: none; }
+.payopt[aria-checked="true"] span { color: var(--ink); }
+.payopt > span { font-size: var(--text-xs); color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.payopt .pp { font-weight: 800; font-style: italic; color: #3fb4ec; }
+.payopt .pp i { color: #8fb3ff; font-style: italic; }
+.renpay { margin-top: var(--space-md); padding: var(--space-md); border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.renpay .paysel { margin-bottom: 0; }
 .ppbox { margin-top: var(--space-md); padding: var(--space-md); border: 1px solid var(--line); border-radius: var(--r-md, 14px); background: var(--card-2); }
 .ppbox .pptit { margin: 0 0 var(--space-sm); font-size: var(--text-sm); color: var(--muted); text-align: center; }
 .ppbox .pptit b { color: var(--ink); }
@@ -565,6 +580,8 @@ footer a:hover { color: var(--ink); }
         <div class="cdnprice ticks" id="cdnPrice" hidden><b id="cdnPriceN"></b><span>por servicio, 30 días</span></div>
         <div id="cdnGate" style="margin-top:var(--space-md)"></div>
         <div id="cdnForm" hidden>
+          <p class="paylbl" id="paySelLbl">1. Elige cómo pagar</p><div class="paysel" id="paySel" role="radiogroup" aria-labelledby="paySelLbl"></div>
+          <p class="paylbl" style="margin-bottom:var(--space-xs)">2. Datos de tu servicio</p>
           <div class="f"><label for="cdnOrigin">Origen (dominio o IP de tu servidor)</label><div class="field"><input id="cdnOrigin" name="origen" placeholder="mi-servidor.com o 203.0.113.10" autocomplete="off" autocapitalize="none" spellcheck="false"></div></div>
           <div class="f"><label for="cdnSlug">Nombre de tu ruta</label><div class="field cdnpath"><span id="cdnPre">/</span><input id="cdnSlug" name="ruta" placeholder="miruta" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="hint">2 a 20 letras minúsculas o números, sin guiones ni espacios. Delante va un prefijo propio de tu cuenta.</div></div>
           <div class="cdnprev" id="cdnPrev" hidden></div>
@@ -574,8 +591,7 @@ footer a:hover { color: var(--ink); }
             <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Se crea al instante</li>
             <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Devolución automática si falla</li>
           </ul>
-          <p class="alt"><a href="#" id="cdnAlt" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p>
-          <button class="primary ghost2" id="cdnFree" type="button" hidden><span class="spinner"></span><span>Crear sin cobro (solo administrador)</span></button>
+                    <button class="primary ghost2" id="cdnFree" type="button" hidden><span class="spinner"></span><span>Crear sin cobro (solo administrador)</span></button>
           <div class="msg" id="cdnMsg" role="status"></div>
           <div id="cdnBrick"></div><div id="cdnBrickPp"></div>
         </div>
@@ -586,7 +602,7 @@ footer a:hover { color: var(--ink); }
           <li>Antes de que venza, pulsa <b>Renovar</b> para sumar otros 30 días. Cambiar el origen no tiene costo.</li>
         </ol></details>
       </section>
-      <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim num" id="cdnCount"></span></div><div class="msg" id="cdnMsg2" role="status"></div><div id="cdnBrick2"></div><div id="cdnBrick2Pp"></div><p id="cdnAlt2Box" class="alt" hidden><a href="#" id="cdnAlt2" class="textlink">Prefiero pagar en la página de Mercado Pago</a></p><div id="cdnList"></div></section>
+      <section class="card"><div class="chead"><h2>Mis servicios CDN</h2><span class="dim num" id="cdnCount"></span></div><div class="msg" id="cdnMsg2" role="status"></div><div id="cdnRenPay"></div><div id="cdnBrick2"></div><div id="cdnBrick2Pp"></div><div id="cdnList"></div></section>
     </div>
     <section class="card" id="cdnAdm" hidden style="margin-top:var(--space-lg)"></section>
   </div>
@@ -889,7 +905,7 @@ function pintarPrecios(){
 }
 const LOC={ARS:'es-AR',BRL:'pt-BR',CLP:'es-CL',COP:'es-CO',MXN:'es-MX',PEN:'es-PE',UYU:'es-UY'};
 const cargarSdk=()=>mpSdk||(mpSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://sdk.mercadopago.com/js/v2';s.onload=ok;s.onerror=()=>{mpSdk=null;ko(new Error('No se pudo cargar el módulo de pago'))};document.head.appendChild(s)}));
-function cerrarBrick(){ if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null} ['cdnBrick','cdnBrick2','cdnBrickPp','cdnBrick2Pp'].forEach(id=>{const b=document.getElementById(id);if(b)b.innerHTML=''}); const a=document.getElementById('cdnAlt2Box'); if(a) a.hidden=true; }
+function cerrarBrick(){ if(brickCtl){try{brickCtl.unmount()}catch{}brickCtl=null} ['cdnBrick','cdnBrick2','cdnBrickPp','cdnBrick2Pp'].forEach(id=>{const b=document.getElementById(id);if(b)b.innerHTML=''}); }
 const RECHAZO={cc_rejected_insufficient_amount:'Fondos insuficientes en la tarjeta.',cc_rejected_bad_filled_card_number:'Revisa el número de la tarjeta.',cc_rejected_bad_filled_date:'Revisa la fecha de vencimiento.',cc_rejected_bad_filled_security_code:'Revisa el código de seguridad.',cc_rejected_high_risk:'Pago rechazado por seguridad. Prueba con otra tarjeta.',cc_rejected_card_disabled:'La tarjeta está inhabilitada para compras online.'};
 
 /* ---------- perfil ---------- */
@@ -979,7 +995,7 @@ function pintarCdn(){
   if(!cdnData){ gate.innerHTML='<div class="hint">Cargando…</div>'; form.hidden=true; return; }
   gate.innerHTML=''; form.hidden=false;
   const sv=cdnData.services||[]; g('cdnPre').textContent='/'+cdnData.prefijo; cdnVista(); g('cdnCount').textContent=sv.length+' de '+cdnData.max;
-  g('cdnGoT').textContent=p?'Pagar '+p+' y crear mi CDN':'Pagar y crear mi CDN';
+  pintarSelector();
   g('cdnFree').hidden=!cdnData.admin;
   let sb=g('cdnSaldo'); if(!sb){ sb=document.createElement('div'); sb.id='cdnSaldo'; sb.className='hint'; sb.style.marginTop='10px'; g('cdnFree').after(sb); }
   sb.hidden=!cdnData.admin||!cdnData.saldo;
@@ -1086,7 +1102,7 @@ function pintarAdmPruebas(){
 async function cdnAccion(b){
   const card=b.closest('.rec'), id=b.dataset.id;
   if(b.dataset.cdn==='origen'){ card.querySelector('.cdnedit').hidden=false; return; }
-  if(b.dataset.cdn==='renovar'){ document.getElementById('cdnAlt2Box').hidden=false; return cdnPagar({renovar:id},'cdnBrick2','cdnMsg2'); }
+  if(b.dataset.cdn==='renovar') return elegirRenovar(id,card);
   if(b.dataset.cdn==='renovarGratis') return cdnLanzar({accion:'renovar',id},'Servicio renovado.','cdnMsg2');
   const origen=card.querySelector('.cdnoin').value.trim();
   if(!origen) return cdnMsg('cdnMsg2','err','Escribe el nuevo origen.');
@@ -1104,6 +1120,42 @@ async function cdnCrearGratis(){
   const ok=await cdnLanzar({accion:'crear',...p},'Tu servicio CDN está listo. Copia el payload de abajo.','cdnMsg');
   b.classList.remove('loading'); if(ok) document.getElementById('cdnSlug').value=''; pintarCdn();
 }
+// ---------- elegir medio de pago (arriba, antes de pagar) ----------
+const IC_CARD='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>';
+const IC_MP='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>';
+let METODO='tarjeta';
+try{ const m=localStorage.getItem('jx_pago'); if(m) METODO=m; }catch{}
+function metodos(){
+  const p=precioTxt(), l=[{id:'tarjeta',t:IC_CARD+'Tarjeta',d:p},{id:'mp',t:IC_MP+'Mercado Pago',d:p}];
+  if(PAYPAL) l.push({id:'paypal',t:'<span class="pp"><i>Pay</i>Pal</span>',d:'USD '+Number(PAYPAL.precio)});
+  return l;
+}
+function selectorPago(cont,onPick){
+  const l=metodos(); if(!l.some(m=>m.id===METODO)) METODO='tarjeta';
+  cont.classList.toggle('n2',l.length===2);
+  cont.innerHTML=l.map(m=>'<button type="button" class="payopt" role="radio" data-pm="'+m.id+'" aria-checked="'+(m.id===METODO)+'"><b>'+m.t+'</b><span>'+esc(m.d)+'</span></button>').join('');
+  cont.querySelectorAll('.payopt').forEach(b=>b.onclick=()=>{ METODO=b.dataset.pm; try{localStorage.setItem('jx_pago',METODO)}catch{} cont.querySelectorAll('.payopt').forEach(x=>x.setAttribute('aria-checked',String(x===b))); onPick&&onPick(METODO); });
+}
+function textoBoton(){
+  const g=document.getElementById('cdnGoT'); if(!g) return; const p=precioTxt();
+  g.textContent=METODO==='paypal'&&PAYPAL?'Pagar USD '+Number(PAYPAL.precio).toFixed(2)+' con PayPal':METODO==='mp'?'Pagar '+(p?p+' ':'')+'en Mercado Pago':'Pagar '+(p?p+' ':'')+'y crear mi CDN';
+}
+function precioBox(){ const n=document.getElementById('cdnPriceN'); if(!n) return; const pp=METODO==='paypal'&&PAYPAL; const t=pp?'USD '+Number(PAYPAL.precio):precioTxt(); if(t){ n.textContent=t; document.getElementById('cdnPrice').hidden=false; } }
+function pintarSelector(){ const c=document.getElementById('paySel'); if(!c) return; selectorPago(c,()=>{ cerrarBrick(); cdnMsg('cdnMsg'); textoBoton(); precioBox(); }); textoBoton(); precioBox(); }
+function pagarCon(metodo,pedido,boxId,msgId){
+  if(!sesion) return openModal('login');
+  cerrarBrick();
+  if(metodo==='paypal'&&PAYPAL){ cdnPedido=pedido; cdnMsg(msgId,'ok',(pedido.renovar?'Renovación':'Servicio nuevo')+': USD '+Number(PAYPAL.precio).toFixed(2)+'. Pulsa el botón de PayPal para pagar.'); return montarPaypal(pedido,boxId+'Pp',msgId); }
+  if(metodo==='mp') return cdnPagarMP(pedido,msgId);
+  return cdnPagar(pedido,boxId,msgId);
+}
+function elegirRenovar(id,card){
+  const box=document.getElementById('cdnRenPay'); cerrarBrick(); cdnMsg('cdnMsg'); cdnMsg('cdnMsg2');
+  const path=card&&card.querySelector('.name')?card.querySelector('.name').textContent:'';
+  box.innerHTML='<div class="renpay"><p class="paylbl" style="margin:0">Renovar 30 días'+(path?' · <span class="mono">'+esc(path)+'</span>':'')+'</p><p class="hint" style="margin:4px 0 0">Elige cómo pagar:</p><div class="paysel" role="radiogroup"></div></div>';
+  selectorPago(box.querySelector('.paysel'),m=>pagarCon(m,{renovar:id},'cdnBrick2','cdnMsg2'));
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
 // Pago con tarjeta dentro de la web (Checkout Bricks). El servidor vuelve a validar el pedido y fija el importe.
 async function cdnPagar(pedido,boxId,msgId){
   if(!sesion) return openModal('login');
@@ -1111,10 +1163,9 @@ async function cdnPagar(pedido,boxId,msgId){
   cdnPedido=pedido; cdnMsg('cdnMsg'); cdnMsg('cdnMsg2');
   const monto=(cdnData&&cdnData.precio)||PRECIO_CDN;
   try{
-    await cargarSdk(); cerrarBrick(); if(boxId==='cdnBrick2') document.getElementById('cdnAlt2Box').hidden=false;
+    await cargarSdk(); cerrarBrick();
     mpInst=mpInst||new MercadoPago(PUBKEY,{locale:LOC[MONEDA]||'es-AR'});
-    cdnMsg(msgId,'ok',(pedido.renovar?'Renovación':'Servicio nuevo')+': '+precioTxt()+'. Completa los datos de tu tarjeta'+(PAYPAL?' o paga con PayPal.':'.'));
-    montarPaypal(pedido,boxId+'Pp',msgId);
+    cdnMsg(msgId,'ok',(pedido.renovar?'Renovación':'Servicio nuevo')+': '+precioTxt()+'. Completa los datos de tu tarjeta.');
     brickCtl=await mpInst.bricks().create('cardPayment',boxId,{
       initialization:{amount:monto,payer:{email:sesion.email}},
       customization:{paymentMethods:{minInstallments:1,maxInstallments:1},visual:{style:{theme:'dark'}}},
@@ -1134,7 +1185,7 @@ async function cdnPagar(pedido,boxId,msgId){
 const cargarPP=()=>ppSdk||(ppSdk=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL.clientId)+'&currency=USD&intent=capture&locale=es_AR&components=buttons';s.onload=ok;s.onerror=()=>{ppSdk=null;ko(new Error('No se pudo cargar PayPal'))};document.head.appendChild(s)}));
 async function montarPaypal(pedido,hostId,msgId){
   const host=document.getElementById(hostId); if(!PAYPAL||!host) return;
-  host.innerHTML='<div class="ppbox"><p class="pptit">¿No tienes tarjeta argentina? Paga con <b>PayPal</b> · <b>USD '+Number(PAYPAL.precio).toFixed(2)+'</b></p><div class="ppbtn"></div></div>';
+  host.innerHTML='<div class="ppbox"><p class="pptit">Total: <b>USD '+Number(PAYPAL.precio).toFixed(2)+'</b> · se abre PayPal para confirmar</p><div class="ppbtn"></div></div>';
   try{
     await cargarPP();
     const cont=host.querySelector('.ppbtn'); if(!cont) return;
@@ -1167,6 +1218,7 @@ async function cdnPagarMP(pedido,msgId){
   cdnMsg(msgId,'err',j.error||'No se pudo iniciar el pago.');
 }
 async function cdnTrasPago(j,msgId){
+  { const rp=document.getElementById('cdnRenPay'); if(rp) rp.innerHTML=''; }
   if(j.entregada){
     avisarPago(true); cdnMsg(msgId,'ok','Pago aprobado. Creando tu servicio… puede tardar unos segundos.');
     const fin=j.op?await cdnEsperar(j.op):{ok:true};
@@ -1178,9 +1230,7 @@ async function cdnTrasPago(j,msgId){
   avisarPago(false); cdnMsg(msgId,'ok','Pago aprobado. Estamos creando tu servicio; aparecerá aquí en unos segundos.');
   let n=0; const iv=setInterval(()=>{ cdnRecargar(); if(++n>=10) clearInterval(iv); },5000);
 }
-document.getElementById('cdnGo').onclick=()=>{ const p=cdnPedidoNuevo(); if(p) cdnPagar(p,'cdnBrick','cdnMsg'); };
-document.getElementById('cdnAlt').onclick=e=>{ e.preventDefault(); const p=cdnPedidoNuevo(); if(p) cdnPagarMP(p,'cdnMsg'); };
-document.getElementById('cdnAlt2').onclick=e=>{ e.preventDefault(); if(cdnPedido&&cdnPedido.renovar) cdnPagarMP(cdnPedido,'cdnMsg2'); };
+document.getElementById('cdnGo').onclick=()=>{ const p=cdnPedidoNuevo(); if(p) pagarCon(METODO,p,'cdnBrick','cdnMsg'); };
 document.getElementById('cdnFree').onclick=cdnCrearGratis;
 document.getElementById('cdnSlug').addEventListener('input',e=>{ const v=e.target.value.toLowerCase().replace(/[^a-z0-9]/g,''); if(v!==e.target.value) e.target.value=v; cdnVista(); });
 document.getElementById('cdnOrigin').addEventListener('input',cdnVista);
