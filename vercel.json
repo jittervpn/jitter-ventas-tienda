@@ -1,7 +1,7 @@
 {
   "routes": [
     {
-      "src": "(?i)^/(wp-.*|wordpress.*|xmlrpc.*|\\.env.*|\\.git.*|\\.aws.*|\\.ssh.*|phpmyadmin.*|pma.*|server-status.*|cgi-bin.*|vendor/.*|.*\\.(php|asp|aspx|jsp|cgi|bak|sql|old|zip|tar|gz|env|ini|log|yml|yaml))$",
+      "src": "^/(wp-.*|wordpress.*|xmlrpc.*|\\.env.*|\\.git.*|\\.aws.*|\\.ssh.*|phpmyadmin.*|pma.*|server-status.*|cgi-bin.*|vendor/.*|.*\\.(php|PHP|asp|aspx|jsp|cgi|bak|sql|old|zip|tar|gz|env|ini|log|yml|yaml))$",
       "status": 404,
       "dest": "/404.html"
     },
