@@ -3,6 +3,7 @@ import { cdn, listaServicios } from "../lib/cdn.js";
 import { vencerPruebas, esDePruebas } from "../lib/pruebas.js";
 import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
+import { ppActivo, ppClientId, ppPrecio, PP_MONEDA } from "../lib/paypal.js";
 
 // Contador público de clientes del CDN: personas distintas (cada cliente tiene su prefijo /cXXXXXX en la ruta).
 // Se guarda 2 minutos en memoria para no consultar la API del CDN en cada visita.
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
     moneda: MONEDA,
     publicKey: (process.env.MP_PUBLIC_KEY || "").trim(),
     items: CATALOGO.map(({ id, tag, nombre, desc, precio, ir }) => ({ id, tag, nombre, desc, precio, ir })),
+    paypal: ppActivo() ? { clientId: ppClientId(), precio: ppPrecio(), moneda: PP_MONEDA } : null,
     cdn: await contadorCdn(), // { clientes, activos } o null si la API no responde
   });
 }
