@@ -1,6 +1,11 @@
 {
   "routes": [
     {
+      "src": "^/(wp-.*|wordpress.*|xmlrpc.*|\\.env.*|\\.git.*|\\.aws.*|\\.ssh.*|phpmyadmin.*|pma.*|server-status.*|cgi-bin.*|vendor/.*|.*\\.(php|PHP|asp|aspx|jsp|cgi|bak|sql|old|zip|tar|gz|env|ini|log|yml|yaml))$",
+      "status": 404,
+      "dest": "/404.html"
+    },
+    {
       "src": "/(lib|vps|root|scripts|cpanel|node_modules)(/.*)?",
       "status": 404,
       "dest": "/404.html"
@@ -9,13 +14,6 @@
       "src": "/(.*\\.md|package\\.json|package-lock\\.json|firestore\\.rules|vercel\\.json|\\.gitignore|\\.git/.*)",
       "status": 404,
       "dest": "/404.html"
-    },
-    {
-      "src": "/auth/(request-code|verify-code)\\.php",
-      "status": 308,
-      "headers": {
-        "Location": "/"
-      }
     },
     {
       "src": "/api/(.*)",

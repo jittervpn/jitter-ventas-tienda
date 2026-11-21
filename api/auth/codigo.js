@@ -10,7 +10,7 @@ import { actualizar } from "../../lib/kv.js";
 import { enviarCodigo } from "../../lib/correo.js";
 
 const EMAIL_RE = /^[^\s@"<>(),;:\\]{1,64}@[a-z0-9.-]{1,190}\.[a-z]{2,}$/i;
-const VENCE_S = 600, MAX_INTENTOS = 5;
+const VENCE_S = 600, MAX_INTENTOS = 5, MAX_FALLOS_DIA = 15; // tope de códigos incorrectos por correo y por hora (frena adivinar sin bloquear días enteros)
 const MAX_DIA = () => parseInt(process.env.MAX_CODES_DAY || "400", 10);
 const secreto = () => (process.env.SESSION_SECRET || "").trim();
 const hashCodigo = (email, code) => crypto.createHmac("sha256", secreto()).update(email + ":" + code).digest("hex");
@@ -26,7 +26,7 @@ async function pedir(req, email) {
     const envios = (act?.envios || []).filter((t) => now - t < 3600);
     if (envios.length && now - envios[envios.length - 1] < 60) throw fallo(429, "Espera un minuto antes de pedir otro código.");
     if (envios.length >= 6) throw fallo(429, "Ya pediste varios códigos para este correo. Espera una hora.");
-    return { data: { h: hashCodigo(email, code), vence: now + VENCE_S, intentos: 0, envios: [...envios, now] } };
+    return { data: { h: hashCodigo(email, code), vence: now + VENCE_S, intentos: 0, envios: [...envios, now], dia: act?.dia, fallosHoy: act?.fallosHoy } };
   });
   try { await enviarCodigo(email, code); }
   catch (e) {
@@ -41,12 +41,14 @@ async function verificar(req, email, code) {
   if (limit(req, { max: 20, windowMs: 60000, key: "v:" + clientIp(req) })) throw fallo(429, "Demasiados intentos. Espera un minuto.");
   const now = Math.floor(Date.now() / 1000);
   const r = await actualizar(doc(email), (act) => {
+    const dia = Math.floor(now / 3600), fallosHoy = act && act.dia === dia ? act.fallosHoy || 0 : 0;
+    if (fallosHoy >= MAX_FALLOS_DIA) throw fallo(429, "Demasiados códigos incorrectos para este correo. Espera una hora y pide uno nuevo.");
     if (!act || !act.h || act.vence < now) throw fallo(400, "El código venció o no existe. Pide uno nuevo.");
     if (act.intentos >= MAX_INTENTOS) return { data: { ...act, h: null }, resultado: { error: fallo(429, "Demasiados intentos. Pide un código nuevo.") } };
     const a = Buffer.from(act.h, "hex"), b = Buffer.from(hashCodigo(email, code), "hex");
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       const quedan = MAX_INTENTOS - 1 - act.intentos;
-      return { data: { ...act, intentos: act.intentos + 1 }, resultado: { error: fallo(400, quedan > 0 ? `Código incorrecto. Te quedan ${quedan} intentos.` : "Código incorrecto. Pide un código nuevo.") } };
+      return { data: { ...act, intentos: act.intentos + 1, dia, fallosHoy: fallosHoy + 1 }, resultado: { error: fallo(400, quedan > 0 ? `Código incorrecto. Te quedan ${quedan} intentos.` : "Código incorrecto. Pide un código nuevo.") } };
     }
     return { data: { ...act, h: null, intentos: 0 }, resultado: { ok: true } }; // un solo uso
   });
