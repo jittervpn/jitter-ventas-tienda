@@ -1,6 +1,7 @@
 import { MONEDA, CATALOGO, cargarPrecios } from "../lib/precios.js";
 import { vencerPruebas } from "../lib/pruebas.js";
 import { contadorCdn } from "../lib/contador.js";
+import { campanaPublica } from "../lib/cupones.js";
 import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
 import { checkEnv, clean, listActive, getTotal } from "../lib/cf.js";
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
     publicKey: (process.env.MP_PUBLIC_KEY || "").trim(),
     items: CATALOGO.map(({ id, tag, nombre, desc, precio, ir }) => ({ id, tag, nombre, desc, precio, ir })),
     paypal: ppActivo() ? { clientId: ppClientId(), precio: ppPrecio(), moneda: PP_MONEDA } : null,
+    cupon: await campanaPublica(), // aviso «Reclama tu cupón» (o null)
     cdn: await contadorCdn(), // { clientes, activos } o null si la API no responde
   });
 }

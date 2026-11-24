@@ -8,6 +8,7 @@ import { cors } from "../lib/cors.js";
 import { prepararCdn, entregarCdn } from "../lib/cdnventa.js";
 import { mensaje, estadoHttp } from "../lib/cdn.js";
 import { leer, actualizar } from "../lib/kv.js";
+import { precioPara, marcarUsado } from "../lib/cupones.js";
 import { pp, ppActivo, ppPrecio, ppDevolver, PP_MONEDA } from "../lib/paypal.js";
 
 const ORDEN_RE = /^[A-Z0-9]{8,40}$/;
@@ -30,13 +31,14 @@ export default async function handler(req, res) {
       try { ped = await prepararCdn(user, b.cdn); }
       catch (e) { const c = e.codigo || "INTERNAL_ERROR"; return res.status(estadoHttp(c)).json({ error: mensaje(c), codigo: c }); }
       if (ped.error) return res.status(ped.status).json({ error: ped.error, codigo: ped.codigo });
-      const monto = ppPrecio().toFixed(2);
+      const pr = await precioPara(user.uid);
+      const monto = pr.usd.toFixed(2);
       const o = await pp("POST", "/v2/checkout/orders", {
         intent: "CAPTURE",
         purchase_units: [{ reference_id: "cdn30", description: ped.descripcion.slice(0, 127), amount: { currency_code: PP_MONEDA, value: monto } }],
         payment_source: { paypal: { experience_context: { brand_name: "Jitterx Panel Cloud", shipping_preference: "NO_SHIPPING", user_action: "PAY_NOW", locale: "es-AR" } } },
       });
-      await actualizar(doc(o.id), () => ({ data: { uid: user.uid, ref: ped.ref, monto, creada: Date.now() } }));
+      await actualizar(doc(o.id), () => ({ data: { uid: user.uid, ref: ped.ref, monto, cupon: pr.cupon, creada: Date.now() } }));
       return res.status(200).json({ id: o.id });
     }
 
@@ -65,6 +67,7 @@ export default async function handler(req, res) {
       }
       const pay = { id: "pp-" + cap.id, status: "approved", external_reference: ped.ref, devolver: (m) => ppDevolver(cap.id, m) };
       const e = await entregarCdn(pay);
+      if (e.ok && ped.cupon) await marcarUsado(ped.uid, pay.id);
       return res.status(200).json({ status: "approved", entregada: !!e.ok, op: e.op || null, devuelto: !!e.devuelto, error: e.ok ? undefined : e.error });
     }
     return res.status(400).json({ error: "Acción no válida." });

@@ -4,6 +4,7 @@ import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { MONEDA, CATALOGO, PLAN_CDN } from "../lib/precios.js";
 import { prepararCdn } from "../lib/cdnventa.js";
+import { precioPara } from "../lib/cupones.js";
 import { mensaje, estadoHttp } from "../lib/cdn.js";
 
 import { cors } from "../lib/cors.js";
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
   try { ped = await prepararCdn(user, b.cdn); }
   catch (e) { const c = e.codigo || "INTERNAL_ERROR"; return res.status(estadoHttp(c)).json({ error: mensaje(c), codigo: c }); }
   if (ped.error) return res.status(ped.status).json({ error: ped.error, codigo: ped.codigo });
+  const pr = await precioPara(user.uid); // con cupón activo, el precio con descuento
 
   // Tipos de pago a ocultar. Valores de MP: ticket, atm, bank_transfer, account_money, credit_card, debit_card, prepaid_card
   const excluidos = (clean(process.env.MP_EXCLUIR) || "ticket,atm").split(",").map((x) => x.trim()).filter(Boolean).map((id) => ({ id }));
@@ -34,7 +36,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { authorization: "Bearer " + token, "content-type": "application/json" },
       body: JSON.stringify({
-        items: [{ id: item.id, title: ped.descripcion, quantity: 1, currency_id: MONEDA, unit_price: item.precio }],
+        items: [{ id: item.id, title: ped.descripcion + (pr.cupon ? " (cupón)" : ""), quantity: 1, currency_id: MONEDA, unit_price: pr.ars }],
         payer: user.email ? { email: user.email } : undefined,
         external_reference: ped.ref,
         notification_url: `https://${req.headers.host}/api/mp-webhook`,
