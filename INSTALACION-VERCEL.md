@@ -104,6 +104,8 @@ Los clientes no pueden comprar rutas que empiecen por `prueba`.
 Desde noviembre de 2026 la web, el login y las pruebas de 1 hora viven en este mismo proyecto:
 
 - `index.html`, guías, `sitemap.xml`, `robots.txt`, iconos → se sirven como archivos estáticos.
+- Admin: `jitterxcloud.shop/admin` (admin.html + api/admin.js), solo correos de `CDN_PERMITIDOS`.
+- Idioma: botón ES/EN en la barra; el diccionario inglés está al final de index.html.
 - Login por código: `api/auth/codigo.js` (mismo uid por correo y mismo token que el antiguo PHP).
 - Códigos de acceso y registro de pruebas: Vercel Blob privado `jitterx-datos` (`BLOB_READ_WRITE_TOKEN`).
 - Correo: Gmail SMTP. Variables: `SMTP_USER` (tu Gmail) y `SMTP_PASS` (contraseña de aplicación de Google).

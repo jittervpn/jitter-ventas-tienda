@@ -1,33 +1,30 @@
 import { MONEDA, CATALOGO } from "../lib/precios.js";
-import { cdn, listaServicios } from "../lib/cdn.js";
-import { vencerPruebas, esDePruebas } from "../lib/pruebas.js";
+import { vencerPruebas } from "../lib/pruebas.js";
+import { contadorCdn } from "../lib/contador.js";
 import { cors } from "../lib/cors.js";
 import { limit } from "../lib/ratelimit.js";
+import { checkEnv, clean, listActive, getTotal } from "../lib/cf.js";
 import { ppActivo, ppClientId, ppPrecio, PP_MONEDA } from "../lib/paypal.js";
 
-// Contador público de clientes del CDN: personas distintas (cada cliente tiene su prefijo /cXXXXXX en la ruta).
-// Se guarda 2 minutos en memoria para no consultar la API del CDN en cada visita.
-let cache = { t: 0, v: null };
-async function contadorCdn() {
-  if (cache.v && Date.now() - cache.t < 120000) return cache.v;
+// Contador de subdominios (antes /api/stats; vercel.json reenvía /api/stats aquí con ?que=stats).
+async function stats(req, res) {
+  res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=30");
+  const err = checkEnv();
+  if (err) return res.status(500).json({ error: err });
   try {
-    const sv = listaServicios(await cdn("GET", "/v1/services")).filter((s) => !esDePruebas(s));
-    const pref = (s) => (String(s.path || "").match(/^\/(c[0-9a-f]{6})/) || [])[1];
-    const activo = (s) => /^(active|activo|deployed|ready|enabled|online)$/.test(s.estado);
-    const todos = new Set(sv.map(pref).filter(Boolean));
-    const activos = new Set(sv.filter(activo).map(pref).filter(Boolean));
-    cache = { t: Date.now(), v: { clientes: todos.size, activos: activos.size } };
+    const [active, { total }] = await Promise.all([listActive(), getTotal()]);
+    return res.status(200).json({ total, active: active.length, max: parseInt(process.env.MAX_USERS || "100", 10), zone: clean(process.env.ZONE_NAME) });
   } catch (e) {
-    console.error("planes: contador CDN", e.codigo || "", e.message);
-    if (!cache.v) return null;
+    console.error("api/stats:", e.message);
+    return res.status(502).json({ error: "El servicio de subdominios no responde." });
   }
-  return cache.v;
 }
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
   const over = limit(req, { max: 40, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
+  if (req.query && req.query.que === "stats") return stats(req, res);
   await vencerPruebas(); // cada visita (o un cron externo) cierra las pruebas de 1 hora que ya vencieron
   res.setHeader("Cache-Control", "no-store");
   res.status(200).json({
