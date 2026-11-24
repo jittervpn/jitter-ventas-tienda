@@ -40,7 +40,11 @@ header nav a[aria-current="page"] { background: var(--grad); color: #fff; }
 .navcta:active, .cta:active { transform: translateY(1px); }
 .cta { min-height: 46px; padding: 0 24px; font-size: 1rem; }
 @media (max-width: 52rem) { header nav a:nth-child(n+3) { display: none; } }
-@media (max-width: 34rem) { header nav { display: none; } .navcta { margin-left: auto; } }
+.langsw { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); flex: none; }
+.langsw a { display: inline-flex; align-items: center; min-height: 30px; padding: 0 9px; border-radius: 999px; color: var(--muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-decoration: none; }
+.langsw a:hover { color: var(--ink); }
+.langsw a[aria-current] { background: rgba(108, 123, 255, 0.18); color: var(--ink); }
+@media (max-width: 34rem) { header nav { display: none; } .langsw { margin-left: auto; } .bar { gap: 10px; } }
 
 main { padding: 40px var(--gutter) 72px; }
 article { max-width: var(--measure); margin: 0 auto; padding: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }

@@ -6,9 +6,10 @@
 import crypto from "node:crypto";
 import { cors } from "../lib/cors.js";
 import { esAdmin } from "../lib/admin.js";
+import { traficoDe } from "../lib/trafico.js";
 import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
-import { CATALOGO, MONEDA, PLAN_CDN } from "../lib/precios.js";
+import { CATALOGO, MONEDA, PLAN_CDN, cargarPrecios } from "../lib/precios.js";
 import { registro, mapPrueba, poolEstado, vencerPruebas, miPrueba, esDePruebas, REPOSO, DURACION_MS, NOMBRE_RESERVADO } from "../lib/pruebas.js";
 import { cdn, CAMPOS, pick, mensaje, estadoHttp, listaServicios, mapService, operacionId, prefijo, esMio, SLUG_RE, origenValido, MAX_POR_CLIENTE, limpiarSlug, rutaDe } from "../lib/cdn.js";
 
@@ -42,12 +43,14 @@ export default async function handler(req, res) {
       await vencerPruebas();
       const todos = listaServicios(await cdn("GET", "/v1/services"));
       const mios = todos.filter((s) => esMio(u.uid, s)).map((s) => (esDePruebas(s) ? { ...s, dePruebas: true } : s));
+      await Promise.all(mios.map(async (s) => { s.trafico = await traficoDe(s.id, s.trafico).catch(() => null); }));
       if (req.query && req.query.debug === "1") {
         if (!puedeCrear(u)) return res.status(403).json({ error: "Solo para administradores." });
         const leer = async (p) => { try { return await cdn("GET", p); } catch (e) { return { error: e.message }; } };
         const [servicios, movimientos, saldo] = await Promise.all([leer("/v1/services"), leer("/v1/transactions"), leer("/v1/balance")]);
         return res.json({ servicios, movimientos, saldo });
       }
+      await cargarPrecios();
       const precio = (CATALOGO.find((c) => c.id === PLAN_CDN) || {}).precio || 0;
       let saldo; // solo para el administrador: saldo de la cuenta del CDN
       if (puedeCrear(u)) { try { saldo = await cdn("GET", "/v1/balance"); } catch (e) { saldo = { error: e.message }; } }

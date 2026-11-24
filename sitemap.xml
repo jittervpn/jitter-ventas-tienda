@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://jitterxcloud.shop/</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guias.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/acerca.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/contacto.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/privacidad.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/terminos.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guia-cdn-cloudfront.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guia-http-custom.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guia-subdominio.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guia-tunel-ssh-websocket.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://jitterxcloud.shop/guia-seguridad-wifi-publica.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guias.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/acerca.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/contacto.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/privacidad.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/terminos.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guia-cdn-cloudfront.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guia-http-custom.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guia-subdominio.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guia-tunel-ssh-websocket.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/guia-seguridad-wifi-publica.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guias.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/acerca.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/contacto.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/privacidad.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/terminos.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guia-cdn-cloudfront.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guia-http-custom.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guia-subdominio.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guia-tunel-ssh-websocket.html</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://jitterxcloud.shop/en/guia-seguridad-wifi-publica.html</loc><lastmod>2026-11-24</lastmod></url>
 </urlset>
