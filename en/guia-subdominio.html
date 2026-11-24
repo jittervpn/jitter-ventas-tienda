@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1015">
+<title>How to point a subdomain to your VPS | Jitterx Panel Cloud</title>
+<meta name="description" content="What an A record is, how to create a free subdomain pointing to your server's IP, and how to use it as your CDN origin.">
+<link rel="canonical" href="https://jitterxcloud.shop/en/guia-subdominio.html">
+<link rel="alternate" hreflang="es" href="https://jitterxcloud.shop/guia-subdominio.html">
+<link rel="alternate" hreflang="en" href="https://jitterxcloud.shop/en/guia-subdominio.html">
+<link rel="alternate" hreflang="x-default" href="https://jitterxcloud.shop/guia-subdominio.html">
+<link rel="stylesheet" href="/guias.css">
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="/" aria-label="Jitterx Panel Cloud, home"><span class="mk" aria-hidden="true"><i></i><i></i><i></i></span>Jitterx<span>panel cloud</span></a>
+<nav aria-label="Main"><a href="/">Dashboard</a><a href="/en/guias.html">Guides</a><a href="/en/acerca.html">About</a><a href="/en/contacto.html">Contact</a></nav><div class="langsw" role="group" aria-label="Idioma / Language"><a href="/guia-subdominio.html" hreflang="es" data-lang="es">ES</a><a href="/en/guia-subdominio.html" hreflang="en" data-lang="en" aria-current="true">EN</a></div><a class="navcta" href="/#cdn">Get CDN</a></div></header>
+<main>
+<article data-art>
+<h1>How to point a subdomain to your VPS</h1>
+<p class="meta">Updated on November 24, 2026, by the Jitterx Panel Cloud team</p>
+<p>A subdomain is an easy-to-remember address, like <code>my-server</code> followed by our domain, that points to your server's public IP. On Jitterx Panel Cloud you can create one for free in seconds and use it, for example, as your CDN origin.</p>
+<h2>What an A record is</h2>
+<p>The DNS system turns names into IP addresses. An <b>A record</b> links a name to an IPv4 address. When someone types your subdomain, DNS answers with your server's IP and the connection goes there. Our subdomains use <b>DNS only</b> mode: they don't go through any proxy and point straight to your IP.</p>
+<h2>Step by step</h2>
+<ol>
+<li>Go to the site and open the <b>Domain</b> section.</li>
+<li>Type the name you want: 2 to 32 characters, using lowercase letters, numbers and hyphens.</li>
+<li>Type your server's <b>public IPv4</b>. The preview shows how it will look: <code>name.domain → IP</code>.</li>
+<li>Tap <b>Create A record</b>. The subdomain resolves in under a minute.</li>
+</ol>
+<h2>Conditions</h2>
+<ul>
+<li>It's <b>free</b> and lasts <b>7 days</b>; after that it's deleted automatically.</li>
+<li>You can have <b>1 active record</b> at a time.</li>
+<li>Only public IPv4 addresses are accepted.</li>
+</ul>
+<h2>Using it as your CDN origin</h2>
+<p>When you get your CDN you can type this subdomain in the <b>Origin</b> field. Keep in mind it lasts 7 days: if it expires, the CDN won't find your server anymore. For ongoing use, it's more practical to use the public IP directly or a permanent domain of your own. If you change the origin later, do it with <b>Change origin</b>, free of charge.</p>
+<h2>How to check it works</h2>
+<p>From a computer you can run <code>nslookup name.domain</code> or <code>ping name.domain</code>: the answer should show your server's IP. You can also use any online DNS checker.</p>
+<div class="box"><p><b>Responsible use.</b> Subdomains are for your own servers. Using them for phishing, impersonation or illegal activity is not allowed.</p></div>
+<h2>Keep learning</h2><div class="grid"><a href="/en/guia-cdn-cloudfront.html"><b>How to get and use your CloudFront CDN</b><span>What the Jitterx Panel Cloud CloudFront CDN is, what you need, and how to buy it, renew it and change its origin, step by step.</span></a><a href="/en/guia-http-custom.html"><b>How to set up HTTP Custom with your CloudFront CDN</b><span>A practical guide to connecting HTTP Custom on Android with your CDN service's host, port and payload, plus troubleshooting.</span></a><a href="/en/guia-tunel-ssh-websocket.html"><b>What an SSH tunnel over WebSocket is and what it's for</b><span>A clear explanation of SSH tunnels, how WebSocket encapsulation works, why it fits a CDN, and its security limits.</span></a><a href="/en/guia-seguridad-wifi-publica.html"><b>How to protect your connection on public WiFi</b><span>The real risks of open WiFi networks and practical ways to protect your data: HTTPS, encrypted tunnels, updates and more.</span></a></div>
+</article>
+</main>
+<footer><div class="in"><span><b>Jitterx Panel Cloud</b>, © 2026. CloudFront CDN and subdomains for your VPS.</span><nav aria-label="Site links"><a href="/en/guias.html">Guides</a><a href="/en/acerca.html">About</a><a href="/en/contacto.html">Contact</a><a href="/en/privacidad.html">Privacy policy</a><a href="/en/terminos.html">Terms of use</a></nav></div></footer>
+<script src="/guias.js"></script><script src="/ads.js"></script>
+</body>
+</html>

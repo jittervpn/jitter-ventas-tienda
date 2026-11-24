@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1015">
+<title>How to get and use your CloudFront CDN | Jitterx Panel Cloud</title>
+<meta name="description" content="What the Jitterx Panel Cloud CloudFront CDN is, what you need, and how to buy it, renew it and change its origin, step by step.">
+<link rel="canonical" href="https://jitterxcloud.shop/en/guia-cdn-cloudfront.html">
+<link rel="alternate" hreflang="es" href="https://jitterxcloud.shop/guia-cdn-cloudfront.html">
+<link rel="alternate" hreflang="en" href="https://jitterxcloud.shop/en/guia-cdn-cloudfront.html">
+<link rel="alternate" hreflang="x-default" href="https://jitterxcloud.shop/guia-cdn-cloudfront.html">
+<link rel="stylesheet" href="/guias.css">
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="/" aria-label="Jitterx Panel Cloud, home"><span class="mk" aria-hidden="true"><i></i><i></i><i></i></span>Jitterx<span>panel cloud</span></a>
+<nav aria-label="Main"><a href="/">Dashboard</a><a href="/en/guias.html">Guides</a><a href="/en/acerca.html">About</a><a href="/en/contacto.html">Contact</a></nav><div class="langsw" role="group" aria-label="Idioma / Language"><a href="/guia-cdn-cloudfront.html" hreflang="es" data-lang="es">ES</a><a href="/en/guia-cdn-cloudfront.html" hreflang="en" data-lang="en" aria-current="true">EN</a></div><a class="navcta" href="/#cdn">Get CDN</a></div></header>
+<main>
+<article data-art>
+<h1>How to get and use your CloudFront CDN</h1>
+<p class="meta">Updated on November 24, 2026, by the Jitterx Panel Cloud team</p>
+<p>The Jitterx Panel Cloud CloudFront CDN gives you your own endpoint inside the CloudFront network that forwards traffic to your server. Instead of connecting straight to your VPS IP, your app connects to a CloudFront domain, and CloudFront hands the connection to your server. This guide explains what you need, how to buy it and how to keep it active.</p>
+<h2>How it works</h2>
+<p>Each CDN service has three pieces: a <b>CDN host</b> (a domain ending in <code>cloudfront.net</code>), your own <b>path</b> (for example <code>/c1a2b3cmypath</code>) and an <b>origin</b>, which is your server's domain or IP. When your app opens a WebSocket connection to the CDN host with your path, CloudFront forwards it to the origin on port 80. The path carries a prefix unique to your account, so nobody else can use yours.</p>
+<h2>What you need first</h2>
+<ul>
+<li><b>Your own server (VPS)</b> running a service that accepts <b>WebSocket connections on port 80</b>, for example an SSH tunnel over WebSocket.</li>
+<li><b>The origin:</b> the server's public IPv4 or a domain that already points to it. If you don't have a domain, you can create one for free with the guide on <a href="/en/guia-subdominio.html">pointing a subdomain to your VPS</a>.</li>
+<li>An account on the site: you log in with your email and a 6-digit code, no passwords.</li>
+</ul>
+<h2>Step by step</h2>
+<ol>
+<li>Go to the site, log in and open the <b>CDN</b> section in the menu.</li>
+<li>Choose how to pay: <b>Card</b>, <b>Mercado Pago</b> or <b>PayPal</b>.</li>
+<li>In <b>Origin</b>, type your server's domain or public IP.</li>
+<li>In <b>Your path name</b>, choose 2 to 20 lowercase letters or numbers, no hyphens or spaces. Your account prefix is added in front automatically.</li>
+<li>Tap the pay button. Each service costs <span class="jx-precio">$17.000</span> and lasts <b>30 days</b>.</li>
+<li>Once the payment is approved, the service is created on its own. A few seconds later it shows up in <b>My CDN services</b> as <b>Active</b>, with the CDN host and the payload ready to copy.</li>
+</ol>
+<p>Before charging you, the site checks that the origin and path are valid. If the service still couldn't be created after payment because of invalid details, the money is refunded automatically.</p>
+<h2>Copy the details into your app</h2>
+<p>Your service card shows the <b>CDN host</b>, <b>port 80</b>, the <b>path</b> and the <b>CloudFront payload</b>, each with a copy button. It also shows the service's traffic when the CDN provides it. The payload looks like this:</p>
+<pre><code>GET /your-path HTTP/1.1[crlf]Host: your-host.cloudfront.net[lf]Connection: Upgrade[lf]Upgrade: websocket[crlf][crlf]</code></pre>
+<p>How to load it into the app is explained in the guide on <a href="/en/guia-http-custom.html">setting up HTTP Custom with your CDN</a>.</p>
+<h2>Renewing and changing the origin</h2>
+<ul>
+<li><b>Renew:</b> on your service card tap <b>Renew</b>, choose how to pay and pay again. 30 days are added and you keep the same host, path and payload, so you don't need to touch the app.</li>
+<li><b>Change origin:</b> if you move to another server, tap <b>Change origin</b>, type the new domain or IP and save. It's free.</li>
+<li>The site warns you when a service has less than 3 days left.</li>
+</ul>
+<h2>Common problems</h2>
+<h3>"The origin domain doesn't resolve"</h3>
+<p>The domain you typed doesn't point to any IP yet. Check its A record or use the server's public IP directly.</p>
+<h3>The service is active but the app won't connect</h3>
+<p>Check that your server accepts WebSocket on port 80 and that your provider's firewall has that port open. Also make sure the payload is complete, including the last line.</p>
+<h3>"That path is already in use"</h3>
+<p>You already have a service with that name. Choose another path name.</p>
+<div class="box"><p><b>Responsible use.</b> The CDN is for connecting to your own services. Using it for spam, attacks or any illegal activity is forbidden; services that break this rule are suspended without notice.</p></div>
+<h2>Keep learning</h2><div class="grid"><a href="/en/guia-http-custom.html"><b>How to set up HTTP Custom with your CloudFront CDN</b><span>A practical guide to connecting HTTP Custom on Android with your CDN service's host, port and payload, plus troubleshooting.</span></a><a href="/en/guia-subdominio.html"><b>How to point a subdomain to your VPS</b><span>What an A record is, how to create a free subdomain pointing to your server's IP, and how to use it as your CDN origin.</span></a><a href="/en/guia-tunel-ssh-websocket.html"><b>What an SSH tunnel over WebSocket is and what it's for</b><span>A clear explanation of SSH tunnels, how WebSocket encapsulation works, why it fits a CDN, and its security limits.</span></a><a href="/en/guia-seguridad-wifi-publica.html"><b>How to protect your connection on public WiFi</b><span>The real risks of open WiFi networks and practical ways to protect your data: HTTPS, encrypted tunnels, updates and more.</span></a></div>
+</article>
+</main>
+<footer><div class="in"><span><b>Jitterx Panel Cloud</b>, © 2026. CloudFront CDN and subdomains for your VPS.</span><nav aria-label="Site links"><a href="/en/guias.html">Guides</a><a href="/en/acerca.html">About</a><a href="/en/contacto.html">Contact</a><a href="/en/privacidad.html">Privacy policy</a><a href="/en/terminos.html">Terms of use</a></nav></div></footer>
+<script src="/guias.js"></script><script src="/ads.js"></script>
+</body>
+</html>

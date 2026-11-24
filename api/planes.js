@@ -1,4 +1,4 @@
-import { MONEDA, CATALOGO } from "../lib/precios.js";
+import { MONEDA, CATALOGO, cargarPrecios } from "../lib/precios.js";
 import { vencerPruebas } from "../lib/pruebas.js";
 import { contadorCdn } from "../lib/contador.js";
 import { cors } from "../lib/cors.js";
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
   const over = limit(req, { max: 40, windowMs: 60000 });
   if (over) return res.status(429).json({ error: over });
   if (req.query && req.query.que === "stats") return stats(req, res);
+  await cargarPrecios();
   await vencerPruebas(); // cada visita (o un cron externo) cierra las pruebas de 1 hora que ya vencieron
   res.setHeader("Cache-Control", "no-store");
   res.status(200).json({

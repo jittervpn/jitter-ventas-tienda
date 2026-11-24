@@ -8,6 +8,7 @@ import { limit, clientIp } from "../../lib/ratelimit.js";
 import { esDescartable, uidDeEmail, crearToken } from "../../lib/auth.js";
 import { actualizar } from "../../lib/kv.js";
 import { enviarCodigo } from "../../lib/correo.js";
+import { recordarCliente } from "../../lib/clientes.js";
 
 const EMAIL_RE = /^[^\s@"<>(),;:\\]{1,64}@[a-z0-9.-]{1,190}\.[a-z]{2,}$/i;
 const VENCE_S = 600, MAX_INTENTOS = 5, MAX_FALLOS_DIA = 15; // tope de códigos incorrectos por correo y por hora (frena adivinar sin bloquear días enteros)
@@ -54,6 +55,7 @@ async function verificar(req, email, code) {
   });
   if (r.error) throw r.error;
   const uid = uidDeEmail(email);
+  try { await recordarCliente(uid, email); } catch (e) { console.error("auth: no se pudo anotar el cliente", e.message); } // para ver correos en /admin
   return { ok: true, token: crearToken(uid, email), user: { uid, email, nombre: null, verificado: true } };
 }
 

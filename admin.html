@@ -96,6 +96,36 @@ h1 { margin: 0; font-size: 1.625rem; letter-spacing: -.02em; line-height: 1.2; }
 .msg.err { background: var(--err-soft); color: #fecaca; }
 .msg.ok { background: rgba(52,211,153,.12); color: #bbf7d0; }
 .denied { text-align: center; }
+.card + .card { margin-top: 16px; }
+.card h2 { margin: 0 0 4px; font-size: 1.0625rem; }
+.fld { display: grid; gap: 6px; }
+.fld label { font-size: .8125rem; font-weight: 700; color: var(--ink-2); }
+.inp { min-height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card-2); width: 100%; }
+.inp:focus { border-color: var(--accent); outline: none; }
+.pre { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: 12px; background: var(--card-2); overflow: hidden; }
+.pre:focus-within { border-color: var(--accent); }
+.pre b { padding: 0 12px; color: var(--muted); font-size: .8125rem; border-right: 1px solid var(--line); align-self: stretch; display: grid; place-items: center; }
+.pre input { border: 0; background: transparent; min-height: 46px; padding: 0 14px; width: 100%; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.0625rem; }
+.pre input:focus { outline: none; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+@media (max-width: 40rem) { .grid2 { grid-template-columns: 1fr; } }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--grad); color: #fff; font-weight: 800; }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn.sm { min-height: 34px; padding: 0 12px; font-size: .8125rem; border-radius: 10px; }
+.btn.alt { background: var(--card-2); color: var(--ink); border: 1px solid var(--line-2); font-weight: 700; }
+.row-act { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.hint { font-size: .8125rem; color: var(--muted); margin: 8px 0 0; }
+.list { display: grid; gap: 10px; margin-top: 14px; }
+.it { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.it .p { font-family: var(--mono); font-size: .8125rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.it .e { font-size: .8125rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.it .m { font-size: .8125rem; color: var(--ink-2); display: grid; gap: 2px; }
+.it .m span { color: var(--muted); font-size: .75rem; }
+@media (max-width: 40rem) { .it { grid-template-columns: 1fr; gap: 8px; } }
+.pill { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; font-size: .6875rem; font-weight: 700; background: rgba(52,211,153,.14); color: var(--ok); }
+.pill.w { background: rgba(251,191,36,.14); color: var(--warn); } .pill.o { background: var(--card-3); color: var(--muted); } .pill.r { background: var(--err-soft); color: var(--err); }
+.search { margin-top: 4px; }
+pre.raw { margin: 12px 0 0; max-height: 420px; overflow: auto; padding: 14px; border-radius: 12px; background: #090c12; border: 1px solid var(--line); font: .75rem/1.5 var(--mono); color: var(--ink-2); white-space: pre-wrap; word-break: break-all; }
 .denied svg { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--err); }
 </style>
 </head>
@@ -185,13 +215,21 @@ const IC={
 };
 const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[k]+'</svg>';
 // Para añadir una sección: {id, t, ic, render(main)}. Las que aún no existen se muestran como «Próximamente».
+let actual='resumen';
 const SECCIONES=[
   {id:'resumen',t:'Resumen',ic:'home',render:resumen},
+  {id:'servicios',t:'Servicios y tráfico',ic:'cloud',render:servicios},
+  {id:'precios',t:'Precios',ic:'tag',render:precios},
+  {id:'pruebas',t:'Pruebas de 1 hora',ic:'gift',render:pruebas},
+  {id:'crear',t:'Crear sin cobro',ic:'plus',render:crear},
+  {id:'api',t:'API del CDN',ic:'coin',render:apiCdn},
 ];
-let actual='resumen';
+const deHash=()=>{ const h=(location.hash||'').slice(1); return SECCIONES.some(x=>x.id===h)?h:'resumen'; };
+actual=deHash();
+window.addEventListener('hashchange',()=>{ const h=deHash(); if(h!==actual&&!$('#app').hidden){ actual=h; nav(); abrir(); } });
 function nav(){
   $('#nav').innerHTML=SECCIONES.map(s=>'<button type="button" data-s="'+s.id+'"'+(s.id===actual?' aria-current="page"':'')+'>'+svg(s.ic)+esc(s.t)+(s.render?'':'<span class="soon">Pronto</span>')+'</button>').join('');
-  $('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ actual=b.dataset.s; nav(); abrir(); });
+  $('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ actual=b.dataset.s; try{history.replaceState(null,'','#'+actual)}catch{} nav(); abrir(); });
 }
 function abrir(){ const s=SECCIONES.find(x=>x.id===actual)||SECCIONES[0]; s.render($('#main')); }
 
@@ -214,9 +252,107 @@ async function resumen(main){
     tarjeta('k4','users',num(c.clientes),'Clientes con CDN',c.activos!=null?num(c.activos)+' activos':'')+
     tarjeta('k2','cloud',num(c.servicios),'Servicios CDN','',c.error?'La API del CDN no respondió':'')+
     tarjeta('k3','clock',num(c.vencenPronto),'Vencen en 7 días')+
+    (c.trafico!=null?tarjeta('k2','cloud',bytes(c.trafico),'Tráfico de todos los servicios'):'')+
     tarjeta('k5','gift',num(p.activas),'Pruebas activas',p.pendientes?num(p.pendientes)+' pendientes':'',p.error?'Registro no disponible':'')+
     tarjeta('k6','tag',precio,'Precio CDN 30 días'+(pr.paypal!=null?' · PayPal USD '+pr.paypal:''));
-  if(!main.querySelector('.empty')) main.insertAdjacentHTML('beforeend','<div class="empty">'+svg('plus')+'<b>Aquí irán tus herramientas</b>Dime qué quieres administrar desde aquí y lo agrego como una sección nueva.</div>');
+
+}
+
+const bytes=b=>{ if(b==null) return '—'; const u=['B','KB','MB','GB','TB']; let i=0; while(b>=1000&&i<u.length-1){ b/=1000; i++; } return (i?b.toFixed(b<10?2:1):b)+' '+u[i]; };
+const fecha=ms=>ms?new Date(ms).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+const cabecera=(t,sub,extra)=>'<div class="head"><div><h1>'+esc(t)+'</h1><p class="sub">'+esc(sub)+'</p></div>'+(extra||'')+'</div>';
+const caja=(cls,t)=>'<div class="msg '+cls+'">'+esc(t)+'</div>';
+async function revisar(d){ if(d.status===401){ salir(); return false; } if(d.status===403){ $('#deniedT').textContent=d.error||'Esta cuenta no es de administrador.'; show('denied'); return false; } return true; }
+const post=(url,body)=>api(url,{method:'POST',body:JSON.stringify(body)}).catch(()=>({error:'Sin conexión.'}));
+
+// ---- Servicios y tráfico (todos los clientes) ----
+async function servicios(main){
+  main.innerHTML=cabecera('Servicios y tráfico','Todos los servicios CDN de tus clientes, del que vence antes al último.','<button class="ghost" id="rec" type="button">Actualizar</button>')+
+    '<input class="inp search" id="q" placeholder="Buscar por correo, ruta, host u origen" autocomplete="off" autocapitalize="none" spellcheck="false"><div class="list" id="lst"><div class="hint">Cargando…</div></div>';
+  $('#rec').onclick=()=>servicios(main);
+  const d=await api('/api/admin?que=servicios').catch(()=>({error:'Sin conexión.'}));
+  if(!(await revisar(d))) return;
+  const lst=$('#lst');
+  if(d.error) return lst.innerHTML=caja('err',d.error);
+  const sv=d.servicios||[]; const conTrafico=sv.some(s=>s.trafico);
+  const estado=s=>{ if(!s.expira) return ['Sin fecha','o']; const d=Math.ceil((s.expira-Date.now())/864e5); return d<=0?['Vencido','r']:d<=3?['Vence en '+d+' d','w']:['Activo · '+d+' d','']; };
+  const pinta=f=>{ const l=sv.filter(s=>!f||[s.email,s.path,s.host,s.origin].some(x=>String(x||'').toLowerCase().includes(f)));
+    lst.innerHTML=l.length?l.map(s=>{ const [t,c]=estado(s); const tr=s.trafico;
+      return '<div class="it"><div style="min-width:0"><div class="p">'+esc(s.path)+'</div><div class="e">'+esc(s.email||'Cliente sin correo registrado ('+(s.prefijo||'?')+')')+'</div></div>'+
+        '<div class="m"><div><span class="pill '+c+'">'+esc(t)+'</span></div><span>Vence '+fecha(s.expira)+'</span>'+(tr?'<span>Tráfico: '+esc([tr.bytes!=null?bytes(tr.bytes):'',tr.peticiones!=null?num(tr.peticiones)+' peticiones':''].filter(Boolean).join(' · '))+'</span>':'')+'<span title="'+esc(s.origin)+'">Origen: '+esc(s.origin||'—')+'</span></div>'+
+        '<div><button class="btn sm alt" type="button" data-ren="'+esc(s.id)+'">Renovar gratis</button></div></div>'; }).join('')
+      :'<div class="empty"><b>'+(f?'Sin resultados':'Aún no hay servicios')+'</b>'+(f?'Prueba con otra búsqueda.':'Cuando un cliente compre su CDN aparecerá aquí.')+'</div>';
+    lst.querySelectorAll('[data-ren]').forEach(b=>b.onclick=async()=>{ if(!confirm('¿Renovar 30 días sin cobro este servicio? Gasta créditos del CDN.')) return; b.disabled=true; const j=await post('/api/admin',{accion:'renovar',id:b.dataset.ren}); b.disabled=false; b.textContent=j.ok?'Renovado ✓':'Error'; if(!j.ok) alert(j.error||'No se pudo renovar.'); });
+  };
+  pinta(''); $('#q').oninput=e=>pinta(e.target.value.trim().toLowerCase());
+  if(sv.length&&!conTrafico) lst.insertAdjacentHTML('beforebegin','<p class="hint">La API del CDN todavía no devolvió datos de tráfico. Revisa la sección «API del CDN» para ver qué responde.</p>');
+}
+
+// ---- Precios ----
+async function precios(main){
+  main.innerHTML=cabecera('Precios','Lo que paga cada cliente por 30 días de CDN.')+'<div class="card" id="pc"><div class="hint">Cargando…</div></div>';
+  const d=await api('/api/admin?que=precios').catch(()=>({error:'Sin conexión.'}));
+  if(!(await revisar(d))) return;
+  const pc=$('#pc'); if(d.error) return pc.innerHTML=caja('err',d.error);
+  pc.innerHTML='<h2>CDN CloudFront 30 días</h2><p class="sub">El cambio se aplica en segundos para compras y renovaciones nuevas. Los pagos que ya estaban en curso con el precio anterior se aceptan durante 48 horas.</p>'+
+    '<div class="grid2"><div class="fld"><label for="pa">Tarjeta y Mercado Pago</label><div class="pre"><b>'+esc(d.moneda)+'</b><input id="pa" inputmode="numeric" value="'+esc(d.ars)+'"></div></div>'+
+    '<div class="fld"><label for="pu">PayPal'+(d.paypal?'':' (desactivado)')+'</label><div class="pre"><b>USD</b><input id="pu" inputmode="decimal" value="'+esc(d.usd)+'"></div></div></div>'+
+    '<div class="row-act"><button class="btn" id="gp" type="button">Guardar precios</button><span class="hint" style="margin:0">'+(d.actualizado?'Último cambio: '+fecha(d.actualizado)+(d.por?' por '+esc(d.por):''):'Aún no cambiaste los precios desde aquí.')+'</span></div><div id="pm"></div>';
+  $('#gp').onclick=async()=>{ const ars=Number(String($('#pa').value).replace(/[.\s]/g,'').replace(',','.')), usd=Number(String($('#pu').value).replace(',','.'));
+    if(!(ars>0)||!(usd>0)) return $('#pm').innerHTML=caja('err','Escribe precios válidos.');
+    if(!confirm('¿Cambiar el precio a '+d.moneda+' '+num(ars)+' y USD '+usd+'?')) return;
+    const b=$('#gp'); b.disabled=true; const j=await post('/api/admin',{accion:'precios',ars,usd}); b.disabled=false;
+    $('#pm').innerHTML=j.ok?caja('ok','Precios guardados: '+d.moneda+' '+num(j.precios.ars)+' y USD '+j.precios.usd+'. Ya se ven en la web.'):caja('err',j.error||'No se pudo guardar.'); };
+}
+
+// ---- Pruebas de 1 hora ----
+async function pruebas(main){
+  main.innerHTML=cabecera('Pruebas de 1 hora','Das una prueba a un correo; el cliente la activa en su sección CDN con su servidor.','<button class="ghost" id="rec" type="button">Actualizar</button>')+'<div id="pb"><div class="hint">Cargando…</div></div>';
+  $('#rec').onclick=()=>pruebas(main);
+  const d=await api('/api/cdn').catch(()=>({error:'Sin conexión.'}));
+  if(!(await revisar(d))) return;
+  const pb=$('#pb'); const P=d.pruebas;
+  if(d.error||!P) return pb.innerHTML=caja('err',d.error||'No se pudo leer el registro de pruebas.');
+  if(P.error) return pb.innerHTML=caja('err',P.error);
+  const est={pendiente:['Pendiente','w'],activa:['Activa',''],terminada:['Terminada','o'],cancelada:['Cancelada','o']};
+  pb.innerHTML='<div class="card"><h2>Dar una prueba</h2><p class="sub">El cliente entra con ese correo y verá «Tienes una prueba gratis de 1 hora».</p><div class="row-act" style="margin-top:12px"><input class="inp" id="pe" type="email" placeholder="correo@del-cliente.com" autocomplete="off" autocapitalize="none" spellcheck="false" style="flex:1;min-width:200px"><button class="btn" id="pd" type="button">Dar prueba</button></div><div id="pmsg"></div></div>'+
+    '<div class="card"><h2>Servicios de pruebas</h2><p class="sub">Al terminar cada prueba el servicio vuelve a <code>'+esc(P.reposo)+'</code>.</p><div class="list">'+
+    (P.pool.length?P.pool.map(s=>'<div class="it"><div class="p">'+esc(s.path)+'</div><div class="m">'+(s.ocupadoPor?'<div><span class="pill w">En uso</span></div><span>'+esc(s.ocupadoPor.email)+' hasta '+fecha(s.ocupadoPor.vence)+'</span>':'<div><span class="pill">Libre</span></div>')+'</div><div></div></div>').join('')
+      :'<div class="empty"><b>Aún no tienes un servicio de pruebas</b>Créalo una vez en «Crear sin cobro» con un nombre que empiece por <code>prueba</code> (por ejemplo prueba1) y origen <code>'+esc(P.reposo)+'</code>.</div>')+'</div></div>'+
+    '<div class="card"><h2>Últimas pruebas</h2><div class="list">'+(P.lista.length?P.lista.map(p=>{ const [t,c]=est[p.estado]||[p.estado,'o'];
+      return '<div class="it"><div class="e" style="color:var(--ink)">'+esc(p.email)+'</div><div class="m"><div><span class="pill '+c+'">'+t+'</span></div><span>'+(p.estado==='activa'?'Hasta '+fecha(p.vence):fecha(p.activada||p.creada))+'</span></div><div>'+((p.estado==='pendiente'||p.estado==='activa')?'<button class="btn sm alt" type="button" data-pc="'+p.id+'">'+(p.estado==='activa'?'Cortar':'Cancelar')+'</button>':'')+'</div></div>'; }).join(''):'<div class="hint">Aún no diste ninguna prueba.</div>')+'</div></div>';
+  $('#pd').onclick=async()=>{ const email=$('#pe').value.trim().toLowerCase(); if(!email) return $('#pmsg').innerHTML=caja('err','Escribe el correo del cliente.');
+    const b=$('#pd'); b.disabled=true; const j=await post('/api/cdn',{accion:'prueba_dar',email}); b.disabled=false;
+    if(j.error) return $('#pmsg').innerHTML=caja('err',j.error);
+    $('#pmsg').innerHTML=caja('ok',(j.existia?'Ese correo ya tenía una prueba pendiente o activa.':'Prueba lista.')+' El cliente la verá al entrar con '+email+'.'); setTimeout(()=>pruebas(main),1500); };
+  pb.querySelectorAll('[data-pc]').forEach(b=>b.onclick=async()=>{ b.disabled=true; const j=await post('/api/cdn',{accion:'prueba_cancelar',id:Number(b.dataset.pc)}); if(j.error){ b.disabled=false; return alert(j.error); } pruebas(main); });
+}
+
+// ---- Crear sin cobro ----
+function crear(main){
+  main.innerHTML=cabecera('Crear sin cobro','Crea un servicio CDN en tu cuenta sin pagar (gasta créditos del CDN). Úsalo para ti o para servicios de pruebas.')+
+    '<div class="card"><div class="grid2" style="margin-top:0"><div class="fld"><label for="co">Origen</label><input class="inp" id="co" placeholder="mi-servidor.com o 203.0.113.10" autocapitalize="none" spellcheck="false"></div>'+
+    '<div class="fld"><label for="cr">Nombre de la ruta</label><input class="inp" id="cr" placeholder="prueba1" autocapitalize="none" spellcheck="false"></div></div>'+
+    '<p class="hint">2 a 20 letras minúsculas o números. Para el servicio de pruebas usa un nombre que empiece por <code>prueba</code> y origen <code>example.com</code>.</p>'+
+    '<div class="row-act"><button class="btn" id="cb" type="button">Crear servicio</button></div><div id="cm"></div></div>';
+  $('#cb').onclick=async()=>{ const origen=$('#co').value.trim().toLowerCase(), ruta=$('#cr').value.trim().toLowerCase();
+    if(!origen||!/^[a-z0-9]{2,20}$/.test(ruta)) return $('#cm').innerHTML=caja('err','Revisa el origen y el nombre de la ruta.');
+    const b=$('#cb'); b.disabled=true; const j=await post('/api/cdn',{accion:'crear',origen,ruta}); b.disabled=false;
+    $('#cm').innerHTML=j.ok?caja('ok','Servicio '+(j.path||'')+' en creación. Aparecerá en unos segundos en «Servicios y tráfico» y en tu sección CDN.'):caja('err',j.error||'No se pudo crear.'); };
+}
+
+// ---- API del CDN: saldo, datos crudos y diagnóstico de tráfico ----
+async function apiCdn(main){
+  main.innerHTML=cabecera('API del CDN','Saldo, movimientos y respuestas tal como las devuelve la API. Útil si algo falla.')+
+    '<div class="card"><h2>Tráfico</h2><p class="sub">Comprueba qué responde la API sobre el tráfico de un servicio (para activar el tráfico en la web).</p><div class="row-act" style="margin-top:12px"><input class="inp" id="tid" placeholder="ID del servicio" style="flex:1;min-width:200px" autocapitalize="none" spellcheck="false"><button class="btn alt" id="tb" type="button">Comprobar</button></div><pre class="raw" id="tr" hidden></pre></div>'+
+    '<div class="card"><h2>Datos crudos</h2><p class="sub">Servicios, movimientos de créditos y saldo.</p><div class="row-act" style="margin-top:12px"><button class="btn alt" id="db" type="button">Cargar</button><button class="btn alt" id="dc" type="button" hidden>Copiar</button></div><pre class="raw" id="dr" hidden></pre></div>';
+  $('#tb').onclick=async()=>{ const id=$('#tid').value.trim(); if(!id) return; const t=$('#tr'); t.hidden=false; t.textContent='Consultando…';
+    const j=await api('/api/admin?que=trafico&id='+encodeURIComponent(id)).catch(()=>({error:'Sin conexión.'})); t.textContent=JSON.stringify(j,null,2); };
+  $('#db').onclick=async()=>{ const t=$('#dr'); t.hidden=false; t.textContent='Cargando…'; const j=await api('/api/cdn?debug=1').catch(()=>({error:'Sin conexión.'}));
+    if(!(await revisar(j))) return; t.textContent=JSON.stringify(j,null,2); $('#dc').hidden=false; };
+  $('#dc').onclick=()=>navigator.clipboard.writeText($('#dr').textContent).then(()=>{$('#dc').textContent='Copiado ✓'});
+  // sugerir un ID para el diagnóstico
+  api('/api/admin?que=servicios').then(d=>{ const s=(d.servicios||[])[0]; if(s&&!$('#tid').value) $('#tid').value=s.id; }).catch(()=>{});
 }
 
 async function iniciar(){
