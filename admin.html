@@ -260,10 +260,11 @@ async function resumen(main){
     (c.trafico!=null?tarjeta('k2','cloud',bytes(c.trafico),'Tráfico de todos los servicios'):'')+
     tarjeta('k5','gift',num(p.activas),'Pruebas activas',p.pendientes?num(p.pendientes)+' pendientes':'',p.error?'Registro no disponible':'')+
     (d.cupones?tarjeta('k3','ticket',num(d.cupones.pendientes),'Cupones pendientes',d.cupones.activos?num(d.cupones.activos)+' activos · '+num(d.cupones.usados)+' usados':''):'')+
-    tarjeta('k6','tag',precio,'Precio CDN 30 días'+(pr.paypal!=null?' · PayPal USD '+pr.paypal:''));
+    tarjeta('k6','tag',precio,'Precio CDN 30 días'+(pr.paypal!=null?' · PayPal '+usd(pr.paypal):''));
 
 }
 
+const usd=n=>'USD '+Number(n||0).toFixed(2);
 const bytes=b=>{ if(b==null) return '—'; const u=['B','KB','MB','GB','TB']; let i=0; while(b>=1000&&i<u.length-1){ b/=1000; i++; } return (i?b.toFixed(b<10?2:1):b)+' '+u[i]; };
 const fecha=ms=>ms?new Date(ms).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
 const cabecera=(t,sub,extra)=>'<div class="head"><div><h1>'+esc(t)+'</h1><p class="sub">'+esc(sub)+'</p></div>'+(extra||'')+'</div>';
@@ -300,15 +301,17 @@ async function precios(main){
   const d=await api('/api/admin?que=precios').catch(()=>({error:'Sin conexión.'}));
   if(!(await revisar(d))) return;
   const pc=$('#pc'); if(d.error) return pc.innerHTML=caja('err',d.error);
-  pc.innerHTML='<h2>CDN CloudFront 30 días</h2><p class="sub">El cambio se aplica en segundos para compras y renovaciones nuevas. Los pagos que ya estaban en curso con el precio anterior se aceptan durante 48 horas.</p>'+
-    '<div class="grid2"><div class="fld"><label for="pa">Tarjeta y Mercado Pago</label><div class="pre"><b>'+esc(d.moneda)+'</b><input id="pa" inputmode="numeric" value="'+esc(d.ars)+'"></div></div>'+
-    '<div class="fld"><label for="pu">PayPal'+(d.paypal?'':' (desactivado)')+'</label><div class="pre"><b>USD</b><input id="pu" inputmode="decimal" value="'+esc(d.usd)+'"></div></div></div>'+
+  const cp=d.campana, cv=cp&&cp.activa&&cp.hasta>Date.now();
+  pc.innerHTML='<h2>Precio normal · CDN CloudFront 30 días</h2><p class="sub">El cambio se aplica en segundos para compras y renovaciones nuevas. Los pagos que ya estaban en curso con el precio anterior se aceptan durante 48 horas.</p>'+
+    '<div class="grid2"><div class="fld"><label for="pa">Tarjeta y Mercado Pago (normal)</label><div class="pre"><b>'+esc(d.moneda)+'</b><input id="pa" inputmode="numeric" value="'+esc(d.ars)+'"></div></div>'+
+    '<div class="fld"><label for="pu">PayPal (normal)'+(d.paypal?'':' · desactivado')+'</label><div class="pre"><b>USD</b><input id="pu" inputmode="decimal" value="'+esc(d.usd)+'"></div></div></div>'+
+    (cv?'<p class="hint">Con cupón (sección Cupones): <b>'+esc(d.moneda)+' '+num(cp.ars)+'</b> y <b>'+usd(cp.usd)+'</b> hasta el '+new Date(cp.hasta-1000).toLocaleDateString('es-AR')+'.'+((cp.ars>=d.ars||cp.usd>=d.usd)?' <span style="color:var(--err)">⚠ El precio con cupón no es menor que el normal: el cupón no descuenta.</span>':'')+'</p>':'')+
     '<div class="row-act"><button class="btn" id="gp" type="button">Guardar precios</button><span class="hint" style="margin:0">'+(d.actualizado?'Último cambio: '+fecha(d.actualizado)+(d.por?' por '+esc(d.por):''):'Aún no cambiaste los precios desde aquí.')+'</span></div><div id="pm"></div>';
-  $('#gp').onclick=async()=>{ const ars=Number(String($('#pa').value).replace(/[.\s]/g,'').replace(',','.')), usd=Number(String($('#pu').value).replace(',','.'));
-    if(!(ars>0)||!(usd>0)) return $('#pm').innerHTML=caja('err','Escribe precios válidos.');
-    if(!confirm('¿Cambiar el precio a '+d.moneda+' '+num(ars)+' y USD '+usd+'?')) return;
-    const b=$('#gp'); b.disabled=true; const j=await post('/api/admin',{accion:'precios',ars,usd}); b.disabled=false;
-    $('#pm').innerHTML=j.ok?caja('ok','Precios guardados: '+d.moneda+' '+num(j.precios.ars)+' y USD '+j.precios.usd+'. Ya se ven en la web.'):caja('err',j.error||'No se pudo guardar.'); };
+  $('#gp').onclick=async()=>{ const ars=Number(String($('#pa').value).replace(/[.\s]/g,'').replace(',','.')), usdv=Number(String($('#pu').value).replace(',','.'));
+    if(!(ars>0)||!(usdv>0)) return $('#pm').innerHTML=caja('err','Escribe precios válidos.');
+    if(!confirm('¿Cambiar el precio normal a '+d.moneda+' '+num(ars)+' y '+usd(usdv)+'?')) return;
+    const b=$('#gp'); b.disabled=true; const j=await post('/api/admin',{accion:'precios',ars,usd:usdv}); b.disabled=false;
+    $('#pm').innerHTML=j.ok?caja('ok','Precios guardados: '+d.moneda+' '+num(j.precios.ars)+' y '+usd(j.precios.usd)+'. Ya se ven en la web.'):caja('err',j.error||'No se pudo guardar.'); };
 }
 
 // ---- Pruebas de 1 hora ----
@@ -342,19 +345,19 @@ async function cupones(main){
   if(!(await revisar(d))) return;
   const cu=$('#cu'); if(d.error) return cu.innerHTML=caja('err',d.error);
   const c=d.campana, L=d.cupones||[], m=d.moneda||'ARS';
-  const vig=c.activa&&c.hasta>Date.now();
+  const vig=c.activa&&c.hasta>Date.now(), N=d.normal||{}, sinDesc=N.ars&&(c.ars>=N.ars||c.usd>=N.usd);
   const fin=new Date(c.hasta-3*36e5-1000).toISOString().slice(0,10); // último día (hora Argentina)
   const pend=L.filter(k=>k.estado==='pendiente'), otros=L.filter(k=>k.estado!=='pendiente');
   const EST={pendiente:['Pendiente','w'],activo:['Activo',''],usado:['Usado','o'],vencido:['Vencido','o'],rechazado:['Rechazado','r']};
   const fila=k=>{ const [t,cl]=EST[k.estado]||[k.estado,'o'];
     return '<div class="it"><div style="min-width:0"><div class="e" style="color:var(--ink)">'+esc(k.email)+'</div><div class="e">'+(k.estado==='usado'?'Usado '+fecha(k.usado):k.activado?'Activado '+fecha(k.activado):'Pedido '+fecha(k.pedido))+'</div></div>'+
-      '<div class="m"><div><span class="pill '+cl+'">'+t+'</span></div><span>'+esc(m)+' '+num(k.ars)+' · USD '+esc(k.usd)+'</span></div>'+
+      '<div class="m"><div><span class="pill '+cl+'">'+t+'</span></div><span>'+esc(m)+' '+num(k.ars)+' · '+usd(k.usd)+'</span></div>'+
       '<div style="display:flex;gap:6px;flex-wrap:wrap">'+(k.estado==='pendiente'?'<button class="btn sm" type="button" data-act="'+esc(k.email)+'">Activar</button>':'')+((k.estado==='pendiente'||k.estado==='activo')?'<button class="btn sm alt" type="button" data-rej="'+k.id+'">'+(k.estado==='activo'?'Quitar':'Rechazar')+'</button>':'')+'</div></div>'; };
   cu.innerHTML=
     '<div class="card"><h2>Activar por correo</h2><p class="sub">Escribe el Gmail del cliente. Si ya lo pidió, se activa su pedido; si no, se le crea uno ya activo. Le avisamos por correo.</p>'+
       '<div class="row-act" style="margin-top:12px"><input class="inp" id="ce" type="email" placeholder="cliente@gmail.com" autocomplete="off" autocapitalize="none" spellcheck="false" style="flex:1;min-width:200px"><button class="btn" id="ca" type="button"'+(vig?'':' disabled')+'>Activar cupón</button></div><div id="cmsg">'+(vig?'':caja('err','La campaña está cerrada o vencida: ábrela abajo para poder activar cupones.'))+'</div></div>'+
     '<div class="card"><h2>Pedidos pendientes'+(pend.length?' <span class="pill w">'+pend.length+'</span>':'')+'</h2><div class="list">'+(pend.length?pend.map(fila).join(''):'<div class="hint">No hay pedidos pendientes.</div>')+'</div></div>'+
-    '<div class="card"><h2>Campaña</h2><p class="sub">Precio con cupón y hasta cuándo vale. Cada cupón sirve para un pago (compra o renovación).</p>'+
+    '<div class="card"><h2>Campaña</h2><p class="sub">Precio con cupón y hasta cuándo vale. Cada cupón sirve para un pago (compra o renovación). Precio normal: '+esc(m)+' '+num(N.ars)+' y '+usd(N.usd)+'.</p>'+(sinDesc?caja('err','El precio con cupón tiene que ser menor que el normal. Revisa aquí o en Precios.'):'')+
       '<div class="row-act" style="margin-top:12px"><label class="sw"><input type="checkbox" id="cact"'+(c.activa?' checked':'')+'> Campaña abierta (se muestra «Reclama tu cupón» en la web)</label></div>'+
       '<div class="grid2"><div class="fld"><label for="cars">Precio con cupón</label><div class="pre"><b>'+esc(m)+'</b><input id="cars" inputmode="numeric" value="'+esc(c.ars)+'"></div></div>'+
       '<div class="fld"><label for="cusd">Precio con cupón (PayPal)</label><div class="pre"><b>USD</b><input id="cusd" inputmode="decimal" value="'+esc(c.usd)+'"></div></div>'+

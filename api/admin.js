@@ -56,15 +56,21 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, avisado });
       }
       if (b.accion === "cupon_rechazar") return res.status(200).json(await rechazar(b.id));
-      if (b.accion === "campana") return res.status(200).json({ ok: true, ...(await guardarCampana(b)) });
+      if (b.accion === "campana") {
+        await cargarPrecios({ forzar: true });
+        if (Number(b.ars) >= precioCdn() || Number(b.usd) >= precioUsd())
+          return res.status(400).json({ error: `El precio con cupón tiene que ser menor que el normal (${MONEDA} ${precioCdn().toLocaleString("es-AR")} y USD ${precioUsd().toFixed(2)}). Revisa la sección Precios.` });
+        return res.status(200).json({ ok: true, ...(await guardarCampana(b)) });
+      }
       return res.status(400).json({ error: "Acción no válida." });
     }
     if (req.method !== "GET") return res.status(405).json({ error: "Método no permitido" });
 
-    if (q.que === "cupones") return res.status(200).json({ ...(await listaAdmin()), moneda: MONEDA });
+    if (q.que === "cupones") { await cargarPrecios({ forzar: true }); return res.status(200).json({ ...(await listaAdmin()), moneda: MONEDA, normal: { ars: precioCdn(), usd: precioUsd() } }); }
     if (q.que === "precios") {
       const c = await cargarPrecios({ forzar: true });
-      return res.status(200).json({ ars: c.ars, usd: c.usd, moneda: MONEDA, paypal: ppActivo(), actualizado: c.actualizado, por: c.por });
+      const cup = await listaAdmin().catch(() => null);
+      return res.status(200).json({ ars: c.ars, usd: c.usd, moneda: MONEDA, paypal: ppActivo(), actualizado: c.actualizado, por: c.por, campana: cup ? cup.campana : null });
     }
     if (q.que === "trafico") {
       if (!ID_RE.test(String(q.id || ""))) return res.status(400).json({ error: "Servicio inválido." });
