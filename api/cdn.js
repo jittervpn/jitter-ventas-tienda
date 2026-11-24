@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import { cors } from "../lib/cors.js";
 import { esAdmin } from "../lib/admin.js";
 import { traficoDe } from "../lib/trafico.js";
+import { cuponDe, precioPara, reclamar } from "../lib/cupones.js";
 import { limit } from "../lib/ratelimit.js";
 import { requireUser } from "../lib/auth.js";
 import { CATALOGO, MONEDA, PLAN_CDN, cargarPrecios } from "../lib/precios.js";
@@ -60,12 +61,21 @@ export default async function handler(req, res) {
         try { const [pool, { pruebas: l = [] }] = await Promise.all([poolEstado(todos), registro({ accion: "lista" })]); pruebas = { pool, lista: l.slice(0, 60).map(mapPrueba), reposo: REPOSO() }; }
         catch (e) { pruebas = { error: "No se pudo leer el registro de pruebas (¿conectaste el Blob store al proyecto?). " + e.message }; }
       }
-      return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio, moneda: MONEDA, dias: 30, prueba, pruebas });
+      let cupon = null, mio = { ars: precio, usd: null, cupon: false };
+      try { [cupon, mio] = await Promise.all([cuponDe(u.uid), precioPara(u.uid)]); } catch (e) { console.error("cupones:", e.message); }
+      return res.json({ saldo, services: mios, prefijo: prefijo(u.uid), max: MAX_POR_CLIENTE(), admin: puedeCrear(u), precio: mio.ars, precioUsd: mio.usd, conCupon: mio.cupon, precioNormal: precio, cupon, moneda: MONEDA, dias: 30, prueba, pruebas });
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
     let b = {};
     try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { return res.status(400).json({ error: "Datos inválidos." }); }
+
+    // ---------- cupón de descuento: el cliente lo reclama y el admin lo activa en /admin ----------
+    if (b.accion === "cupon_reclamar") {
+      if (limit(req, { max: 5, windowMs: 3600000, key: "cup:" + u.uid })) return res.status(429).json({ error: "Demasiados intentos. Espera un rato." });
+      try { const r = await reclamar(u.uid, u.email); return res.json({ ok: true, ...r }); }
+      catch (e) { return res.status(e.status || 502).json({ error: e.status ? e.message : "No se pudo registrar tu pedido. Inténtalo de nuevo." }); }
+    }
 
     // ---------- pruebas de 1 hora ----------
     if (b.accion === "prueba_activar") {

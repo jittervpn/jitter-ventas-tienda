@@ -107,6 +107,7 @@ Desde noviembre de 2026 la web, el login y las pruebas de 1 hora viven en este m
 - Admin: `jitterxcloud.shop/admin` (admin.html + api/admin.js), solo correos de `CDN_PERMITIDOS`.
 - Idioma: botón ES/EN. El panel se traduce con el diccionario al final de index.html; las guías y páginas tienen su versión en /en/.
 - Precios: se cambian en /admin → Precios (se guardan en Blob, config/precios.json). Los pagos con el precio anterior se aceptan 48 h.
+- Cupones: /admin → Cupones (campaña con precio y fecha, activar por correo). Datos en Blob (cupones.json). Un cupón = un pago.
 - Tráfico: se detecta solo en la respuesta de la API del CDN (lib/trafico.js); /admin → API del CDN muestra qué devuelve.
 - Login por código: `api/auth/codigo.js` (mismo uid por correo y mismo token que el antiguo PHP).
 - Códigos de acceso y registro de pruebas: Vercel Blob privado `jitterx-datos` (`BLOB_READ_WRITE_TOKEN`).

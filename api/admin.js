@@ -4,6 +4,7 @@
 //   GET  /api/admin?que=trafico&id=ID  -> diagnóstico: qué devuelve la API del CDN sobre tráfico de ese servicio
 //   POST {accion:"precios", ars, usd}  -> cambia los precios
 //   POST {accion:"renovar", id}        -> renueva 30 días SIN cobro cualquier servicio
+//   GET  ?que=cupones · POST {accion:"cupon_activar", email} | {accion:"cupon_rechazar", id} | {accion:"campana", activa, ars, usd, hasta}
 // Las pruebas de 1 hora y crear sin cobro siguen en /api/cdn (ya restringidas al admin).
 // Cada sección nueva del admin se añade aquí para no gastar funciones del plan (máximo 12).
 import { cors } from "../lib/cors.js";
@@ -16,6 +17,8 @@ import { contadorCdn } from "../lib/contador.js";
 import { traficoDe, diagnostico } from "../lib/trafico.js";
 import { directorio } from "../lib/clientes.js";
 import { ppActivo } from "../lib/paypal.js";
+import { listaAdmin, activar, rechazar, guardarCampana } from "../lib/cupones.js";
+import { enviarCupon } from "../lib/correo.js";
 import { MONEDA, cargarPrecios, guardarPrecios, precioCdn, precioUsd } from "../lib/precios.js";
 
 const seguro = async (fn) => { try { return await fn(); } catch (e) { return { error: e.message }; } };
@@ -44,10 +47,21 @@ export default async function handler(req, res) {
         console.log("admin: renovación sin cobro de", id, "por", u.email);
         return res.status(200).json({ ok: true, op: operacionId(j) || null });
       }
+      if (b.accion === "cupon_activar") {
+        const r = await activar(b.email, u.email);
+        if (r.ya) return res.status(200).json({ ok: true, ya: true });
+        let avisado = false;
+        try { await enviarCupon(r.cupon.email, { ...r.cupon, moneda: MONEDA }); avisado = true; } catch (e) { console.error("admin: no se pudo avisar del cupón", e.message); }
+        console.log("admin: cupón activado para", r.cupon.email, "por", u.email);
+        return res.status(200).json({ ok: true, avisado });
+      }
+      if (b.accion === "cupon_rechazar") return res.status(200).json(await rechazar(b.id));
+      if (b.accion === "campana") return res.status(200).json({ ok: true, ...(await guardarCampana(b)) });
       return res.status(400).json({ error: "Acción no válida." });
     }
     if (req.method !== "GET") return res.status(405).json({ error: "Método no permitido" });
 
+    if (q.que === "cupones") return res.status(200).json({ ...(await listaAdmin()), moneda: MONEDA });
     if (q.que === "precios") {
       const c = await cargarPrecios({ forzar: true });
       return res.status(200).json({ ars: c.ars, usd: c.usd, moneda: MONEDA, paypal: ppActivo(), actualizado: c.actualizado, por: c.por });
@@ -69,11 +83,12 @@ export default async function handler(req, res) {
 
     // resumen
     await cargarPrecios();
-    const [saldo, servicios, pruebas, contador] = await Promise.all([
+    const [saldo, servicios, pruebas, contador, cup] = await Promise.all([
       seguro(() => cdn("GET", "/v1/balance")),
       seguro(async () => listaServicios(await cdn("GET", "/v1/services"))),
       seguro(async () => (await registro({ accion: "lista" })).pruebas.map(mapPrueba)),
       seguro(() => contadorCdn()),
+      seguro(() => listaAdmin()),
     ]);
     const sv = Array.isArray(servicios) ? servicios.filter((s) => !esDePruebas(s)) : [];
     const ahora = Date.now(), en7 = ahora + 7 * 864e5;
@@ -92,6 +107,7 @@ export default async function handler(req, res) {
       },
       pruebas: { activas: pr.filter((p) => p.estado === "activa" && p.vence > ahora).length, pendientes: pr.filter((p) => p.estado === "pendiente").length, total: pr.length, error: pruebas?.error },
       precios: { tarjeta: precioCdn(), moneda: MONEDA, paypal: ppActivo() ? precioUsd() : null },
+      cupones: cup && cup.cupones ? { pendientes: cup.cupones.filter((k) => k.estado === "pendiente").length, activos: cup.cupones.filter((k) => k.estado === "activo").length, usados: cup.cupones.filter((k) => k.estado === "usado").length } : null,
     });
   } catch (e) {
     const c = e.codigo;

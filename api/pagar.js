@@ -5,6 +5,7 @@ import { limit } from "../lib/ratelimit.js";
 import { clean } from "../lib/cf.js";
 import { CATALOGO, PLAN_CDN } from "../lib/precios.js";
 import { prepararCdn } from "../lib/cdnventa.js";
+import { precioPara } from "../lib/cupones.js";
 import { mensaje, estadoHttp } from "../lib/cdn.js";
 import { entregar } from "../lib/entrega.js";
 
@@ -34,14 +35,15 @@ export default async function handler(req, res) {
     try { ped = await prepararCdn(user, b.cdn); }
     catch (e) { const c = e.codigo || "INTERNAL_ERROR"; return res.status(estadoHttp(c)).json({ error: mensaje(c), codigo: c }); }
     if (ped.error) return res.status(ped.status).json({ error: ped.error, codigo: ped.codigo });
+    const pr = await precioPara(user.uid); // con cupón activo, el precio con descuento
 
     const key = /^[\w-]{8,64}$/.test(String(b.key || "")) ? b.key : randomUUID();
     const r = await fetch("https://api.mercadopago.com/v1/payments", {
       method: "POST",
       headers: { authorization: "Bearer " + token, "content-type": "application/json", "X-Idempotency-Key": key },
       body: JSON.stringify({
-        transaction_amount: item.precio, token: fd.token, installments: 1, // el importe lo fija el servidor
-        description: ped.descripcion,
+        transaction_amount: pr.ars, token: fd.token, installments: 1, // el importe lo fija el servidor
+        description: ped.descripcion + (pr.cupon ? " (cupón)" : ""),
         payment_method_id: fd.payment_method_id, issuer_id: fd.issuer_id,
         payer: { email: fd.payer?.email || user.email, identification: fd.payer?.identification },
         external_reference: ped.ref,
