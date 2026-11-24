@@ -35,6 +35,18 @@
         "Content-Security-Policy": "object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self' https://*.mercadopago.com https://*.mercadopago.com.ar https://*.mercadolibre.com; upgrade-insecure-requests"
       },
       "continue": true
+    },
+    {
+      "src": "/admin/?",
+      "dest": "/admin.html",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-store"
+      }
+    },
+    {
+      "src": "/api/stats",
+      "dest": "/api/planes?que=stats"
     }
   ]
 }

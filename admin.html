@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0c0f17">
+<title>Admin · Jitterx Panel Cloud</title>
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0c0f17; --card: #151a26; --card-2: #1b2130; --card-3: #232a3b;
+  --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
+  --ink: #eef1f8; --ink-2: #c3c9d8; --muted: #8b93a7;
+  --accent: #6c7bff; --accent-soft: rgba(108,123,255,.14); --grad: linear-gradient(135deg,#6c7bff 0%,#8b5cf6 100%);
+  --ok: #34d399; --warn: #fbbf24; --err: #f87171; --err-soft: rgba(248,113,113,.14);
+  --c1:#6c7bff; --c1s:rgba(108,123,255,.16); --c2:#22d3ee; --c2s:rgba(34,211,238,.14); --c3:#fbbf24; --c3s:rgba(251,191,36,.14);
+  --c4:#34d399; --c4s:rgba(52,211,153,.14); --c5:#f472b6; --c5s:rgba(244,114,182,.14); --c6:#38bdf8; --c6s:rgba(56,189,248,.14);
+  --font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --r: 14px; --r-lg: 20px; --gutter: 32px;
+}
+@media (max-width: 40rem) { :root { --gutter: 16px; } }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: .9375rem; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(900px 420px at 15% -8%, rgba(108,123,255,.14), transparent 60%); background-repeat: no-repeat; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg { display: block; }
+
+.top { position: sticky; top: 0; z-index: 10; background: rgba(12,15,23,.82); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.top .in { max-width: 1200px; margin: 0 auto; padding: 12px var(--gutter); display: flex; align-items: center; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+.logo .mk { width: 34px; height: 34px; border-radius: 10px; background: var(--grad); display: grid; place-items: center; }
+.logo .mk svg { width: 18px; height: 18px; color: #fff; }
+.logo small { display: block; font-size: .6875rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; line-height: 1; margin-top: 2px; }
+.top .sp { flex: 1; }
+.who { font-size: .8125rem; color: var(--muted); max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ghost { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--card); color: var(--ink-2); font-size: .8125rem; font-weight: 600; text-decoration: none; }
+.ghost:hover { color: var(--ink); background: var(--card-2); }
+.ghost svg { width: 16px; height: 16px; }
+@media (max-width: 40rem) { .who, .ghost .t { display: none; } .ghost { padding: 0 10px; } }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 28px var(--gutter) 64px; display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 28px; align-items: start; }
+@media (max-width: 60rem) { .wrap { grid-template-columns: 1fr; gap: 18px; padding-top: 18px; } }
+.side { position: sticky; top: 84px; display: grid; gap: 4px; }
+.side button { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: var(--ink-2); font-weight: 600; font-size: .875rem; text-align: left; }
+.side button svg { width: 18px; height: 18px; flex: none; color: var(--muted); }
+.side button:hover { background: var(--card); color: var(--ink); }
+.side button[aria-current="page"] { background: var(--accent-soft); color: var(--ink); }
+.side button[aria-current="page"] svg { color: var(--accent); }
+.side .soon { margin-left: auto; font-size: .6875rem; color: var(--muted); font-weight: 600; }
+@media (max-width: 60rem) { .side { position: static; display: flex; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; } .side button { flex: none; background: var(--card); border: 1px solid var(--line); } .side .soon { display: none; } }
+
+h1 { margin: 0; font-size: 1.625rem; letter-spacing: -.02em; line-height: 1.2; }
+.sub { margin: 6px 0 0; color: var(--muted); font-size: .875rem; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px; display: grid; gap: 10px; min-height: 132px; }
+.stat .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; }
+.stat .ic svg { width: 20px; height: 20px; }
+.stat .n { font-size: 1.875rem; font-weight: 800; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .n small { font-size: .875rem; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-left: 4px; }
+.stat .l { font-size: .8125rem; color: var(--muted); font-weight: 600; }
+.stat .x { font-size: .75rem; color: var(--err); }
+.k1 { background: var(--c1s); color: var(--c1); } .k2 { background: var(--c2s); color: var(--c2); } .k3 { background: var(--c3s); color: var(--c3); }
+.k4 { background: var(--c4s); color: var(--c4); } .k5 { background: var(--c5s); color: var(--c5); } .k6 { background: var(--c6s); color: var(--c6); }
+.skel .n { width: 70px; height: 30px; border-radius: 8px; background: linear-gradient(90deg, var(--card-2), var(--card-3), var(--card-2)); background-size: 200% 100%; animation: sh 1.2s linear infinite; color: transparent; }
+@keyframes sh { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel .n { animation: none; } }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; }
+.empty { margin-top: 18px; text-align: center; padding: 36px 22px; border: 1.5px dashed var(--line-2); border-radius: var(--r-lg); color: var(--muted); }
+.empty svg { width: 34px; height: 34px; margin: 0 auto 10px; color: var(--accent); }
+.empty b { display: block; color: var(--ink); font-size: 1rem; margin-bottom: 4px; }
+
+.gate { max-width: 420px; margin: 8vh auto 0; padding: 0 var(--gutter); }
+.gate .card { padding: 28px; }
+.gate h1 { font-size: 1.375rem; }
+.gate label { display: block; margin: 18px 0 6px; font-size: .8125rem; font-weight: 700; color: var(--ink-2); }
+.gate input { width: 100%; min-height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card-2); }
+.gate input:focus { border-color: var(--accent); outline: none; }
+.gate .code { font-family: var(--mono); letter-spacing: .4em; text-align: center; font-size: 1.25rem; }
+.primary { width: 100%; min-height: 46px; margin-top: 16px; border: 0; border-radius: 12px; background: var(--grad); color: #fff; font-weight: 800; }
+.primary:disabled { opacity: .6; cursor: wait; }
+.link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; font-size: .8125rem; margin-top: 12px; }
+.msg { margin-top: 12px; font-size: .8125rem; border-radius: 10px; padding: 10px 12px; }
+.msg.err { background: var(--err-soft); color: #fecaca; }
+.msg.ok { background: rgba(52,211,153,.12); color: #bbf7d0; }
+.denied { text-align: center; }
+.denied svg { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--err); }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="logo" href="/admin"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span>Jitterx<small>Administración</small></span></a>
+  <span class="sp"></span>
+  <span class="who" id="who" hidden></span>
+  <a class="ghost" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg><span class="t">Ver la web</span></a>
+  <button class="ghost" id="salir" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="t">Salir</span></button>
+</div></header>
+
+<!-- Acceso -->
+<section class="gate" id="login" hidden>
+  <div class="card">
+    <h1>Entrar al admin</h1>
+    <p class="sub">Te enviamos un código a tu correo de administrador.</p>
+    <form id="f1">
+      <label for="email">Correo</label>
+      <input id="email" type="email" autocomplete="email" inputmode="email" required placeholder="tu@correo.com">
+      <button class="primary" id="b1" type="submit">Enviar código</button>
+    </form>
+    <form id="f2" hidden>
+      <label for="code">Código de 6 dígitos</label>
+      <input id="code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required placeholder="••••••">
+      <button class="primary" id="b2" type="submit">Entrar</button>
+      <button class="link" id="otro" type="button">Usar otro correo</button>
+    </form>
+    <div class="msg" id="lmsg" hidden role="status"></div>
+  </div>
+</section>
+
+<section class="gate" id="denied" hidden>
+  <div class="card denied">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+    <h1>Sin acceso</h1>
+    <p class="sub" id="deniedT">Esta cuenta no es de administrador.</p>
+    <button class="primary" id="salir2" type="button">Entrar con otra cuenta</button>
+  </div>
+</section>
+
+<!-- Panel -->
+<div class="wrap" id="app" hidden>
+  <nav class="side" aria-label="Secciones del admin" id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+const TK='jx_token';
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const tok=()=>{try{return localStorage.getItem(TK)}catch{return null}};
+const setTok=t=>{try{t?localStorage.setItem(TK,t):localStorage.removeItem(TK)}catch{}};
+async function api(path,opts={}){
+  const t=tok(); const r=await fetch(path,{...opts,headers:{'content-type':'application/json',...(t?{authorization:'Bearer '+t}:{}),...(opts.headers||{})}});
+  let j={}; try{ j=await r.json() }catch{}
+  return {status:r.status,...j};
+}
+const show=id=>['login','denied','app'].forEach(x=>$('#'+x).hidden=x!==id);
+function lmsg(tipo,t){ const m=$('#lmsg'); m.hidden=!t; m.className='msg '+(tipo||''); m.textContent=t||''; }
+function salir(){ setTok(null); $('#who').hidden=true; $('#salir').hidden=true; $('#f2').hidden=true; $('#f1').hidden=false; lmsg(); show('login'); }
+$('#salir').onclick=salir; $('#salir2').onclick=salir;
+
+// ---- acceso con código por correo (mismo login que la web) ----
+$('#f1').onsubmit=async e=>{ e.preventDefault(); const b=$('#b1'); b.disabled=true; lmsg();
+  const j=await api('/api/auth/codigo',{method:'POST',body:JSON.stringify({accion:'pedir',email:$('#email').value.trim()})}).catch(()=>({error:'Sin conexión.'}));
+  b.disabled=false;
+  if(!j.ok) return lmsg('err',j.error||'No se pudo enviar el código.');
+  $('#f1').hidden=true; $('#f2').hidden=false; $('#code').focus(); lmsg('ok','Revisa tu correo: el código vence en 10 minutos.'); };
+$('#f2').onsubmit=async e=>{ e.preventDefault(); const b=$('#b2'); b.disabled=true; lmsg();
+  const j=await api('/api/auth/codigo',{method:'POST',body:JSON.stringify({accion:'verificar',email:$('#email').value.trim(),code:$('#code').value})}).catch(()=>({error:'Sin conexión.'}));
+  b.disabled=false;
+  if(!j.token) return lmsg('err',j.error||'Código incorrecto.');
+  setTok(j.token); $('#code').value=''; iniciar(); };
+$('#otro').onclick=()=>{ $('#f2').hidden=true; $('#f1').hidden=false; lmsg(); };
+
+// ---- secciones ----
+const IC={
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.4-.9-1.4-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1.1 0-2.1-.6-2.5-1.5M12 6.5V8M12 16v1.5"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  cloud:'<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.78A6 6 0 1 0 6 17.5"/><path d="M6 19h11.5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gift:'<path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+  tag:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+};
+const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[k]+'</svg>';
+// Para añadir una sección: {id, t, ic, render(main)}. Las que aún no existen se muestran como «Próximamente».
+const SECCIONES=[
+  {id:'resumen',t:'Resumen',ic:'home',render:resumen},
+];
+let actual='resumen';
+function nav(){
+  $('#nav').innerHTML=SECCIONES.map(s=>'<button type="button" data-s="'+s.id+'"'+(s.id===actual?' aria-current="page"':'')+'>'+svg(s.ic)+esc(s.t)+(s.render?'':'<span class="soon">Pronto</span>')+'</button>').join('');
+  $('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ actual=b.dataset.s; nav(); abrir(); });
+}
+function abrir(){ const s=SECCIONES.find(x=>x.id===actual)||SECCIONES[0]; s.render($('#main')); }
+
+const num=n=>n==null?'—':Number(n).toLocaleString('es-AR');
+function saldoDe(s){ if(!s||s.error) return null; const b=s.balance??s.credits??s.available??(s.data&&(s.data.balance??s.data.credits??s.data.available)); return b; }
+function tarjeta(k,ic,n,l,extra,err){ return '<div class="stat"><span class="ic '+k+'">'+svg(ic)+'</span><div class="n">'+n+(extra?'<small>'+esc(extra)+'</small>':'')+'</div><div class="l">'+esc(l)+'</div>'+(err?'<div class="x">'+esc(err)+'</div>':'')+'</div>'; }
+
+async function resumen(main){
+  main.innerHTML='<div class="head"><div><h1>Resumen</h1><p class="sub">Así va tu negocio ahora mismo.</p></div><button class="ghost" id="rec" type="button">Actualizar</button></div>'+
+    '<div class="stats">'+Array.from({length:6},()=>'<div class="stat skel"><span class="ic k1"></span><div class="n">0</div><div class="l">Cargando…</div></div>').join('')+'</div>';
+  $('#rec').onclick=()=>resumen(main);
+  const d=await api('/api/admin').catch(()=>({error:'Sin conexión.'}));
+  if(d.status===401) return salir();
+  if(d.status===403){ $('#deniedT').textContent=d.error||'Esta cuenta no es de administrador.'; return show('denied'); }
+  if(d.error&&!d.cdn){ main.querySelector('.stats').outerHTML='<div class="msg err">'+esc(d.error)+'</div>'; return; }
+  const c=d.cdn||{}, p=d.pruebas||{}, pr=d.precios||{}, sb=saldoDe(d.saldo);
+  const precio=(pr.tarjeta!=null?'$ '+num(pr.tarjeta):'—');
+  main.querySelector('.stats').innerHTML=
+    tarjeta('k1','coin',sb==null?'—':num(sb),'Créditos del CDN','',d.saldo&&d.saldo.error?'No se pudo consultar':'')+
+    tarjeta('k4','users',num(c.clientes),'Clientes con CDN',c.activos!=null?num(c.activos)+' activos':'')+
+    tarjeta('k2','cloud',num(c.servicios),'Servicios CDN','',c.error?'La API del CDN no respondió':'')+
+    tarjeta('k3','clock',num(c.vencenPronto),'Vencen en 7 días')+
+    tarjeta('k5','gift',num(p.activas),'Pruebas activas',p.pendientes?num(p.pendientes)+' pendientes':'',p.error?'Registro no disponible':'')+
+    tarjeta('k6','tag',precio,'Precio CDN 30 días'+(pr.paypal!=null?' · PayPal USD '+pr.paypal:''));
+  if(!main.querySelector('.empty')) main.insertAdjacentHTML('beforeend','<div class="empty">'+svg('plus')+'<b>Aquí irán tus herramientas</b>Dime qué quieres administrar desde aquí y lo agrego como una sección nueva.</div>');
+}
+
+async function iniciar(){
+  if(!tok()) return show('login');
+  let email=''; try{ email=JSON.parse(atob(tok().split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).email||''; }catch{}
+  $('#who').textContent=email; $('#who').hidden=!email; $('#salir').hidden=false;
+  show('app'); nav(); abrir();
+}
+iniciar();
+</script>
+</body>
+</html>
